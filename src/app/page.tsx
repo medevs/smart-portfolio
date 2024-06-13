@@ -1,4 +1,5 @@
 import { Bot } from "lucide-react";
+import { H1 } from "@/components/ui/H1";
 import { Metadata } from "next";
 import Image from "next/image";
 
@@ -11,7 +12,7 @@ export default function Home() {
     <section className="space-y-16 bg-[url('/background.png')] bg-cover bg-center bg-no-repeat px-1 py-8">
       <section className="grid grid-cols-1 items-center gap-8 sm:grid-cols-2">
         <div className="space-y-3">
-          <h1 className="text-center sm:text-start">Hi, I&apos;m Ahmed 👋</h1>
+          <H1 className="text-center sm:text-start">Hi, I&apos;m Ahmed 👋</H1>
           <p className="text-center sm:text-start">
             I&apos;m a full-stack developer based in Bremen Germany who builds cool
             projects.
