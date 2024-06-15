@@ -8,7 +8,7 @@ export default function Navbar() {
         <nav className="space-x-4 font-medium">
           <Link href="/">Home</Link>
           <Link href="/about">About</Link>
-          <Link href="#">Blog</Link>
+          <Link href="/blog">Blog</Link>
         </nav>
         <div className="flex items-center gap-4">
           <ThemeToggle />
