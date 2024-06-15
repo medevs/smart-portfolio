@@ -166,14 +166,14 @@ function ChatMessage({ message: { role, content } }: ChatMessageProps) {
             ),
             li: ({ node, ...props }) => <li {...props} className="mt-1" />,
             blockquote: ({ node, ...props }) => (
-              <blockquote {...props} className="border-l-4 border-gray-300 pl-4 italic text-gray-600 mt-3 first:mt-0" />
+              <blockquote {...props} className="text-primary" />
             ),
             code: ({ node, ...props }) => {
               const { inline } = node as any;
               return (
                 <code
                   {...props}
-                  className={`bg-gray-100 rounded p-1 ${inline ? 'inline-block' : 'block'} mt-3 first:mt-0`}
+                  className={`rounded p-1 ${inline ? 'inline-block' : 'block'} mt-3 first:mt-0 text-primary`}
                 />
               );
             },
