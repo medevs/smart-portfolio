@@ -2,6 +2,7 @@ import { H1 } from "@/components/ui/H1";
 import { Metadata } from "next";
 import Image from "next/image";
 import me from "@/assets/Ahmed.jpg";
+import Technologies from "@/components/Technologies";
 
 export const metadata: Metadata = {
   title: "Ahmed Oublihi - My Smart Portfolio",
@@ -29,6 +30,7 @@ export default function Home() {
         </div>
       </section>
       <section className="space-y-3 text-center">
+        <Technologies />
       </section>
     </section>
   );

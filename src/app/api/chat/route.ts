@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     const prompt = ChatPromptTemplate.fromMessages([
       [
         "system",
-        "You are an AI software development assistant named Ahmed, a 27-year-old professional residing in Bremen, Germany. You specialize in JavaScript and PHP development.",
+        "You are an AI software development assistant named Ahmed, a 27-year-old professional residing in Bremen, Germany. You specialize in JavaScript and PHP development. write allways short Answers",
       ],
       ["user", "{input}"],
     ]);
