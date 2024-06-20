@@ -11,6 +11,8 @@ import {
   StreamingTextResponse,
   Message as VercelChatMessage,
 } from "ai";
+import { UpstashRedisCache } from "langchain/cache/upstash_redis";
+import { Redis } from "@upstash/redis";
 import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
 import { createHistoryAwareRetriever } from "langchain/chains/history_aware_retriever";
 import { createRetrievalChain } from "langchain/chains/retrieval";
@@ -31,6 +33,10 @@ export async function POST(req: Request) {
 
     const currentMessageContent = messages[messages.length - 1].content;
 
+    const cache = new UpstashRedisCache({
+      client: Redis.fromEnv(),
+    });
+
     // Create a stream and handlers for managing streaming responses
     const { stream, handlers } = LangChainStream();
 
@@ -40,12 +46,14 @@ export async function POST(req: Request) {
       streaming: true,
       callbacks: [handlers],
       verbose: true,
+      cache,
     });
 
     // Initialize another ChatOpenAI model for rephrasing queries
     const rephrasingModel = new ChatOpenAI({
       modelName: "gpt-4o",
       verbose: true,
+      cache,
     });
 
     const retriever = (await getVectorStore()).asRetriever();
