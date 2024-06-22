@@ -10,13 +10,15 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <section className="space-y-16 bg-[url('/background.png')] bg-cover bg-center bg-no-repeat px-1 py-8">
+    <section className="space-y-16 px-1 py-8">
       <section className="grid grid-cols-1 items-center gap-8 sm:grid-cols-2">
         <div className="space-y-3">
           <H1 className="text-center sm:text-start">Hi, I&apos;m Ahmed 👋</H1>
           <p className="text-center sm:text-start">
-            I&apos;m a full-stack developer based in Bremen Germany who builds cool
-            projects.
+            I&apos;m a passionate Software Developer based in Bremen, Germany, with a strong focus on web technologies. I love delving into JavaScript ecosystems and building scalable and efficient web applications. I strive to deliver high-quality solutions that meet both user needs and business objectives.
+          </p>
+          <p className="text-center sm:text-start">
+            I&apos;m particularly interested in artificial intelligence and enjoy building software that leverages AI technologies.
           </p>
         </div>
         <div className="flex justify-center">
