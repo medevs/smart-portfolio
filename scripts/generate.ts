@@ -34,9 +34,9 @@ async function generateEmbeddings() {
           .split("/page.")[0] || "/";
 
       const pageContentTrimmed = doc.pageContent
-        .replace(/^import.*$/gm, "") // Remove all import statements
-        .replace(/ className=(["']).*?\1| className={.*?}/g, "") // Remove all className props
-        .replace(/^\s*[\r]/gm, "") // remove empty lines
+        ?.replace(/^import.*$/gm, "") // Remove all import statements
+        ?.replace(/ className=(["']).*?\1| className={.*?}/g, "") // Remove all className props
+        ?.replace(/^\s*[\r]/gm, "") // remove empty lines
         .trim();
 
       return {
@@ -48,6 +48,8 @@ async function generateEmbeddings() {
   const splitter = RecursiveCharacterTextSplitter.fromLanguage("html");
 
   const splitDocs = await splitter.splitDocuments(docs);
+
+  console.log(splitDocs)
 
   await vectorStore.addDocuments(splitDocs);
 }

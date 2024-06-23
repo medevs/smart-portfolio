@@ -1,6 +1,5 @@
 "use client";
 
-import { Avatar } from "@nextui-org/avatar";
 import { Card, CardBody } from "@nextui-org/card";
 import { Education } from "../components/Education";
 import me from "@/assets/Ahmed.jpg";
@@ -56,8 +55,6 @@ export default function About() {
             className="border-2 object-cover shadow-md dark:border-foreground rounded-full"
           />
           <h1 className="text-4xl font-bold mt-4">Ahmed Oublihi</h1>
-
-          {/* <Button>Download CV</Button> */}
         </CardBody>
       </Card>
 
@@ -106,17 +103,6 @@ export default function About() {
           </ul>
         </CardBody>
       </Card>
-
-      {/* vertical img */}
-      <div className="lg:block lg:row-start-1 lg:row-span-2 lg:col-start-3  lg:h-[350px] rounded-xl relative verticalImage">
-        {/* <Image
-          src={me}
-          alt="A photo of me"
-          height={300}
-          width={300}
-          className="border-2 object-cover shadow-md dark:border-foreground"
-        /> */}
-      </div>
 
       <Card className="col-span-full lg:row-start-4 lg:row-span-1 lg:col-start-2 lg:col-span-2">
         <svg

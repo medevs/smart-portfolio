@@ -1,4 +1,6 @@
-export const Education = ({ career, years, description }) => {
+import { educationType } from "../types/education";
+
+export const Education = ({ career, years, description }: educationType) => {
   return (
     <div>
       <h3 className="text-xl inline">{career}</h3>
