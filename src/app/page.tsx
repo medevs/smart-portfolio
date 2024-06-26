@@ -1,24 +1,13 @@
-"use client";
-
-import { Card, CardBody } from "@nextui-org/card";
-import { Education } from "../components/Education";
-import me from "@/assets/Ahmed.jpg";
+import { Metadata } from "next";
 import Image from "next/image";
+import heroImage from "@/assets/Ahmed.jpg";
 
-const educationList = [
-  {
-    career: "Full Stack Developmet Immersive",
-    years: "2022",
-    description: "",
-  },
-  {
-    career: "Computer Engineering",
-    years: "2018-2021",
-    description: "",
-  },
-]
+export const metadata: Metadata = {
+  title: "Home",
+  description: "Welcome to Ahmed's portfolio. Explore my work and get in touch.",
+};
 
-const skills = [
+const technologies = [
   { icon: "🟨", name: "JavaScript" },
   { icon: "🟦", name: "TypeScript" },
   { icon: "⚛️", name: "React" },
@@ -41,108 +30,122 @@ const skills = [
   { icon: "🔗", name: "Langchain" },
 ];
 
-export default function About() {
+const featuredProjects = [
+  { icon: "💻", name: "Project Alpha", description: "A web app built with React and Next.js" },
+  { icon: "📊", name: "Project Beta", description: "A data dashboard using D3.js and Tailwind CSS" },
+  { icon: "🎨", name: "Project Gamma", description: "A design system for modern web applications" },
+  { icon: "🔧", name: "Project Delta", description: "An API service built with Node.js and Express" },
+];
+
+const recentPosts = [
+  { title: "Understanding JavaScript Closures", date: "June 15, 2024" },
+  { title: "Building Responsive Layouts with Tailwind CSS", date: "May 28, 2024" },
+  { title: "Getting Started with TypeScript", date: "April 10, 2024" },
+];
+
+export default function HomePage() {
+  const currentTime = new Date().toLocaleTimeString();
+  const currentLocation = "Bremen, Germany";
 
   return (
-    <div className="grid grid-rows-8 grid-cols-4 lg:grid-cols-3 gap-5 py-12 md:py-24 lg:py-32">
-      <Card className="col-span-full lg:row-start-2 lg:row-span-2 lg:col-start-2 lg:col-span-1">
-        <CardBody className="flex-col items-center justify-center gap-2">
-          <Image
-            src={me}
-            alt="A photo of me"
-            height={250}
-            width={250}
-            className="border-2 object-cover shadow-md dark:border-foreground rounded-full"
-          />
-          <h1 className="text-4xl font-bold mt-4">Ahmed Oublihi</h1>
-        </CardBody>
-      </Card>
-
-      <Card className="col-span-full lg:row-start-1 lg:row-span-1 lg:col-span-2  ">
-        <CardBody className="gap-2">
-          <div className="text-3xl font-bold">Who am I?</div>
-          <div className="text-lg text-gray-400">
-            <p>
-              Hi! my name is Ahmed, a passionate Software Developer based in Bremen, Germany, with a strong focus on web technologies. I love delving into JavaScript ecosystems and building scalable and efficient web applications. With a keen eye for detail and a drive for continuous learning, I strive to deliver high-quality solutions that meet both user needs and business objectives.
-            </p>
-            <p>
-              Im particularly interested in artificial intelligence and enjoy building software that leverages AI technologies.
-            </p>
+    <div className="flex flex-col min-h-screen">
+      <section className="py-12 md:py-24 lg:py-32">
+        <div className="container mx-auto px-4 md:px-6 lg:px-8 text-center">
+          <div className="mb-8">
+            <Image src={heroImage} alt="Hero image" height={450} width={450} className="mx-auto rounded-full shadow-md" />
           </div>
-        </CardBody>
-      </Card>
+          <h1 className="text-4xl font-bold mb-4">Welcome to My Portfolio</h1>
+          <p className="text-lg mb-8">Hi, I'm Ahmed. I build web applications that solve real-world problems.</p>
+          <a href="#technologies" className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg">Explore My Work</a>
+        </div>
+      </section>
 
-      <Card className="col-span-full row-start-2 row-end-3 lg:row-start-2 lg:col-start-1 lg:col-span-1">
-        <CardBody className="justify-center items-center">
-          <h2 className="text-2xl lg:text-3xl font-bold  text-center">
-            Software developer
-          </h2>
-        </CardBody>
-      </Card>
-
-      <Card className="hidden lg:flex col-span-2 lg:row-start-3 lg:row-span-1 lg:col-start-3 lg:col-span-1">
-        <CardBody className="justify-center items-center lg:row-start-2 lg:cols-start-4">
-          <div className="text-3xl font-bold text-center">
-            &#34;{'I really like creating software solutions'}&#34;
+      <section className="py-12 md:py-24 lg:py-32 bg-white dark:bg-gray-800">
+        <div className="container grid gap-12 px-4 md:px-6 lg:px-8 grid-cols-1 lg:grid-cols-2 xl:grid-cols-4">
+          <div className="space-y-4 lg:col-span-2 xl:col-span-2">
+            <div className="p-4 max-w-full mx-auto bg-gray-100 dark:bg-gray-700 rounded-lg shadow-lg">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-gray-900 dark:text-gray-50 text-2xl">📍</span>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">Current Location & Time</h2>
+              </div>
+              <p className="text-md text-gray-700 dark:text-gray-300">
+                <strong>Location:</strong> {currentLocation}
+              </p>
+              <p className="text-md text-gray-700 dark:text-gray-300">
+                <strong>Time:</strong> {currentTime}
+              </p>
+            </div>
           </div>
-        </CardBody>
-      </Card>
 
-      <Card className="col-span-full lg:row-start-3 lg:row-span-2 lg:col-start-1 lg:col-span-1 technologyIconList">
-        <CardBody className="gap-4">
-          <h2 className="text-3xl font-bold">
-            Technologies I have worked with
-          </h2>
-          <ul className="flex flex-wrap gap-4 justify-center">
-            {skills.map((skill, index) => (
-              <li key={index} className="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-gray-700">
-                <span className="text-lg text-gray-500 dark:text-gray-400">{skill.icon}</span>
-                <span className="text-md font-medium text-gray-700 dark:text-gray-300">{skill.name}</span>
-              </li>
-            ))}
-          </ul>
-        </CardBody>
-      </Card>
-
-      <Card className="col-span-full lg:row-start-4 lg:row-span-1 lg:col-start-2 lg:col-span-2">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="hidden lg:block icon icon-tabler icon-tabler-timeline absolute top-0 -right-7"
-          width="200"
-          height="200"
-          viewBox="0 0 24 24"
-          strokeWidth="2"
-          stroke="#232323"
-          fill="none"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path
-            stroke="none"
-            d="M0 0h24v24H0z"
-            fill="none"
-          ></path>
-          <path d="M4 16l6 -7l5 5l5 -6"></path>
-          <path d="M15 14m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-          <path d="M10 9m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-          <path d="M4 16m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-          <path d="M20 8m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-        </svg>
-        <CardBody className="gap-2 flex-wrap">
-          <h2 className="text-3xl font-bold ">Education</h2>
-
-          <div className="flex flex-col lg:flex-col gap-2">
-            {educationList.map((education) => (
-              <Education
-                key={`education-item-${education.career}`}
-                career={education.career}
-                years={education.years}
-                description={education.description}
-              />
-            ))}
+          <div className="space-y-4 lg:col-span-2 xl:col-span-4">
+            <div className="p-4 max-w-full mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-gray-900 dark:text-gray-50 text-2xl">🚀</span>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">Featured Projects</h2>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {featuredProjects.map((project, index) => (
+                  <div key={index} className="p-4 rounded-lg bg-gray-100 dark:bg-gray-700 shadow-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-lg text-gray-500 dark:text-gray-400">{project.icon}</span>
+                      <span className="text-xl font-bold text-gray-900 dark:text-gray-50">{project.name}</span>
+                    </div>
+                    <p className="text-md text-gray-700 dark:text-gray-300">{project.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-        </CardBody>
-      </Card>
+
+          <div className="space-y-4 lg:col-span-2 xl:col-span-2">
+            <div className="p-4 max-w-full mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-gray-900 dark:text-gray-50 text-2xl">📝</span>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">Recent Blog Posts</h2>
+              </div>
+              <ul className="space-y-4">
+                {recentPosts.map((post, index) => (
+                  <li key={index} className="p-4 rounded-lg bg-gray-100 dark:bg-gray-700 shadow-lg">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-50">{post.title}</h3>
+                    <p className="text-md text-gray-700 dark:text-gray-300">{post.date}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="space-y-4 lg:col-span-2 xl:col-span-4" id="technologies">
+            <div className="p-4 max-w-full mx-auto bg-gray-100 dark:bg-gray-700 rounded-lg shadow-lg">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-gray-900 dark:text-gray-50 text-2xl">💻</span>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">Technologies</h2>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {technologies.map((tech, index) => (
+                  <div key={index} className="p-4 rounded-lg bg-white dark:bg-gray-800 shadow-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-lg text-gray-500 dark:text-gray-400">{tech.icon}</span>
+                      <span className="text-xl font-bold text-gray-900 dark:text-gray-50">{tech.name}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4 lg:col-span-2 xl:col-span-4">
+            <div className="p-4 max-w-full mx-auto bg-gray-100 dark:bg-gray-700 rounded-lg shadow-lg">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-gray-900 dark:text-gray-50 text-2xl">📊</span>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">GitHub Stats</h2>
+              </div>
+              <div className="flex justify-center">
+                <img src="https://github-readme-stats.vercel.app/api/top-langs?username=medevs&show_icons=true&locale=en&layout=compact&theme=radical" alt="Top Languages" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
