@@ -55,7 +55,7 @@ export default function HomePage() {
             <Image src={heroImage} alt="Hero image" height={450} width={450} className="mx-auto rounded-full shadow-md" />
           </div>
           <h1 className="text-4xl font-bold mb-4">Welcome to My Portfolio</h1>
-          <p className="text-lg mb-8">Hi, I'm Ahmed. I build web applications that solve real-world problems.</p>
+          <p className="text-lg mb-8">Hi, Im Ahmed. I build web applications that solve real-world problems.</p>
           <a href="#technologies" className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg">Explore My Work</a>
         </div>
       </section>
@@ -140,7 +140,7 @@ export default function HomePage() {
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">GitHub Stats</h2>
               </div>
               <div className="flex justify-center">
-                <img src="https://github-readme-stats.vercel.app/api/top-langs?username=medevs&show_icons=true&locale=en&layout=compact&theme=radical" alt="Top Languages" />
+                <img height={590} width={590} src="https://github-readme-stats.vercel.app/api/top-langs?username=medevs&show_icons=true&locale=en&layout=compact&theme=radical" alt="Top Languages" />
               </div>
             </div>
           </div>
