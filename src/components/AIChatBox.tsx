@@ -79,11 +79,10 @@ export default function AIChatBox({ open, onClose }: AIChatBoxProps) {
             <div className="mx-8 flex h-full flex-col items-center justify-center gap-3 text-center">
               <Bot size={28} />
               <p className="text-lg font-medium">
-                Send a message to start the AI chat!
+                Hello! How can I assist you today?
               </p>
-              <p>
-                You can ask the chatbot any question about me and it will find
-                the relevant information on this website.
+              <p className="text-sm text-gray-500">
+                Feel free to ask me anything about this website.
               </p>
             </div>
           )}
@@ -91,7 +90,7 @@ export default function AIChatBox({ open, onClose }: AIChatBoxProps) {
         <form onSubmit={handleSubmit} className="m-3 flex gap-1">
           <button
             type="button"
-            className="flex w-10 flex-none items-center justify-center"
+            className="flex w-10 flex-none items-center justify-center hover:text-red-500 transition-colors duration-300"
             title="Clear chat"
             onClick={() => setMessages([])}
           >
@@ -106,7 +105,7 @@ export default function AIChatBox({ open, onClose }: AIChatBoxProps) {
           />
           <button
             type="submit"
-            className="flex w-10 flex-none items-center justify-center disabled:opacity-50"
+            className="flex w-10 flex-none items-center justify-center disabled:opacity-50 hover:text-blue-400 transition-colors duration-300"
             disabled={input.length === 0}
             title="Submit message"
           >

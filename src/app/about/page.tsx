@@ -1,49 +1,50 @@
 import { Metadata } from "next";
 import Image from "next/image";
 import me from "@/assets/Ahmed.jpg";
+import { skills, projects, timeline } from '../../assets/data';
 
 export const metadata: Metadata = {
   title: "About Me",
   description: "Discover Ahmed's story and achievements.",
 };
 
-const skills = [
-  { icon: "🟨", name: "JavaScript" },
-  { icon: "🟦", name: "TypeScript" },
-  { icon: "⚛️", name: "React" },
-  { icon: "⚡️", name: "Next.js" },
-  { icon: "🎨", name: "Tailwind CSS" },
-  { icon: "🌐", name: "Webix JS" },
-  { icon: "📊", name: "Ext JS" },
-  { icon: "🟢", name: "Node.js" },
-  { icon: "🐘", name: "PHP" },
-  { icon: "🍃", name: "MongoDB" },
-  { icon: "🗃️", name: "MySQL" },
-  { icon: "🔄", name: "Prisma" },
-  { icon: "🔧", name: "Git" },
-  { icon: "🐙", name: "GitHub" },
-  { icon: "🔀", name: "SVN" },
-  { icon: "🐳", name: "Docker" },
-  { icon: "💻", name: "VS Code" },
-  { icon: "🪐", name: "Astro" },
-  { icon: "🤖", name: "OpenAI" },
-  { icon: "🔗", name: "Langchain" },
-];
+// const skills = [
+//   { icon: "🟨", name: "JavaScript" },
+//   { icon: "🟦", name: "TypeScript" },
+//   { icon: "⚛️", name: "React" },
+//   { icon: "⚡️", name: "Next.js" },
+//   { icon: "🎨", name: "Tailwind CSS" },
+//   { icon: "🌐", name: "Webix JS" },
+//   { icon: "📊", name: "Ext JS" },
+//   { icon: "🟢", name: "Node.js" },
+//   { icon: "🐘", name: "PHP" },
+//   { icon: "🍃", name: "MongoDB" },
+//   { icon: "🗃️", name: "MySQL" },
+//   { icon: "🔄", name: "Prisma" },
+//   { icon: "🔧", name: "Git" },
+//   { icon: "🐙", name: "GitHub" },
+//   { icon: "🔀", name: "SVN" },
+//   { icon: "🐳", name: "Docker" },
+//   { icon: "💻", name: "VS Code" },
+//   { icon: "🪐", name: "Astro" },
+//   { icon: "🤖", name: "OpenAI" },
+//   { icon: "🔗", name: "Langchain" },
+// ];
 
-const projects = [
-  { icon: "💻", name: "Web App" },
-  { icon: "📊", name: "Data Dashboard" },
-  { icon: "🎨", name: "Design System" },
-  { icon: "🔧", name: "API Service" },
-  { icon: "🤖", name: "AI Agent" },
-];
+// const projects = [
+//   { icon: "💻", name: "Web App" },
+//   { icon: "📊", name: "Data Dashboard" },
+//   { icon: "🎨", name: "Design System" },
+//   { icon: "🔧", name: "API Service" },
+//   { icon: "🤖", name: "AI Agent" },
+// ];
 
-const timeline = [
-  { year: "2020", event: "Started learning JavaScript" },
-  { year: "2021", event: "Built my first web application" },
-  { year: "2022", event: "Joined a tech company as a developer" },
-  { year: "2023", event: "Started contributing to open source" },
-];
+// const timeline = [
+//   { year: "2020", event: "Started learning JavaScript" },
+//   { year: "2021", event: "Built my first web application" },
+//   { year: "2022", event: "Joined a tech company as a developer" },
+//   { year: "2023", event: "Started contributing to open source" },
+// ];
 
 export default function Page() {
   return (

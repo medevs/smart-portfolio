@@ -1,47 +1,14 @@
 import { Metadata } from "next";
 import Image from "next/image";
 import heroImage from "@/assets/Ahmed.jpg";
+import { Github, Linkedin, Twitter, Mail } from 'lucide-react';
+import { skills, recentPosts, featuredProjects } from '../assets/data';
+import AIChatButton from "@/components/AIChatButton";
 
 export const metadata: Metadata = {
   title: "Home",
   description: "Welcome to Ahmed's portfolio. Explore my work and get in touch.",
 };
-
-const technologies = [
-  { icon: "🟨", name: "JavaScript" },
-  { icon: "🟦", name: "TypeScript" },
-  { icon: "⚛️", name: "React" },
-  { icon: "⚡️", name: "Next.js" },
-  { icon: "🎨", name: "Tailwind CSS" },
-  { icon: "🌐", name: "Webix JS" },
-  { icon: "📊", name: "Ext JS" },
-  { icon: "🟢", name: "Node.js" },
-  { icon: "🐘", name: "PHP" },
-  { icon: "🍃", name: "MongoDB" },
-  { icon: "🗃️", name: "MySQL" },
-  { icon: "🔄", name: "Prisma" },
-  { icon: "🔧", name: "Git" },
-  { icon: "🐙", name: "GitHub" },
-  { icon: "🔀", name: "SVN" },
-  { icon: "🐳", name: "Docker" },
-  { icon: "💻", name: "VS Code" },
-  { icon: "🪐", name: "Astro" },
-  { icon: "🤖", name: "OpenAI" },
-  { icon: "🔗", name: "Langchain" },
-];
-
-const featuredProjects = [
-  { icon: "💻", name: "Project Alpha", description: "A web app built with React and Next.js" },
-  { icon: "📊", name: "Project Beta", description: "A data dashboard using D3.js and Tailwind CSS" },
-  { icon: "🎨", name: "Project Gamma", description: "A design system for modern web applications" },
-  { icon: "🔧", name: "Project Delta", description: "An API service built with Node.js and Express" },
-];
-
-const recentPosts = [
-  { title: "Understanding JavaScript Closures", date: "June 15, 2024" },
-  { title: "Building Responsive Layouts with Tailwind CSS", date: "May 28, 2024" },
-  { title: "Getting Started with TypeScript", date: "April 10, 2024" },
-];
 
 export default function HomePage() {
   const currentTime = new Date().toLocaleTimeString();
@@ -49,33 +16,58 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <section className="py-12 md:py-24 lg:py-32">
-        <div className="container mx-auto px-4 md:px-6 lg:px-8 text-center">
-          <div className="mb-8">
-            <Image src={heroImage} alt="Hero image" height={450} width={450} className="mx-auto rounded-full shadow-md" />
-          </div>
-          <h1 className="text-4xl font-bold mb-4">Welcome to My Portfolio</h1>
-          <p className="text-lg mb-8">Hi, Im Ahmed. I build web applications that solve real-world problems.</p>
-          <a href="#technologies" className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg">Explore My Work</a>
-        </div>
-      </section>
 
-      <section className="py-12 md:py-24 lg:py-32 bg-white dark:bg-gray-800">
-        <div className="container grid gap-12 px-4 md:px-6 lg:px-8 grid-cols-1 lg:grid-cols-2 xl:grid-cols-4">
-          <div className="space-y-4 lg:col-span-2 xl:col-span-2">
-            <div className="p-4 max-w-full mx-auto bg-gray-100 dark:bg-gray-700 rounded-lg shadow-lg">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-gray-900 dark:text-gray-50 text-2xl">📍</span>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">Current Location & Time</h2>
-              </div>
-              <p className="text-md text-gray-700 dark:text-gray-300">
-                <strong>Location:</strong> {currentLocation}
-              </p>
-              <p className="text-md text-gray-700 dark:text-gray-300">
-                <strong>Time:</strong> {currentTime}
-              </p>
+      <section className="relative py-12 md:py-24 lg:py-32 transition-colors duration-500 overflow-hidden">
+        {/* Background Stars */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="stars">🔆</div>
+          <div className="stars">🔆</div>
+          <div className="stars">🔆</div>
+          <div className="stars">🔆</div>
+          <div className="stars">🔆</div>
+        </div>
+
+        <div className="container mx-auto px-4 md:px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between relative z-10">
+          <div className="lg:w-1/2 text-center lg:text-left">
+            <h1 className="text-5xl font-bold mb-4">
+              Welcome to My Portfolio
+            </h1>
+            <p className="text-lg mb-8">
+              Hey there, I&apos;m Ahmed, a Software Developer based in Bremen, Germany. I dive deep into JavaScript and love crafting sleek, efficient web apps. With an eye for detail and a hunger for learning, I&apos;m all about delivering high-quality solutions that meet both user needs and business objectives..
+            </p>
+            <span>
+              <AIChatButton />
+            </span>
+            <p className="text-lg mb-8">
+            AI? Oh, that&apos;s my jam. I geek out on building software that taps into AI magic.
+            </p>
+            <div className="flex mb-8">
+              {/* Social Media Icons */}
+              <a href="#" className="mr-4 text-3xl hover:text-blue-500 transition-colors duration-300">
+                <Github />
+              </a>
+              <a href="#" className="mr-4 text-3xl hover:text-blue-500 transition-colors duration-300">
+                <Linkedin />
+              </a>
+              <a href="#" className="mr-4 text-3xl hover:text-blue-500 transition-colors duration-300">
+                <Twitter />
+              </a>
+              <a href="mailto:ahmed@example.com" className="mr-4 text-3xl hover:text-blue-500 transition-colors duration-300">
+                <Mail />
+              </a>
             </div>
           </div>
+          <div className="lg:w-1/2 flex justify-center lg:justify-end mt-6 lg:mt-0">
+            <Image
+              src={heroImage}
+              alt="Ahmed's profile picture"
+              className="rounded-full shadow-md h-64 w-64 object-cover object-center"
+            />
+          </div>
+        </div>
+      </section >
+      <section className="py-12 md:py-24 lg:py-32">
+        <div className="container grid gap-12 px-4 md:px-6 lg:px-8 grid-cols-1 lg:grid-cols-2 xl:grid-cols-4">
 
           <div className="space-y-4 lg:col-span-2 xl:col-span-4">
             <div className="p-4 max-w-full mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg">
@@ -114,14 +106,45 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="space-y-4 lg:col-span-2 xl:col-span-4" id="technologies">
+          <div className="space-y-4 lg:col-span-2 xl:col-span-2">
+
+            <div className="p-4 max-w-full mx-auto bg-gray-100 dark:bg-gray-700 rounded-lg shadow-lg">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-gray-900 dark:text-gray-50 text-2xl">📍</span>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">Current Location & Time</h2>
+              </div>
+              <p className="text-md text-gray-700 dark:text-gray-300">
+                <strong>Location:</strong> {currentLocation}
+              </p>
+              <p className="text-md text-gray-700 dark:text-gray-300">
+                <strong>Time:</strong> {currentTime}
+              </p>
+            </div>
+
+            <div className="p-4 max-w-full mx-auto bg-gray-100 dark:bg-gray-700 rounded-lg shadow-lg">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-gray-900 dark:text-gray-50 text-2xl">🔆</span>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">I Love Tagine</h2>
+              </div>
+            </div>
+
+            <div className="p-4 max-w-full mx-auto bg-gray-100 dark:bg-gray-700 rounded-lg shadow-lg">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-gray-900 dark:text-gray-50 text-2xl">🔆</span>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">I Love Tagine</h2>
+              </div>
+            </div>
+
+          </div>
+
+          <div className="space-y-4 lg:col-span-2 xl:col-span-4" id="skills">
             <div className="p-4 max-w-full mx-auto bg-gray-100 dark:bg-gray-700 rounded-lg shadow-lg">
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-gray-900 dark:text-gray-50 text-2xl">💻</span>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">Technologies</h2>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">skills</h2>
               </div>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                {technologies.map((tech, index) => (
+                {skills.map((tech, index) => (
                   <div key={index} className="p-4 rounded-lg bg-white dark:bg-gray-800 shadow-lg">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-lg text-gray-500 dark:text-gray-400">{tech.icon}</span>
@@ -146,6 +169,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-    </div>
+    </div >
   );
 }
