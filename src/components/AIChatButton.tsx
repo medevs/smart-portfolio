@@ -10,7 +10,7 @@ export default function AIChatButton() {
   return (
     <>
       <button onClick={() => setChatBoxOpen(true)}>
-        <Bot size={24} />
+        <Bot size={24} className={chatBoxOpen ? "animate-ping" : "animate-bounce"} />
       </button>
       <AIChatBox open={chatBoxOpen} onClose={() => setChatBoxOpen(false)} />
     </>
