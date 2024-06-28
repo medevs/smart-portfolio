@@ -37,10 +37,42 @@ export const timeline = [
 ];
 
 export const featuredProjects = [
-  { icon: "💻", name: "BlogGenius", description: "generate  outlines and craft blog posts" },
-  { icon: "📊", name: "RemindApp", description: "Full Stack RemindApp" },
-  { icon: "🎨", name: "AI Journaling APP", description: "AI Journaling APP" },
-  { icon: "🔧", name: "Smart Portfolio", description: "A Portfolio Website with an AI chatbot." },
+  {
+    icon: "🌟",
+    name: "Project Alpha",
+    description: "An innovative solution for modern problems.",
+    slug: "project-alpha",
+    language: "JavaScript",
+    link: "https://example.com/project-alpha",
+    sourceCode: "https://github.com/user/project-alpha"
+  },
+  {
+    icon: "🚀",
+    name: "Project Beta",
+    description: "A revolutionary project that changes everything.",
+    slug: "project-beta",
+    language: "Python",
+    link: "https://example.com/project-beta",
+    sourceCode: "https://github.com/user/project-beta"
+  },
+  {
+    icon: "🔧",
+    name: "Project Gamma",
+    description: "Tools and utilities for developers.",
+    slug: "project-gamma",
+    language: "Go",
+    link: "https://example.com/project-gamma",
+    sourceCode: "https://github.com/user/project-gamma"
+  },
+  {
+    icon: "📱",
+    name: "Project Delta",
+    description: "A mobile app for the modern era.",
+    slug: "project-delta",
+    language: "Swift",
+    link: "https://example.com/project-delta",
+    sourceCode: "https://github.com/user/project-delta"
+  }
 ];
 
 export const recentPosts = [

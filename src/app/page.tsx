@@ -1,122 +1,149 @@
-import { Metadata } from "next";
+// import { useState } from 'react';
+import { ChevronRight, ExternalLink, Github, GithubIcon, Linkedin, LucideGithub, Mail, Phone, Twitter } from 'lucide-react';
+import heroImage from "@/assets/Ahmed.jpg";
+import Image from 'next/image';
 import { skills, recentPosts, featuredProjects } from '../assets/data';
-import Hero  from "@/components/Hero";
-
-export const metadata: Metadata = {
-  title: "Home",
-  description: "Welcome to Ahmed's portfolio. Explore my work and get in touch.",
-};
+import AIChatButton from '@/components/AIChatButton';
+import RealTimeInfoWidget from '@/components/RealTimeInfoWidget';
 
 export default function HomePage() {
-  const currentTime = new Date().toLocaleTimeString();
-  const currentLocation = "Bremen, Germany";
+  // const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <Hero />
-      <section className="">
-        <div className="container grid gap-12 px-4 md:px-6 lg:px-8 grid-cols-1 lg:grid-cols-2 xl:grid-cols-4">
+    <div className="min-h-screen p-4 md:p-8">
+      {/* Bento Grid Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-          <div className="space-y-4 lg:col-span-2 xl:col-span-4">
-            <div className="p-4 max-w-full mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-gray-900 dark:text-gray-50 text-2xl">🚀</span>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">Featured Projects</h2>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                {featuredProjects.map((project, index) => (
-                  <div key={index} className="p-4 rounded-lg bg-gray-100 dark:bg-gray-700 shadow-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-lg text-gray-500 dark:text-gray-400">{project.icon}</span>
-                      <span className="text-xl font-bold text-gray-900 dark:text-gray-50">{project.name}</span>
-                    </div>
-                    <p className="text-md text-gray-700 dark:text-gray-300">{project.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+        {/* About Me */}
+        <div className="bg-neutral-400 p-4 rounded-lg shadow-md col-span-2">
+          <div className="flex items-start space-x-4">
+            {/* Profile Image */}
+            <Image
+              src={heroImage}
+              alt="Ahmed's profile picture"
+              className="rounded-full shadow-md h-24 w-24 object-cover object-center"
+            />
 
-          <div className="space-y-4 lg:col-span-2 xl:col-span-2">
-            <div className="p-4 max-w-full mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-gray-900 dark:text-gray-50 text-2xl">📝</span>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">Recent Blog Posts</h2>
-              </div>
-              <ul className="space-y-4">
-                {recentPosts.map((post, index) => (
-                  <li key={index} className="p-4 rounded-lg bg-gray-100 dark:bg-gray-700 shadow-lg">
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-50">{post.title}</h3>
-                    <p className="text-md text-gray-700 dark:text-gray-300">{post.date}</p>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+            {/* Bio and Links */}
+            <div className="flex-1">
+              <h1 className="text-xl font-bold">Ahmed Oublihi</h1>
+              <p className="text-gray-600">@medevs</p>
 
-          <div className="space-y-4 lg:col-span-2 xl:col-span-2">
-
-            <div className="p-4 max-w-full mx-auto bg-gray-100 dark:bg-gray-700 rounded-lg shadow-lg">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-gray-900 dark:text-gray-50 text-2xl">📍</span>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">Current Location & Time</h2>
-              </div>
-              <p className="text-md text-gray-700 dark:text-gray-300">
-                <strong>Location:</strong> {currentLocation}
+              <p className="text-lg mb-8">
+                Hey there, I&apos;m Ahmed, a Software Developer based in Bremen, Germany. I dive deep into JavaScript and love crafting sleek, efficient web apps. With an eye for detail and a hunger for learning, I&apos;m all about delivering high-quality solutions that meet both user needs and business objectives..
               </p>
-              <p className="text-md text-gray-700 dark:text-gray-300">
-                <strong>Time:</strong> {currentTime}
+              <p className="text-lg mb-8">
+                AI? Oh, that&apos;s my jam. I geek out on building software that taps into AI magic.
               </p>
-            </div>
 
-            <div className="p-4 max-w-full mx-auto bg-gray-100 dark:bg-gray-700 rounded-lg shadow-lg">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-gray-900 dark:text-gray-50 text-2xl">🔆</span>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">I Love Tagine</h2>
-              </div>
-            </div>
-
-            <div className="p-4 max-w-full mx-auto bg-gray-100 dark:bg-gray-700 rounded-lg shadow-lg">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-gray-900 dark:text-gray-50 text-2xl">🔆</span>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">I Love Tagine</h2>
-              </div>
-            </div>
-
-          </div>
-
-          <div className="space-y-4 lg:col-span-2 xl:col-span-4" id="skills">
-            <div className="p-4 max-w-full mx-auto bg-gray-100 dark:bg-gray-700 rounded-lg shadow-lg">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-gray-900 dark:text-gray-50 text-2xl">💻</span>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">skills</h2>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                {skills.map((tech, index) => (
-                  <div key={index} className="p-4 rounded-lg bg-white dark:bg-gray-800 shadow-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-lg text-gray-500 dark:text-gray-400">{tech.icon}</span>
-                      <span className="text-xl font-bold text-gray-900 dark:text-gray-50">{tech.name}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4 lg:col-span-2 xl:col-span-4">
-            <div className="p-4 max-w-full mx-auto bg-gray-100 dark:bg-gray-700 rounded-lg shadow-lg">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-gray-900 dark:text-gray-50 text-2xl">📊</span>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">GitHub Stats</h2>
-              </div>
-              <div className="flex justify-center">
-                <img height={590} width={590} src="https://github-readme-stats.vercel.app/api/top-langs?username=medevs&show_icons=true&locale=en&layout=compact&theme=radical" alt="Top Languages" />
+              <div className="mt-4 flex space-x-4">
+                <a href="https://twitter.com/johndoe" className="text-blue-400 hover:text-blue-500">
+                  <Twitter className="w-5 h-5" />
+                </a>
+                <a href="https://github.com/johndoe" className="text-gray-700 hover:text-gray-900">
+                  <GithubIcon className="w-5 h-5" />
+                </a>
+                <a href="https://linkedin.com/in/johndoe" className="text-blue-700 hover:text-blue-800">
+                  <Linkedin className="w-5 h-5" />
+                </a>
               </div>
             </div>
           </div>
         </div>
-      </section>
-    </div >
+
+        {/* RealTimeInfoWidget */}
+        <RealTimeInfoWidget />
+
+        {/* Technologies */}
+        <div className="bg-neutral-400 p-4 rounded-lg shadow-md">
+          <h2 className="text-xl font-semibold mb-4">Technologies</h2>
+          <ul className="flex flex-wrap gap-4 justify-center">
+            {skills.map((skill, index) => (
+              <li key={index} className="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-gray-700">
+                <span className="text-sm text-gray-500 dark:text-gray-400">{skill.icon}</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{skill.name}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Featured Project */}
+        <div className="bg-neutral-400 m-auto rounded-lg shadow-md col-span-2">
+          <div className="p-4 ">
+            <h2 className="text-xl font-bold text">Featured Projects</h2>
+          </div>
+          <div className="grid gap-4 p-4 sm:grid-cols-2">
+            {featuredProjects.map((project, index) => (
+              <div key={index} className="bg-gray-50 dark:bg-gray-700 rounded-lg overflow-hidden shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                <div className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-2xl text-indigo-500 dark:text-indigo-400">{project.icon}</span>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{project.name}</h3>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">{project.description}</p>
+                  <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mb-3">
+                    <span className="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded mr-2">{project.language}</span>
+                    <span>{project.slug}</span>
+                  </div>
+                </div>
+                <div className="flex border-t border-gray-200 dark:border-gray-600">
+                  <a href={project.link} className="flex-1 px-4 py-3 text-center text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-600 transition duration-150 ease-in-out">
+                    <ExternalLink className="w-4 h-4 inline mr-1" />
+                    Live Project
+                  </a>
+                  <div className="border-l border-gray-200 dark:border-gray-600"></div>
+                  <a href={project.sourceCode} className="flex-1 px-4 py-3 text-center text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-600 transition duration-150 ease-in-out">
+                    <LucideGithub className="w-4 h-4 inline mr-1" />
+                    Source Code
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Other Projects */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+          <div className="p-4 bg-gradient-to-r from-blue-500 to-purple-600">
+            <h2 className="text-lg font-semibold text-white">Latest Posts</h2>
+          </div>
+          <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+            {recentPosts.map((post, index) => (
+              <li key={index} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-150 ease-in-out">
+                <a href="#" className="block">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{post.title}</p>
+                  <div className="flex items-center justify-between mt-1">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{post.date}</p>
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                  </div>
+                </a>
+              </li>
+            ))}
+          </ul>
+          <div className="p-4 bg-gray-50 dark:bg-gray-700">
+            <a href="#" className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">
+              View all posts
+            </a>
+          </div>
+        </div>
+
+        {/* Social Links */}
+        <div className="bg-neutral-400 p-4 rounded-lg shadow-md">
+          <h2 className="text-xl font-semibold mb-4">Connect</h2>
+          
+        </div>
+
+        <div className="bg-neutral-400 p-4 rounded-lg shadow-md">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-gray-900 dark:text-gray-50 text-2xl">📊</span>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">GitHub Stats</h2>
+          </div>
+          <div className="flex justify-center">
+            <img height={590} width={590} src="https://github-readme-stats.vercel.app/api/top-langs?username=medevs&show_icons=true&locale=en&layout=compact&theme=radical" alt="Top Languages" />
+          </div>
+        </div>
+
+      </div>
+    </div>
   );
 }
