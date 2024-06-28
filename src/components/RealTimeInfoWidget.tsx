@@ -83,7 +83,7 @@ const BremenInfoWidget: React.FC = () => {
   }
 
   return (
-    <div className="w-full h-full bg-gradient-to-r from-blue-500 to-teal-400 p-4 rounded-lg shadow-lg text-white flex flex-col justify-between">
+    <div className="w-full h-full bg-gradient-to-r from-blue-500 to-teal-400 p-4 rounded-lg shadow-lg text-white flex flex-col justify-between md:col-span-2 lg:col-span-2">
       <h2 className="text-xl sm:text-2xl font-bold mb-2">Bremen, Germany</h2>
 
       <div className="flex flex-col space-y-2">
