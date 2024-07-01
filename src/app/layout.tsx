@@ -25,7 +25,9 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class">
           <Navbar />
-          <main className="p-4 pb-12 max-w-6xl m-auto overflow-hidden 2xl:overflow-visible mt-24">{children}</main>
+          <main className="p-4 pb-12 max-w-7xl mx-auto overflow-hidden lg:overflow-visible">
+            {children}
+          </main>
           <Footer />
         </ThemeProvider>
       </body>

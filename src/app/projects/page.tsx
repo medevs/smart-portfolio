@@ -3,7 +3,7 @@ import ProjectsGrid  from "@/components/ProjectsGrid";
 
 export default function Projects() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white">
+    <div className="min-h-screen">
       <Head>
         <title>My Portfolio - Projects</title>
         <link rel="icon" href="/favicon.ico" />
@@ -11,7 +11,7 @@ export default function Projects() {
 
       <main className="container mx-auto px-4 py-16">
         <h1 className="text-5xl font-bold mb-8 text-center">
-          My Projects
+          🧑‍💻Projects
         </h1>
         <ProjectsGrid />
       </main>
