@@ -45,14 +45,17 @@ export default function AIChatBox({ open, onClose }: AIChatBoxProps) {
   return (
     <div
       className={cn(
-        "fixed bottom-16 right-4 z-50 w-full max-w-[500px] p-1 xl:right-36",
+        "fixed bottom-16 right-4 z-50 w-full max-w-[500px] p-4 xl:right-24",
         open ? "block" : "hidden",
       )}
     >
-      <button onClick={onClose} className="mb-1 ms-auto block">
-        <XCircle size={30} className="rounded-full bg-background" />
-      </button>
-      <div className="flex h-[600px] flex-col rounded border bg-background shadow-xl">
+      <div className="flex h-[600px] flex-col border bg-background shadow-xl rounded-lg bg-gradient-to-br from-purple-600 to-blue-500 overflow-hidden">
+        <div className="flex items-center justify-between bg-black bg-opacity-30 p-4">
+          <h2 className="text-white font-bold">AI Assistant</h2>
+          <button onClick={onClose} className="text-white hover:text-gray-300 transition-colors">
+            <XCircle size={24} />
+          </button>
+        </div>
         <div className="mt-3 h-full overflow-y-auto px-3" ref={scrollRef}>
           {messages.map((message) => (
             <ChatMessage message={message} key={message.id} />
@@ -76,15 +79,15 @@ export default function AIChatBox({ open, onClose }: AIChatBoxProps) {
             />
           )}
           {!error && messages.length === 0 && (
-            <div className="mx-8 flex h-full flex-col items-center justify-center gap-3 text-center">
-              <Bot size={28} />
-              <p className="text-lg font-medium">
-                Hello! How can I assist you today?
-              </p>
-              <p className="text-sm text-gray-500">
-                Feel free to ask me anything about this website.
-              </p>
-            </div>
+            <div className="flex flex-col items-center justify-center h-full text-center">
+            <Bot size={48} className="text-purple-500 mb-4 animate-bounce" />
+            <p className="text-lg font-medium mb-2">
+              Hello! How can I assist you today?
+            </p>
+            <p className="text-sm ">
+              Feel free to ask me anything about this website.
+            </p>
+          </div>
           )}
         </div>
         <form onSubmit={handleSubmit} className="m-3 flex gap-1">
@@ -100,7 +103,7 @@ export default function AIChatBox({ open, onClose }: AIChatBoxProps) {
             value={input}
             onChange={handleInputChange}
             placeholder="Say something..."
-            className="grow rounded border bg-background px-3 py-2"
+            className="flex-grow rounded-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
             ref={inputRef}
           />
           <button
