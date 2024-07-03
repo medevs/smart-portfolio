@@ -1,80 +1,145 @@
-import React from 'react';
-import { Github, Code, Star, GitBranch, Users, Activity, Coffee, Zap } from 'lucide-react';
+'use client'
+
+import React, { useState, useEffect } from 'react';
+import { Octokit } from '@octokit/rest';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { Loader } from 'lucide-react';
+
+interface UserData {
+  login: string;
+  name: string;
+  avatar_url: string;
+  public_repos: number;
+  followers: number;
+  following: number;
+  public_gists: number;
+  created_at: string;
+  bio: string;
+}
+
+interface RepoData {
+  name: string;
+  stargazers_count: number;
+  language: string;
+}
+
+interface LanguageData {
+  name: string;
+  value: number;
+}
+
+const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
 const GitHubStats: React.FC = () => {
-  const stats = [
-    { icon: <GitBranch className="w-6 h-6" />, label: 'Repositories', value: '50+' },
-    { icon: <Star className="w-6 h-6" />, label: 'Stars Earned', value: '200+' },
-    { icon: <Code className="w-6 h-6" />, label: 'Contributions', value: '1,500+' },
-    { icon: <Users className="w-6 h-6" />, label: 'Followers', value: '100+' },
-    { icon: <Activity className="w-6 h-6" />, label: 'Pull Requests', value: '300+' },
-    { icon: <Coffee className="w-6 h-6" />, label: 'Cups of Coffee', value: '∞' },
-  ];
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [repos, setRepos] = useState<RepoData[]>([]);
+  const [languages, setLanguages] = useState<LanguageData[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const languages = [
-    { name: 'JavaScript', percent: 40 },
-    { name: 'TypeScript', percent: 30 },
-    { name: 'Python', percent: 15 },
-    { name: 'HTML/CSS', percent: 10 },
-    { name: 'Other', percent: 5 },
+  useEffect(() => {
+    const fetchGitHubData = async () => {
+      try {
+        const userResponse = await octokit.users.getByUsername({ username: 'medevs' });
+        setUserData(userResponse.data as UserData);
+
+        const reposResponse = await octokit.repos.listForUser({ username: 'medevs', per_page: 100 });
+        setRepos(reposResponse.data as RepoData[]);
+
+        const languageCounts: { [key: string]: number } = {};
+        reposResponse.data.forEach((repo: RepoData) => {
+          if (repo.language) {
+            languageCounts[repo.language] = (languageCounts[repo.language] || 0) + 1;
+          }
+        });
+
+        const languageData = Object.entries(languageCounts)
+          .map(([name, value]) => ({ name, value }))
+          .sort((a, b) => b.value - a.value)
+          .slice(0, 5);
+
+        setLanguages(languageData);
+      } catch (err) {
+        setError('Failed to fetch GitHub data');
+        console.error('Error fetching GitHub data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGitHubData();
+  }, []);
+
+  if (loading) return <div className="flex justify-center items-center h-64">
+    <Loader className="animate-spin text-indigo-500" size={48} />
+  </div>;
+  if (error) return <div className="text-red-600 dark:text-red-400">{error}</div>;
+
+  const totalStars = repos.reduce((sum, repo) => sum + repo.stargazers_count, 0);
+
+  const stats = [
+    { label: 'Repositories', value: userData?.public_repos || 0 },
+    { label: 'Stars', value: totalStars },
+    { label: 'Followers', value: userData?.followers || 0 },
+    { label: 'Following', value: userData?.following || 0 },
   ];
 
   return (
-    <div className="md:col-span-1 lg:col-span-2 bg-gradient-to-br from-blue-600 to-purple-700 p-8 rounded-3xl shadow-2xl text-white overflow-hidden relative">
-      <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-yellow-300 rounded-full opacity-20 blur-3xl"></div>
-      <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-pink-500 rounded-full opacity-20 blur-3xl"></div>
-
-      <div className="flex items-center gap-3 mb-8">
-        <Github className="w-10 h-10" />
-        <h2 className="text-3xl font-bold">GitHub Insights</h2>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8">
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex-grow">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {stats.map((stat, index) => (
-          <div key={index} className="bg-white bg-opacity-10 p-4 rounded-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-opacity-20">
-            <div className="flex items-center gap-3 mb-2">
-              {stat.icon}
-              <span className="font-semibold">{stat.label}</span>
-            </div>
-            <p className="text-2xl font-bold">{stat.value}</p>
+          <div key={index} className="bg-gray-100 dark:bg-gray-700 p-4 rounded-md shadow text-center">
+            <span className="block text-2xl font-bold text-gray-900 dark:text-gray-100">{stat.value}</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">{stat.label}</span>
           </div>
         ))}
       </div>
-
-      <div className="mb-8">
-        <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <Zap className="w-5 h-5" />
-          Top Languages
-        </h3>
-        <div className="space-y-3">
-          {languages.map((lang, index) => (
-            <div key={index} className="flex items-center">
-              <div className="w-24 text-sm">{lang.name}</div>
-              <div className="flex-grow bg-white bg-opacity-20 rounded-full h-2.5 ml-2">
-                <div
-                  className="bg-gradient-to-r from-yellow-300 to-red-500 h-2.5 rounded-full transition-all duration-500 ease-out"
-                  style={{ width: `${lang.percent}%` }}
-                ></div>
-              </div>
-              <div className="w-12 text-right text-sm">{lang.percent}%</div>
-            </div>
-          ))}
-        </div>
+      <div className="mb-6">
+        <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">Top Languages</h3>
+        <ResponsiveContainer width="100%" height={200}>
+          <PieChart>
+            <Pie
+              data={languages}
+              cx="50%"
+              cy="50%"
+              outerRadius={80}
+              fill="#8884d8"
+              dataKey="value"
+              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+            >
+              {languages.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              ))}
+            </Pie>
+            <Tooltip />
+          </PieChart>
+        </ResponsiveContainer>
       </div>
-
-      <div className="text-center">
+      <div className="text-sm text-gray-600 dark:text-gray-400">
+        Member since: {new Date(userData?.created_at || '').toLocaleDateString()}
+      </div>
+      <div className="mt-6 text-center">
         <a
-          href="https://github.com/medevs"
+          href={`https://github.com/${userData?.login}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center space-x-2 bg-white text-purple-700 font-bold py-3 px-6 rounded-full transition-all duration-300 hover:bg-opacity-90 hover:scale-105"
+          className="inline-block bg-gray-800 dark:bg-gray-600 text-white font-medium py-2 px-4 rounded hover:bg-gray-700 dark:hover:bg-gray-500 transition-colors mr-2"
         >
-          <Github className="w-5 h-5" />
-          <span>View Full GitHub Profile</span>
+          View Profile
+        </a>
+        <a
+          href={`https://github.com/${userData?.login}?tab=repositories`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block bg-blue-500 text-white font-medium py-2 px-4 rounded hover:bg-blue-600 transition-colors"
+        >
+          View Repositories
         </a>
       </div>
     </div>
   );
-}
+};
 
 export default GitHubStats;

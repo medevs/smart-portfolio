@@ -1,57 +1,81 @@
 import dotenv from "dotenv";
-// Configure dotenv before other imports
-dotenv.config({ path: ".env.local" });
-
-import { DocumentInterface } from "@langchain/core/documents";
+import path from "path";
+import { Document } from "@langchain/core/documents";
 import { DirectoryLoader } from "langchain/document_loaders/fs/directory";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { getEmbeddingsCollection, getVectorStore } from "../src/lib/astradb";
+import { VectorStore } from "langchain/vectorstores/base";
 import { Redis } from "@upstash/redis";
 
-async function generateEmbeddings() {
-  await Redis.fromEnv().flushdb();
+// Configure dotenv before other imports
+dotenv.config({ path: ".env.local" });
 
-  const vectorStore = await getVectorStore();
+// These imports might need to be adjusted based on your project structure
+import { getEmbeddingsCollection, getVectorStore } from "../src/lib/astradb";
 
-  (await getEmbeddingsCollection()).deleteMany({});
+async function generateEmbeddings(): Promise<void> {
+  const redis = Redis.fromEnv();
+  await redis.flushdb();
 
-  const loader = new DirectoryLoader(
-    "src/app/",
+  const vectorStore: VectorStore = await getVectorStore();
+
+  const embeddingsCollection = await getEmbeddingsCollection();
+  await embeddingsCollection.deleteMany({});
+
+  const appLoader = new DirectoryLoader(
+    "src/app",
     {
       ".tsx": (path) => new TextLoader(path),
     },
     true,
   );
 
-  const docs = (await loader.load())
-    .filter((doc) => doc.metadata.source.endsWith("page.tsx"))
-    .map((doc): DocumentInterface => {
-      const url =
-        doc.metadata.source
-          .replace(/\\/g, "/")
-          .split("/src/app")[1]
-          .split("/page.")[0] || "/";
+  const assetsLoader = new DirectoryLoader(
+    "src/assets",
+    {
+      ".ts": (path) => new TextLoader(path),
+    },
+    true,
+  );
 
-      const pageContentTrimmed = doc.pageContent
-        ?.replace(/^import.*$/gm, "") // Remove all import statements
-        ?.replace(/ className=(["']).*?\1| className={.*?}/g, "") // Remove all className props
-        ?.replace(/^\s*[\r]/gm, "") // remove empty lines
-        .trim();
+  const componentsLoader = new DirectoryLoader(
+    "src/components",
+    {
+      ".tsx": (path) => new TextLoader(path),
+    },
+    true,
+  );
 
-      return {
-        pageContent: pageContentTrimmed,
-        metadata: { url },
-      };
+  const docs = [
+    ...(await appLoader.load()),
+    ...(await componentsLoader.load()),
+    ...(await assetsLoader.load()),
+  ].map((doc): Document => {
+    const relativePath = path.relative(process.cwd(), doc.metadata.source);
+    const url =
+      "/" +
+      relativePath
+        .split(path.sep)
+        .slice(1)
+        .join("/")
+        .replace(/\.tsx$/, "");
+
+    return new Document({
+      pageContent: doc.pageContent,
+      metadata: { url },
     });
+  });
 
-  const splitter = RecursiveCharacterTextSplitter.fromLanguage("html");
+  const splitter = new RecursiveCharacterTextSplitter({
+    chunkSize: 1000,
+    chunkOverlap: 200,
+  });
 
   const splitDocs = await splitter.splitDocuments(docs);
 
-  console.log(splitDocs)
+  console.log(splitDocs);
 
   await vectorStore.addDocuments(splitDocs);
 }
 
-generateEmbeddings();
+generateEmbeddings().catch(console.error);

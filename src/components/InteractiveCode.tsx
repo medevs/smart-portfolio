@@ -35,7 +35,7 @@ const InteractiveCode: React.FC = () => {
   };
 
   return (
-    <div className={`bg-gray-900 p-6 rounded-2xl shadow-lg md:col-span-1 lg:col-span-2`}>
+    <div className={`bg-gray-900 p-6 rounded-2xl shadow-lg md:col-span-1 lg:col-span-2 flex-grow`}>
       <h2 className="text-2xl font-bold mb-4 text-white">Interactive Code Snippet</h2>
       <div className="mb-4">
         {code.map((line, index) => (

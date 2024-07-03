@@ -4,18 +4,18 @@ import ProjectCard from './ProjectCard';
 
 const projects = [
   {
-    title: "E-commerce Platform",
-    description: "A full-stack e-commerce solution with user authentication, product management, and payment integration.",
-    technologies: ["Next.js", "Node.js", "MongoDB", "Stripe"],
-    githubLink: "https://github.com/username/ecommerce-platform",
-    liveLink: "https://myecommerceplatform.com"
+    title: "Portfolio",
+    description: "A Portfolio Website with an AI chatbot that can answer any question about you.",
+    technologies: ["Next.js", "Langchain", "MongoDB", "Stripe", "tailwind", ],
+    githubLink: "https://github.com/medevs/smart-portfolio",
+    liveLink: "https://medevs.xyz"
   },
   {
-    title: "Task Management App",
-    description: "A responsive task management application with real-time updates and collaboration features.",
+    title: "RemindMe",
+    description: "Full Stack RemindApp",
     technologies: ["React", "Firebase", "Tailwind CSS"],
-    githubLink: "https://github.com/username/task-manager",
-    liveLink: "https://mytaskmanager.com"
+    githubLink: "https://github.com/medevs/remind-me",
+    liveLink: "remind-me-beige.vercel.app"
   }
 ];
 

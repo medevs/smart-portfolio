@@ -1,51 +1,97 @@
-import ProjectCard from './ProjectCard'
+"use client"
+
+import React, { useState, useEffect } from 'react';
+import ProjectCard from './ProjectCard';
+import { Loader } from 'lucide-react';
 
 interface Project {
   title: string;
   description: string;
-  websiteUrl: string;
-  githubUrl: string;
-  techStack: string[];
-  image: string;
+  technologies: string[];
+  githubLink: string;
+  liveLink?: string;
+  stars: number;
+  forks: number;
+  lastUpdated: string;
 }
 
-const projects = [
-  {
-    title: "E-commerce Platform",
-    description: "A full-stack e-commerce solution with user authentication, product management, and payment integration.",
-    technologies: ["Next.js", "Node.js", "MongoDB", "Stripe"],
-    githubLink: "https://github.com/username/ecommerce-platform",
-    liveLink: "https://myecommerceplatform.com"
-  },
-  {
-    title: "Task Management App",
-    description: "A responsive task management application with real-time updates and collaboration features.",
-    technologies: ["React", "Firebase", "Tailwind CSS"],
-    githubLink: "https://github.com/username/task-manager",
-    liveLink: "https://mytaskmanager.com"
-  },
-  {
-    title: "Weather Dashboard",
-    description: "An interactive weather dashboard that provides real-time weather information and forecasts.",
-    technologies: ["Vue.js", "OpenWeatherMap API", "Chart.js"],
-    githubLink: "https://github.com/username/weather-dashboard",
-    liveLink: "https://myweatherdashboard.com"
-  },
-  {
-    title: "Portfolio Website",
-    description: "A personal portfolio website showcasing projects and skills.",
-    technologies: ["Next.js", "Tailwind CSS", "Framer Motion"],
-    githubLink: "https://github.com/username/portfolio",
-    liveLink: "https://myportfolio.com"
-  }
-];
+const ProjectsGrid: React.FC = () => {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<string>('All');
+  const [technologies, setTechnologies] = useState<string[]>(['All']);
 
-export default function ProjectsGrid() {
+  const fetchProjects = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('https://api.github.com/users/medevs/repos?per_page=100');
+      if (!response.ok) {
+        throw new Error('Failed to fetch repositories');
+      }
+      const data = await response.json();
+      const formattedProjects: Project[] = data.map((repo: any) => ({
+        title: repo.name,
+        description: repo.description || 'No description available',
+        technologies: repo.topics || [],
+        githubLink: repo.html_url,
+        liveLink: repo.homepage || undefined,
+        stars: repo.stargazers_count,
+        forks: repo.forks_count,
+        lastUpdated: new Date(repo.updated_at).toLocaleDateString(),
+      }));
+      setProjects(formattedProjects);
+
+      const allTechs = Array.from(new Set(formattedProjects.flatMap(project => project.technologies)));
+      setTechnologies(['All', ...allTechs]);
+    } catch (err) {
+      setError('Error fetching projects. Please try again later.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const filteredProjects = filter === 'All'
+    ? projects
+    : projects.filter(project => project.technologies.includes(filter));
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-      {projects.map((project, index) => (
-        <ProjectCard key={index} {...project} />
-      ))}
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">My Projects</h2>
+        <select
+          className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+        >
+          {technologies.map((tech) => (
+            <option key={tech} value={tech}>
+              {tech}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <Loader className="animate-spin text-indigo-500" size={48} />
+        </div>
+      ) : error ? (
+        <div className="text-red-500 text-center">{error}</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+          {filteredProjects.map((project, index) => (
+            <ProjectCard key={index} {...project} />
+          ))}
+        </div>
+      )}
     </div>
-  )
-}
+  );
+};
+
+export default ProjectsGrid;

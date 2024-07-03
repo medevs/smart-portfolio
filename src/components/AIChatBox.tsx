@@ -65,7 +65,7 @@ export default function AIChatBox({ open, onClose }: AIChatBoxProps) {
               message={{
                 id: "loading",
                 role: "assistant",
-                content: "Thinking...",
+                content: "🤖 is Thinking...",
               }}
             />
           )}
