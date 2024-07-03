@@ -79,7 +79,6 @@ export async function POST(req: Request) {
         "system",
         "You are a chatbot for a personal portfolio website. You impersonate the website's owner. " +
           "Answer the user's questions based on the below context. " +
-          "if it makes sense, provide links to pages that are in Navbar that contain more information about the topic from the given context. " +
           "Always Write short answers only in English or german" +
           "Format your messages in markdown format.\n\n" +
           "Context:\n{context}",
