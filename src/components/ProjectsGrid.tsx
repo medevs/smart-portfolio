@@ -13,6 +13,7 @@ interface Project {
   stars: number;
   forks: number;
   lastUpdated: string;
+  latestCommitDate: string;
 }
 
 const ProjectsGrid: React.FC = () => {
@@ -30,19 +31,32 @@ const ProjectsGrid: React.FC = () => {
         throw new Error('Failed to fetch repositories');
       }
       const data = await response.json();
-      const formattedProjects: Project[] = data.map((repo: any) => ({
-        title: repo.name,
-        description: repo.description || 'No description available',
-        technologies: repo.topics || [],
-        githubLink: repo.html_url,
-        liveLink: repo.homepage || undefined,
-        stars: repo.stargazers_count,
-        forks: repo.forks_count,
-        lastUpdated: new Date(repo.updated_at).toLocaleDateString(),
-      }));
-      setProjects(formattedProjects);
 
-      const allTechs = Array.from(new Set(formattedProjects.flatMap(project => project.technologies)));
+      const projectsWithCommits = await Promise.all(data.map(async (repo: any) => {
+        const commitResponse = await fetch(`https://api.github.com/repos/medevs/${repo.name}/commits?per_page=1`);
+        const commitData = await commitResponse.json();
+        const latestCommitDate = commitData[0]?.commit?.author?.date || repo.updated_at;
+
+        return {
+          title: repo.name,
+          description: repo.description || 'No description available',
+          technologies: repo.topics || [],
+          githubLink: repo.html_url,
+          liveLink: repo.homepage || undefined,
+          stars: repo.stargazers_count,
+          forks: repo.forks_count,
+          lastUpdated: new Date(repo.updated_at).toLocaleDateString(),
+          latestCommitDate: latestCommitDate,
+        };
+      }));
+
+      const sortedProjects = projectsWithCommits.sort((a, b) =>
+        new Date(b.latestCommitDate).getTime() - new Date(a.latestCommitDate).getTime()
+      );
+
+      setProjects(sortedProjects);
+
+      const allTechs = Array.from(new Set(sortedProjects.flatMap(project => project.technologies)));
       setTechnologies(['All', ...allTechs]);
     } catch (err) {
       setError('Error fetching projects. Please try again later.');

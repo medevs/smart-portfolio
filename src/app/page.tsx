@@ -5,7 +5,7 @@ import FeaturedProjects from '@/components/FeaturedProjects';
 import LatestPosts from '@/components/LatestPosts';
 import InteractiveCode from '@/components/InteractiveCode';
 import GitHubStats from '@/components/GitHubStats';
-import GitHubTrends from '@/components/GitHubTrends';
+// import GitHubTrends from '@/components/GitHubTrends';
 import Timeline from '@/components/Timeline';
 
 const HomePage: React.FC = () => {

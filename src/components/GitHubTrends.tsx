@@ -15,7 +15,7 @@ interface TrendingRepo {
   topics: string[];
 }
 
-const octokit = new Octokit({ auth: process.env.NEXT_PUBLIC_GITHUB_TOKEN });
+const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
 const GitHubTrends: React.FC = () => {
   const [trendingRepos, setTrendingRepos] = useState<TrendingRepo[]>([]);

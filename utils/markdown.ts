@@ -18,10 +18,6 @@ export interface PostData {
   author: string;
 }
 
-export interface PostContent extends PostData {
-  contentHtml: string;
-}
-
 export async function getSortedPostsData(): Promise<PostData[]> {
   const fileNames = await fs.readdir(postsDirectory);
   const allPostsData = await Promise.all(fileNames.map(async (fileName) => {
@@ -41,19 +37,19 @@ export async function getSortedPostsData(): Promise<PostData[]> {
   return allPostsData.sort((a, b) => (a.date < b.date ? 1 : -1));
 }
 
+export interface PostContent extends PostData {
+  content: string; // Change this from contentHtml to content
+}
+
 export async function getPostData(id: string): Promise<PostContent> {
   const fullPath = path.join(postsDirectory, `${id}.md`);
   const fileContents = await fs.readFile(fullPath, 'utf8');
   const matterResult = matter(fileContents);
-  const processedContent = await remark()
-    .use(html)
-    .process(matterResult.content);
-  const contentHtml = processedContent.toString();
   const readTime = readingTime(matterResult.content).text;
 
   return {
     id,
-    contentHtml,
+    content: matterResult.content, // Return raw markdown content
     readTime,
     ...(matterResult.data as Omit<PostData, 'id' | 'readTime'>),
   };
