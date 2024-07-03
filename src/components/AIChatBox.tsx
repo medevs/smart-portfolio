@@ -45,11 +45,11 @@ export default function AIChatBox({ open, onClose }: AIChatBoxProps) {
   return (
     <div
       className={cn(
-        "fixed bottom-16 right-4 z-50 w-full max-w-[500px] p-4 xl:right-24",
+        "fixed bottom-16 right-4 z-50 w-full max-w-[500px] p-4 xl:right-22",
         open ? "block" : "hidden",
       )}
     >
-      <div className="flex h-[600px] flex-col border bg-background shadow-xl rounded-lg bg-gradient-to-br from-purple-600 to-blue-500 overflow-hidden">
+      <div className="flex h-[600px] flex-col border bg-background shadow-xl rounded-lg  overflow-hidden">
         <div className="flex items-center justify-between bg-black bg-opacity-30 p-4">
           <h2 className="text-white font-bold">AI Assistant</h2>
           <button onClick={onClose} className="text-white hover:text-gray-300 transition-colors">

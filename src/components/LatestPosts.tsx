@@ -7,7 +7,7 @@ const LatestPosts: React.FC = () => {
   return (
     <div className={`bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl md:col-span-2 lg:col-span-2 flex-grow`}>
       <div className="p-6 ">
-        <h2 className="text-2xl font-bold text-white">Latest Posts</h2>
+        <h2 className="text-2xl font-bold">Latest Posts</h2>
       </div>
       <ul className="divide-y divide-gray-200 dark:divide-gray-700">
         {recentPosts.map((post, index) => (
