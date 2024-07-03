@@ -11,13 +11,14 @@ interface MarkdownContentProps {
 
 const MarkdownContent: React.FC<MarkdownContentProps> = ({ content }) => {
   const components: Components = {
-    code({ node, inline, className, children, ...props }) {
+    code({ node, className, children, ...props }) {
       const match = /language-(\w+)/.exec(className || '');
-      return !inline && match ? (
+      const isInline = node && node.type === 'element' && node.tagName === 'code' && node.properties?.className === undefined;
+      
+      return !isInline && match ? (
         <SyntaxHighlighter
           style={oneDark}
           language={match[1]}
-          PreTag="div"
           {...props}
         >
           {String(children).replace(/\n$/, '')}
@@ -28,7 +29,6 @@ const MarkdownContent: React.FC<MarkdownContentProps> = ({ content }) => {
         </code>
       );
     },
-    // Add custom rendering for other markdown elements
     h1: ({ node, ...props }) => <h1 className="text-4xl font-bold my-4" {...props} />,
     h2: ({ node, ...props }) => <h2 className="text-3xl font-semibold my-3" {...props} />,
     h3: ({ node, ...props }) => <h3 className="text-2xl font-semibold my-2" {...props} />,

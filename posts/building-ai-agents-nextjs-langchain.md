@@ -8,8 +8,6 @@ category: "Artificial Intelligence"
 description: "Explore the fascinating world of AI agents and learn how to build them using Next.js and LangChain. This guide covers everything from the basics to advanced techniques."
 ---
 
-# Building AI Agents with Next.js and LangChain: A Comprehensive Guide
-
 In recent years, the field of artificial intelligence has seen remarkable advancements, particularly in the area of language models and AI agents. These intelligent systems can understand, process, and generate human-like text, opening up a world of possibilities for developers and businesses alike. In this comprehensive guide, we'll explore how to build AI agents using two powerful tools: Next.js and LangChain.
 
 ## Understanding AI Agents
