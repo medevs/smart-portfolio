@@ -7,20 +7,20 @@ import { Loader } from 'lucide-react';
 
 interface UserData {
   login: string;
-  name: string;
+  name: string | null;
   avatar_url: string;
   public_repos: number;
   followers: number;
   following: number;
   public_gists: number;
   created_at: string;
-  bio: string;
+  bio: string | null;
 }
 
 interface RepoData {
   name: string;
   stargazers_count: number;
-  language: string;
+  language: string | null;
 }
 
 interface LanguageData {
@@ -28,7 +28,7 @@ interface LanguageData {
   value: number;
 }
 
-const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+const octokit = new Octokit({ auth: process.env.NEXT_PUBLIC_GITHUB_TOKEN });
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
@@ -46,10 +46,14 @@ const GitHubStats: React.FC = () => {
         setUserData(userResponse.data as UserData);
 
         const reposResponse = await octokit.repos.listForUser({ username: 'medevs', per_page: 100 });
-        setRepos(reposResponse.data as RepoData[]);
+        setRepos(reposResponse.data.map((repo): RepoData => ({
+          name: repo.name,
+          stargazers_count: repo.stargazers_count ?? 0, // Use nullish coalescing to default to 0
+          language: repo.language ?? ''
+        })));
 
         const languageCounts: { [key: string]: number } = {};
-        reposResponse.data.forEach((repo: RepoData) => {
+        reposResponse.data.forEach((repo) => {
           if (repo.language) {
             languageCounts[repo.language] = (languageCounts[repo.language] || 0) + 1;
           }

@@ -2,20 +2,20 @@
 
 import React, { useState, useEffect } from 'react';
 import { Octokit } from '@octokit/rest';
-import { ChevronLeft, ChevronRight, Clock, Loader } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader } from 'lucide-react';
 
 interface TrendingRepo {
   id: number;
   full_name: string;
   html_url: string;
-  description: string;
+  description: string | null;
   stargazers_count: number;
   forks_count: number;
-  language: string;
+  language: string | null;
   topics: string[];
 }
 
-const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+const octokit = new Octokit({ auth: process.env.NEXT_PUBLIC_GITHUB_TOKEN });
 
 const GitHubTrends: React.FC = () => {
   const [trendingRepos, setTrendingRepos] = useState<TrendingRepo[]>([]);
@@ -40,7 +40,18 @@ const GitHubTrends: React.FC = () => {
           page: page
         });
 
-        setTrendingRepos(response.data.items);
+        const mappedRepos: TrendingRepo[] = response.data.items.map(item => ({
+          id: item.id,
+          full_name: item.full_name,
+          html_url: item.html_url,
+          description: item.description,
+          stargazers_count: item.stargazers_count,
+          forks_count: item.forks_count,
+          language: item.language,
+          topics: item.topics || []
+        }));
+
+        setTrendingRepos(mappedRepos);
       } catch (err) {
         setError('Failed to fetch trending repositories');
         console.error('Error fetching trending repos:', err);
@@ -74,7 +85,7 @@ const GitHubTrends: React.FC = () => {
             <p className="text-gray-600 dark:text-gray-300 mt-1">{repo.description}</p>
             <div className="flex flex-wrap items-center gap-2 mt-2">
               <span className="px-2 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-100 text-xs font-semibold rounded">
-                {repo.language ? repo.language : 'X'}
+                {repo.language || 'Unknown'}
               </span>
               {repo.topics.slice(0, 5).map(topic => (
                 <span key={topic} className="px-2 py-1 bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100 text-xs font-semibold rounded">
@@ -93,7 +104,7 @@ const GitHubTrends: React.FC = () => {
         <button
           onClick={() => setPage(p => Math.max(1, p - 1))}
           disabled={page === 1}
-          className="px-4 py-2 rounded hover:transition-transform-colors-opacity disabled:bg-gray-400"
+          className="px-4 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors disabled:bg-gray-100 dark:disabled:bg-gray-600"
         >
           <ChevronLeft />
         </button>
@@ -101,7 +112,7 @@ const GitHubTrends: React.FC = () => {
         <button
           onClick={() => setPage(p => Math.min(5, p + 1))}
           disabled={page === 5}
-          className="px-4 py-2 rounded disabled:bg-gray-400"
+          className="px-4 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors disabled:bg-gray-100 dark:disabled:bg-gray-600"
         >
           <ChevronRight />
         </button>
