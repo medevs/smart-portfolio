@@ -28,6 +28,10 @@ const HomePage: React.FC = () => {
       <div className="sm:col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-6">
         <FeaturedProjects />
       </div>
+
+      <div className="sm:col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-6">
+        <Timeline />
+      </div>
       
       <div className="sm:col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="flex flex-col">
@@ -36,10 +40,6 @@ const HomePage: React.FC = () => {
         <div className="flex flex-col">
           <InteractiveCode />
         </div>
-      </div>
-
-      <div className="sm:col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-6">
-        <Timeline />
       </div>
       
       {/* <div className="sm:col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-6">
