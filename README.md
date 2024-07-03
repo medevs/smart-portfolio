@@ -1,36 +1,118 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Next.js Portfolio with AI Chatbot
 
-## Getting Started
+This project is a personal portfolio website built with Next.js, featuring an AI-powered chatbot that can answer questions about the website's content and the owner's projects.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Responsive portfolio website showcasing projects and skills
+- AI chatbot integrated into the website
+- Dynamic content management for projects and blog posts
+- GitHub integration to display repositories and contributions
+- Dark mode support
+
+## Tech Stack
+
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- Octokit (for GitHub API integration)
+- Langchain (for AI chatbot functionality)
+- Vercel (for deployment)
+
+## Project Structure
+
+```
+/
+├── src/
+│   ├── app/
+│   │   ├── page.tsx
+│   │   ├── layout.tsx
+│   │   └── [...other pages]
+│   ├── components/
+│   │   ├── AboutMe.tsx
+│   │   ├── GitHubStats.tsx
+│   │   ├── Technologies.tsx
+│   │   ├── FeaturedProjects.tsx
+│   │   ├── LatestPosts.tsx
+│   │   ├── InteractiveCode.tsx
+│   │   ├── GitHubTrends.tsx
+│   │   └── Chatbot.tsx
+│   └── lib/
+│       ├── astradb.ts
+│       └── github.ts
+├── public/
+├── scripts/
+│   └── generateEmbeddings.ts
+├── data.json
+├── .env.local
+├── next.config.js
+├── package.json
+└── tailwind.config.js
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Setup and Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/medevs/smart-portfolio.git
+   cd portfolio-chatbot
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-## Learn More
+3. Create a `.env.local` file in the root directory and add the following environment variables:
+   ```
+   GITHUB_TOKEN=your_github_personal_access_token
+   OPENAI_API_KEY=your_openai_api_key
+   ASTRADB_ID=your_astradb_id
+   ASTRADB_REGION=your_astradb_region
+   ASTRADB_KEYSPACE=your_astradb_keyspace
+   ASTRADB_APPLICATION_TOKEN=your_astradb_application_token
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+4. Generate embeddings for the chatbot:
+   ```bash
+   npm run generate
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+5. Run the development server:
+   ```bash
+   npm run dev
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+6. Open [http://localhost:3000](http://localhost:3000) in your browser to see the result.
 
-## Deploy on Vercel
+## Deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+This project is set up for easy deployment on Vercel. Connect your GitHub repository to Vercel and it will automatically deploy your main branch.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Make sure to add all the environment variables from your `.env.local` file to your Vercel project settings.
+
+## Updating Content
+
+To update the chatbot's knowledge:
+
+1. Modify the `data.json` file with your updated content
+2. Run the embedding generation script:
+   ```bash
+   npm run generate
+   ```
+3. Deploy the updates to Vercel
+
+## Customization
+
+- Modify the components in `src/components/` to change the layout and design of your portfolio
+- Update the `src/app/` directory to add or modify pages
+- Adjust the chatbot's behavior by modifying the `Chatbot.tsx` component and the embedding generation script
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

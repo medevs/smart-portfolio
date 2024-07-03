@@ -20,7 +20,7 @@
     ],
     "memberSince": "10.10.2018"
   },
-  "links": {
+  "websiteExistingPages": {
     "homePage": "/",
     "projectsPage": "/projects",
     "blogPage": "/blog",
@@ -75,7 +75,9 @@
       "date": "Aug 2021 - Present · 3 yrs",
       "location": "Bremen, Germany · Hybrid",
       "skills": ["PHP", "SQL", "JavaScript", "HTML", "CSS"]
-    },
+    }
+  ],
+  "education": [
     {
       "title": "Fachinformatiker Anwendungsentwicklung",
       "company": "Schulzentrum SII Utbremen Bremen",
