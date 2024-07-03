@@ -1,9 +1,14 @@
 declare module 'react-syntax-highlighter' {
-  import { ComponentType } from 'react';
+  import { ReactNode } from 'react';
+  
+  export const Prism: React.ComponentType<{
+    children: ReactNode;
+    style?: any;
+    language?: string;
+    customStyle?: React.CSSProperties;
+  }>;
+}
 
-  export const Prism: ComponentType<any>;
-  export const Light: ComponentType<any>;
-  export const SyntaxHighlighter: ComponentType<any>;
-
-  export default SyntaxHighlighter;
+declare module 'react-syntax-highlighter/dist/cjs/styles/prism' {
+  export const tomorrow: any;
 }

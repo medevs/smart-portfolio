@@ -53,6 +53,6 @@ const config: Config = {
       },
     },
   },
-  plugins: [nextui()],
+  plugins: [nextui(), require('@tailwindcss/typography')],
 };
 export default config;
