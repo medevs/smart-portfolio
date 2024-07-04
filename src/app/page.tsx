@@ -7,6 +7,8 @@ import InteractiveCode from '@/components/InteractiveCode';
 import GitHubStats from '@/components/GitHubStats';
 // import GitHubTrends from '@/components/GitHubTrends';
 import Timeline from '@/components/Timeline';
+import Languages from '@/components/Languages';
+import Hobbies from '@/components/Hobbies';
 
 const HomePage: React.FC = () => {
   return (
@@ -39,6 +41,15 @@ const HomePage: React.FC = () => {
         </div>
         <div className="flex flex-col">
           <InteractiveCode />
+        </div>
+      </div>
+
+      <div className="sm:col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-6 grid grid-cols-1 lg:grid-cols-2 gap-4 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-gray-900 dark:to-indigo-900 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col">
+          <Languages />
+        </div>
+        <div className="flex flex-col">
+          <Hobbies />
         </div>
       </div>
       
