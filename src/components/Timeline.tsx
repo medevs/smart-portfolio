@@ -1,5 +1,4 @@
 import React from 'react';
-import { Briefcase, GraduationCap, Calendar, MapPin } from 'lucide-react';
 
 interface TimelineItem {
   type: 'education' | 'experience';
@@ -11,15 +10,7 @@ interface TimelineItem {
   skills?: string[];
 }
 
-const timelineItems: TimelineItem[] = [
-  {
-    type: 'experience',
-    title: 'Software Developer',
-    organization: 'ePhilos AG',
-    date: 'Aug 2021 - Present · 3 yrs',
-    location: 'Bremen, Germany · Hybrid',
-    skills: ['PHP', 'SQL', 'JavaScript', 'HTML', 'CSS']
-  },
+const educationItems: TimelineItem[] = [
   {
     type: 'education',
     title: 'Fachinformatiker Anwendungsentwicklung',
@@ -44,67 +35,82 @@ const timelineItems: TimelineItem[] = [
   }
 ];
 
-const HexagonTimeline: React.FC = () => {
+const experienceItems: TimelineItem[] = [
+  {
+    type: 'experience',
+    title: 'Software Developer',
+    organization: 'ePhilos AG',
+    date: 'Aug 2021 - Present · 3 yrs',
+    location: 'Bremen, Germany · Hybrid',
+    skills: ['PHP', 'SQL', 'JavaScript', 'HTML', 'CSS']
+  },
+  {
+    type: 'experience',
+    title: 'Freelance Web Developer',
+    organization: 'Self-employed',
+    date: 'Jan 2020 - Jul 2021 · 1 yr 7 mos',
+    location: 'Remote',
+    description: 'Developed custom websites and web applications for various clients.',
+    skills: ['React', 'Node.js', 'MongoDB', 'GraphQL', 'Tailwind CSS']
+  },
+  {
+    type: 'experience',
+    title: 'Software Development Intern',
+    organization: 'TechStart Solutions',
+    date: 'Jun 2019 - Dec 2019 · 7 mos',
+    location: 'Paris, France',
+    description: 'Assisted in developing and testing mobile applications.',
+    skills: ['Swift', 'Kotlin', 'Git', 'Agile methodologies']
+  }
+];
+
+const TimelineItem: React.FC<{ item: TimelineItem }> = ({ item }) => (
+  <div className="mb-8 relative">
+    <div className="absolute top-0 left-0 w-2 h-full bg-gray-200 dark:bg-gray-700" />
+    <div className="ml-6 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+      <div className="absolute left-0 top-4 w-6 h-6 bg-blue-500 rounded-full border-4 border-white dark:border-gray-800" />
+      <h3 className="text-lg font-medium text-gray-900 dark:text-white">{item.title}</h3>
+      <p className="text-sm text-gray-600 dark:text-gray-400">{item.organization}</p>
+      <p className="text-sm text-gray-500 dark:text-gray-500">{item.date}</p>
+      {item.location && (
+        <p className="text-sm text-gray-500 dark:text-gray-500">{item.location}</p>
+      )}
+      {item.description && (
+        <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{item.description}</p>
+      )}
+      {item.skills && (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {item.skills.map((skill, index) => (
+            <span key={index} className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+              {skill}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+);
+
+const Timeline: React.FC = () => {
   return (
-    <section className="py-16 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
-      <div className="container mx-auto px-4">
-        <h2 className="text-4xl font-bold text-center mb-16 text-gray-800 dark:text-white">
-          My Journey
-        </h2>
-        <div className="relative">
-          {/* Vertical line */}
-          <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-blue-500 dark:bg-blue-400" />
-          
-          {timelineItems.map((item, index) => (
-            <div key={index} className={`mb-24 flex justify-between items-center w-full ${
-              index % 2 === 0 ? 'flex-row-reverse' : ''
-            }`}>
-              <div className="order-1 w-5/12" />
-              <div className="z-20 flex items-center order-1 bg-blue-500 dark:bg-blue-400 shadow-xl w-16 h-16 rounded-full">
-                <h1 className="mx-auto font-semibold text-lg text-white">
-                  {item.type === 'education' ? (
-                    <GraduationCap size={24} />
-                  ) : (
-                    <Briefcase size={24} />
-                  )}
-                </h1>
-              </div>
-              <div className="order-1 bg-white dark:bg-gray-800 rounded-lg shadow-xl w-5/12 px-6 py-4 transform hover:scale-105 transition-transform duration-300 ease-in-out">
-                <div className="absolute top-0 -mt-8 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-b-[20px] border-b-white dark:border-b-gray-800" />
-                <h3 className="mb-3 font-bold text-gray-800 dark:text-white text-xl">{item.title}</h3>
-                <h4 className="mb-3 font-semibold text-blue-600 dark:text-blue-400 text-lg">{item.organization}</h4>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-3 flex items-center">
-                  <Calendar size={14} className="mr-2" />
-                  {item.date}
-                </p>
-                {item.location && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-3 flex items-center">
-                    <MapPin size={14} className="mr-2" />
-                    {item.location}
-                  </p>
-                )}
-                {item.description && (
-                  <p className="text-gray-700 dark:text-gray-300 mb-3">{item.description}</p>
-                )}
-                {item.skills && (
-                  <div className="flex flex-wrap gap-2">
-                    {item.skills.map((skill, skillIndex) => (
-                      <span 
-                        key={skillIndex}
-                        className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded-full"
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+    <div className="max-w-6xl mx-auto p-4 bg-gray-100 dark:bg-gray-900 rounded-lg shadow">
+      <h1 className="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">My Journey</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div>
+          <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Experience</h2>
+          {experienceItems.map((item, index) => (
+            <TimelineItem key={index} item={item} />
+          ))}
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Education</h2>
+          {educationItems.map((item, index) => (
+            <TimelineItem key={index} item={item} />
           ))}
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 
-export default HexagonTimeline;
+export default Timeline;
