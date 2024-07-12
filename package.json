@@ -23,6 +23,7 @@
     "ai": "^2.2.32",
     "clsx": "^2.1.0",
     "dotenv": "^16.4.1",
+    "framer-motion": "^11.3.2",
     "gray-matter": "^4.0.3",
     "langchain": "^0.1.11",
     "lucide-react": "^0.320.0",
@@ -38,6 +39,7 @@
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.0",
     "remark-html": "^16.0.1",
+    "sharp": "^0.33.4",
     "tailwind-merge": "^2.2.1",
     "ts-node": "^10.9.2"
   },
