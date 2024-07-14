@@ -25,7 +25,7 @@ const projects: Omit<ProjectCardProps, 'stars' | 'forks' | 'lastUpdated'>[] = [
     description: "Full Stack RemindApp",
     technologies: ["React", "Firebase", "Tailwind CSS"],
     githubLink: "https://github.com/medevs/remind-me",
-    liveLink: "remind-me-beige.vercel.app"
+    liveLink: "https://remind-me-beige.vercel.app"
   }
 ];
 

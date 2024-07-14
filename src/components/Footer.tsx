@@ -1,5 +1,3 @@
-import Link from "next/link";
-import ArtisticAhmedLetters from './ArtisticAhmedLetters';
 import AIChatButton from "./AIChatButton";
 
 export default function Footer() {

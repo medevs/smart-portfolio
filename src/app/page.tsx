@@ -5,7 +5,6 @@ import FeaturedProjects from '@/components/FeaturedProjects';
 import LatestPosts from '@/components/LatestPosts';
 import InteractiveCode from '@/components/InteractiveCode';
 import GitHubStats from '@/components/GitHubStats';
-// import GitHubTrends from '@/components/GitHubTrends';
 import Timeline from '@/components/Timeline';
 import Languages from '@/components/Languages';
 import Hobbies from '@/components/Hobbies';
@@ -53,9 +52,6 @@ const HomePage: React.FC = () => {
         </div>
       </div>
       
-      {/* <div className="sm:col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-6">
-        <GitHubTrends />
-      </div> */}
     </div>
   </div>
   );
