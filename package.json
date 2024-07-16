@@ -25,6 +25,7 @@
     "dotenv": "^16.4.1",
     "framer-motion": "^11.3.2",
     "gray-matter": "^4.0.3",
+    "html2canvas": "^1.4.1",
     "langchain": "^0.1.11",
     "lucide-react": "^0.320.0",
     "next": "14.1.0",

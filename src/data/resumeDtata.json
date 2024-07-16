@@ -1,0 +1,127 @@
+{
+  "personalInfo": {
+    "name": "Ahmed Oublihi",
+    "title": "Software Developer",
+    "email": "oublihi.a@gmail.com",
+    "phone": "+212 6XX XXX XXX",
+    "location": "Oujda, Morocco",
+    "github": "https://github.com/medevs",
+    "linkedin": "https://www.linkedin.com/in/ahmed-oublihi/",
+    "website": "https://medevs.xyz",
+    "summary": " I'm a Software Developer based in Bremen, Germany. I dive deep into JavaScript and love crafting sleek, efficient web apps. With an eye for detail and a hunger for learning, I'm all about delivering high-quality solutions that meet both user needs and business objectives.",
+    "image": "https://avatars.githubusercontent.com/u/40724828?v=4"
+  },
+  "experience": [
+    {
+      "company": "Freelance",
+      "position": "Software Developer",
+      "startDate": "Jan 2021",
+      "endDate": "Present",
+      "description": "Developing responsive web applications using React.js and Next.js. Collaborating with clients to understand requirements and deliver high-quality solutions. Implementing modern UI/UX designs and ensuring cross-browser compatibility."
+    },
+    {
+      "company": "Halead",
+      "position": "Software Developer",
+      "startDate": "Sep 2022",
+      "endDate": "Mar 2023",
+      "description": "Worked on developing and maintaining web applications using React.js and Next.js. Collaborated with the backend team to integrate APIs and improve user experience. Implemented responsive designs and optimized application performance."
+    }
+  ],
+  "education": [
+    {
+      "institution": "Mohammed First University",
+      "degree": "Bachelor's degree in Computer Science",
+      "startDate": "2017",
+      "endDate": "2021",
+      "description": "Focused on web development technologies, software engineering principles, and computer science fundamentals. Participated in various coding projects and hackathons."
+    },
+    {
+      "institution": "Udacity",
+      "degree": "Nanodegree in React Development",
+      "startDate": "2022",
+      "endDate": "2022",
+      "description": "Completed an intensive program focusing on advanced React concepts, state management with Redux, and building complex user interfaces. Developed several projects showcasing proficiency in React ecosystem."
+    },
+    {
+      "institution": "FreeCodeCamp",
+      "degree": "Full Stack Development Certification",
+      "startDate": "2020",
+      "endDate": "2021",
+      "description": "Completed a comprehensive curriculum covering both frontend and backend technologies. Earned certifications in Responsive Web Design, JavaScript Algorithms and Data Structures, and Frontend Libraries."
+    }
+  ],
+  "skills": [
+    "JavaScript",
+    "TypeScript",
+    "React.js",
+    "Next.js",
+    "Tailwind CSS",
+    "HTML5",
+    "CSS3",
+    "Git",
+    "RESTful APIs",
+    "Node.js",
+    "Express.js",
+    "MongoDB",
+    "Redux",
+    "Jest",
+    "Webpack",
+    "GraphQL"
+  ],
+  "languages": [
+    {
+      "language": "Arabic",
+      "proficiency": "Native"
+    },
+    {
+      "language": "Berber (Tamazight)",
+      "proficiency": "Native"
+    },
+    {
+      "language": "English",
+      "proficiency": "Professional working proficiency"
+    },
+    {
+      "language": "German",
+      "proficiency": "Professional working proficiency"
+    },
+    {
+      "language": "French",
+      "proficiency": "Professional working proficiency"
+    }
+  ],
+  "projects": [
+    {
+      "name": "SpeedFleet",
+      "description": "A web application for car rental companies to manage their fleet and bookings. Implemented real-time updates and an intuitive booking system.",
+      "technologies": ["Next.js", "TypeScript", "Tailwind CSS", "MongoDB", "Socket.io"],
+      "link": "https://github.com/medevs/speedfleet"
+    },
+    {
+      "name": "Quran Tafsir",
+      "description": "A comprehensive web application providing Quran translations and interpretations in multiple languages. Features include search functionality and audio recitations.",
+      "technologies": ["React.js", "TypeScript", "Tailwind CSS", "RESTful API", "IndexedDB"],
+      "link": "https://github.com/medevs/quran-tafsir"
+    },
+    {
+      "name": "NextChat",
+      "description": "A real-time chat application built with Next.js and Socket.io. Includes features like private messaging, group chats, and message encryption.",
+      "technologies": ["Next.js", "Socket.io", "Tailwind CSS", "JWT Authentication"],
+      "link": "https://github.com/medevs/next-chat"
+    },
+    {
+      "name": "Portfolio Website",
+      "description": "Personal portfolio website showcasing projects and skills. Includes a blog section and contact form.",
+      "technologies": ["Next.js", "React", "Tailwind CSS", "Vercel"],
+      "link": "https://medevs.netlify.app"
+    }
+  ],
+  "interests": [
+    "Web Development",
+    "Open Source Contributions",
+    "UI/UX Design",
+    "Continuous Learning",
+    "Tech Blogging",
+    "Mobile App Development"
+  ]
+}
