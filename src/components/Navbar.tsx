@@ -23,7 +23,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <Link href="/" className="text-3xl font-bold">
-            ⵣ
+              ⵣ
             </Link>
           </div>
           <div className="hidden md:block">
@@ -46,14 +46,14 @@ export default function Navbar() {
           </div>
           <div className="hidden md:block">
             <div className="ml-4 flex items-center md:ml-6">
-              
+
               <ThemeToggle />
             </div>
           </div>
           <div className="flex -mr-2 md:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-900 hover:text-black hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-gray-500"
+              className="inline-flex items-center justify-center p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-inset focus:ring-gray-500"
             >
               <span className="sr-only">Open main menu</span>
               {!isOpen ? (
@@ -71,7 +71,7 @@ export default function Navbar() {
       </nav>
 
       {isOpen && (
-        <motion.div 
+        <motion.div
           className="md:hidden backdrop-blur-md  bg-opacity-70"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -82,7 +82,7 @@ export default function Navbar() {
               <Link
                 key={link.name}
                 href={link.href}
-                className="px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:text-black hover:bg-gray-100 transition-colors duration-300 flex items-center"
+                className="px-3 py-2 rounded-md text-base font-medium flex items-center"
               >
                 <link.icon className="w-5 h-5 mr-2" />
                 {link.name}
