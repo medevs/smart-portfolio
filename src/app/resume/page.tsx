@@ -1,10 +1,15 @@
 import React from 'react';
-import Resume from '../../components/Resume';
-import DownloadButton from '@/components/DownloadButton';
+import dynamic from 'next/dynamic';
+import Resume from '@/components/Resume';
+
+const DownloadButton = dynamic(
+  () => import('@/components/DownloadButton'),
+  { ssr: false }
+);
 
 export default function ResumePage() {
   return (
-    <div className="mx-auto px-4">
+    <div className="container mx-auto px-4 max-w-5xl">
       <div className="flex justify-end mb-4">
         <DownloadButton />
       </div>
