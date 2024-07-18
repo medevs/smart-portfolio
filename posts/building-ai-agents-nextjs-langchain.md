@@ -1,7 +1,6 @@
 ---
 title: "Building AI Agents with Next.js and LangChain: A Comprehensive Guide"
 date: "2023-07-15"
-readTime: "10 min read"
 author: "Ahmed Oublihi"
 tags: ["AI", "Next.js", "LangChain", "Web Development"]
 category: "Artificial Intelligence"
