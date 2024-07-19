@@ -1,8 +1,7 @@
+// File: utils/markdown.ts
 import fs from 'fs/promises';
 import path from 'path';
 import matter from 'gray-matter';
-import { remark } from 'remark';
-import html from 'remark-html';
 import readingTime from 'reading-time';
 
 const postsDirectory = path.join(process.cwd(), 'posts');
@@ -16,6 +15,10 @@ export interface PostData {
   category: string;
   description: string;
   author: string;
+}
+
+export interface PostContent extends PostData {
+  content: string;
 }
 
 export async function getSortedPostsData(): Promise<PostData[]> {
@@ -37,10 +40,6 @@ export async function getSortedPostsData(): Promise<PostData[]> {
   return allPostsData.sort((a, b) => (a.date < b.date ? 1 : -1));
 }
 
-export interface PostContent extends PostData {
-  content: string; // Change this from contentHtml to content
-}
-
 export async function getPostData(id: string): Promise<PostContent> {
   const fullPath = path.join(postsDirectory, `${id}.md`);
   const fileContents = await fs.readFile(fullPath, 'utf8');
@@ -49,13 +48,13 @@ export async function getPostData(id: string): Promise<PostContent> {
 
   return {
     id,
-    content: matterResult.content, // Return raw markdown content
+    content: matterResult.content,
     readTime,
     ...(matterResult.data as Omit<PostData, 'id' | 'readTime'>),
   };
 }
 
-export async function getAllPostIds() {
+export async function getAllPostIds(): Promise<{ params: { id: string } }[]> {
   const fileNames = await fs.readdir(postsDirectory);
   return fileNames.map((fileName) => ({
     params: {
