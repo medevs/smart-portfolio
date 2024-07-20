@@ -55,19 +55,6 @@ const GitHubInsightsCharts: React.FC = () => {
         }));
         setTopRepos(topReposData);
 
-        // Fetch recent events
-        const eventResponse = await fetch('https://api.github.com/events?per_page=100');
-        const eventData = await eventResponse.json();
-        const eventCounts: { [key: string]: number } = {};
-        eventData.forEach((event: any) => {
-          eventCounts[event.type] = (eventCounts[event.type] || 0) + 1;
-        });
-        const eventDataArray = Object.entries(eventCounts)
-          .map(([type, count]) => ({ type, count }))
-          .sort((a, b) => b.count - a.count)
-          .slice(0, 5);
-        setEvents(eventDataArray);
-
       } catch (err) {
         console.error('Error fetching GitHub insights:', err);
         setError('Failed to fetch GitHub insights. Please try again later.');
@@ -128,22 +115,8 @@ const GitHubInsightsCharts: React.FC = () => {
         </div>
       </div>
 
-      <div className="mt-8">
-        <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200 flex items-center">
-          <Activity className="mr-2" /> Recent GitHub Events
-        </h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={events}>
-            <XAxis dataKey="type" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="count" fill="#82ca9d" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-
       <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-        <p>These charts provide insights into popular languages, top repositories, and recent activity on GitHub.</p>
+        <p>These charts provide insights into popular languages and top repositories</p>
         <p>Data is based on public GitHub information and is updated periodically.</p>
       </div>
     </div>

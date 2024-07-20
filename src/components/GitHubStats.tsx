@@ -101,14 +101,14 @@ const GitHubStats: React.FC = () => {
         ))}
       </div>
       <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">Top Languages</h3>
+        <h3 className="text-xl font-semibold mb-8 text-gray-800 dark:text-gray-200">Top Languages</h3>
         <ResponsiveContainer width="100%" height={200}>
           <PieChart>
             <Pie
               data={languages}
               cx="50%"
               cy="50%"
-              outerRadius={80}
+              outerRadius={60}
               fill="#8884d8"
               dataKey="value"
               label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
