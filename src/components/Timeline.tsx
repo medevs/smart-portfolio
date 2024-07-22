@@ -48,19 +48,19 @@ const experienceItems: TimelineItem[] = [
     type: 'experience',
     title: 'Freelance Web Developer',
     organization: 'Self-employed',
-    date: 'Jan 2020 - Jul 2021 · 1 yr 7 mos',
+    date: 'Jan 2020 - Jul 2020 · 7 mos',
     location: 'Remote',
     description: 'Developed custom websites and web applications for various clients.',
-    skills: ['React', 'Node.js', 'MongoDB', 'GraphQL', 'Tailwind CSS']
+    skills: ['React', 'Node.js', 'MongoDB', 'Tailwind CSS']
   },
   {
     type: 'experience',
     title: 'Software Development Intern',
     organization: 'TechStart Solutions',
-    date: 'Jun 2019 - Dec 2019 · 7 mos',
-    location: 'Paris, France',
-    description: 'Assisted in developing and testing mobile applications.',
-    skills: ['Swift', 'Kotlin', 'Git', 'Agile methodologies']
+    date: 'Jun 2019 - DSep 2019 · 3 mos',
+    location: 'Marrakech Morocco',
+    description: 'Assisted in developing and testing web applications.',
+    skills: ['Wordpress', 'jquery', 'Git', 'Agile methodologies']
   }
 ];
 
