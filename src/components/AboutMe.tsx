@@ -23,13 +23,13 @@ const AboutMe: React.FC = () => {
               AI? Oh, that&apos;s my jam. I geek out on building software that taps into AI magic.
             </p>
             <div className="flex justify-center sm:justify-start space-x-4">
-              <a href="https://twitter.com/ahmedoublihi" className="text-blue-400 hover:text-blue-500 transition-colors duration-300">
+              <a href="https://twitter.com/ahmedoublihi" target='_blank' className="text-blue-400 hover:text-blue-500 transition-colors duration-300">
                 <Twitter className="w-6 h-6" />
               </a>
-              <a href="https://github.com/medevs" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-300">
+              <a href="https://github.com/medevs" target='_blank' className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-300">
                 <GithubIcon className="w-6 h-6" />
               </a>
-              <a href="https://linkedin.com/in/ahmed-oublihi" className="text-blue-700 hover:text-blue-800 transition-colors duration-300">
+              <a href="https://linkedin.com/in/ahmed-oublihi" target='_blank' className="text-blue-700 hover:text-blue-800 transition-colors duration-300">
                 <Linkedin className="w-6 h-6" />
               </a>
             </div>
