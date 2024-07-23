@@ -1,47 +1,74 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const DownloadButton: React.FC = () => {
-  const [isClient, setIsClient] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const handleDownloadPDF = async () => {
+    setIsLoading(true);
+    setError(null);
 
-  const handleDownloadPDF = async (): Promise<void> => {
-    if (typeof window !== 'undefined') {
-      const html2pdf = (await import('html2pdf.js')).default;
-      const element = document.getElementById('resume');
-      if (element) {
-        const opt = {
-          margin: 10,
-          filename: 'resume.pdf',
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
+    try {
+      const resumeElement = document.getElementById('resume');
+      if (!resumeElement) throw new Error('Resume element not found');
 
-        try {
-          await html2pdf().from(element).set(opt).save();
-        } catch (error) {
-          console.error('PDF generation failed:', error);
-        }
+      // Temporarily apply light mode styles
+      document.body.classList.remove('dark');
+      resumeElement.classList.add('print-light-mode');
+
+      const canvas = await html2canvas(resumeElement, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      });
+
+      // Restore original styles
+      document.body.classList.add('dark');
+      resumeElement.classList.remove('print-light-mode');
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+      // If content exceeds one page, add a new page
+      if (pdfHeight > pdf.internal.pageSize.getHeight()) {
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, -pdf.internal.pageSize.getHeight(), pdfWidth, pdfHeight);
       }
+
+      pdf.save('resume.pdf');
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+      setError(`Failed to generate PDF: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  if (!isClient) {
-    return null; // Don't render anything on the server
-  }
-
   return (
-    <button 
-      onClick={handleDownloadPDF}
-      className="mb-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-    >
-      Download PDF
-    </button>
+    <div>
+      <button 
+        onClick={handleDownloadPDF}
+        disabled={isLoading}
+        className="mb-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:bg-gray-400"
+      >
+        {isLoading ? 'Generating PDF...' : 'Download PDF'}
+      </button>
+      {error && <p className="text-red-500">{error}</p>}
+    </div>
   );
 };
 

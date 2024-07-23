@@ -47,32 +47,30 @@ interface Project {
 
 // Header Component
 const Header: React.FC<{ personalInfo: PersonalInfo }> = ({ personalInfo }) => (
-  <header className="mb-8 flex flex-col md:flex-row items-center bg-gray-900 p-6 rounded-lg">
+  <header className="mb-2 flex flex-col md:flex-row items-center p-6 border-b-2 border-gray-200 dark:border-gray-700">
     <div className="md:mr-8 mb-4 md:mb-0">
       <Image
         src={heroImage || "/default-profile.jpg"}
         alt={personalInfo.name}
-        width={150}
-        height={150}
-        className="rounded-full border-4 border-blue-500"
+        width={200}
+        height={200}
+        className="rounded-full border-4 border-gray-300 dark:border-gray-600"
       />
     </div>
     <div className="text-center md:text-left">
-      <h1 className="text-4xl font-bold mb-2 text-white">{personalInfo.name}</h1>
-      <h2 className="text-2xl text-blue-400 mb-4">{personalInfo.title}</h2>
+      <h1 className="text-4xl font-bold mb-2 text-black dark:text-white">{personalInfo.name}</h1>
+      <h2 className="text-2xl text-gray-600 dark:text-gray-300 mb-4">{personalInfo.title}</h2>
       <div className="flex flex-wrap justify-center md:justify-start gap-4 mb-4">
-        <a href={`mailto:${personalInfo.email}`} className="flex items-center text-gray-300 hover:text-blue-400 transition-colors">
+        <a href={`mailto:${personalInfo.email}`} className="flex items-center text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
           <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path></svg>
           {personalInfo.email}
         </a>
-        <a href={`mailto:${personalInfo.linkedin}`} className="flex items-center text-gray-300 hover:text-blue-400 transition-colors">
+        <a href={personalInfo.linkedin} className="flex items-center text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
           {personalInfo.linkedin}
         </a>
-
-        <a href={`mailto:${personalInfo.github}`} className="flex items-center text-gray-300 hover:text-blue-400 transition-colors">
+        <a href={personalInfo.github} className="flex items-center text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
           {personalInfo.github}
         </a>
-        
       </div>
     </div>
   </header>
@@ -80,14 +78,14 @@ const Header: React.FC<{ personalInfo: PersonalInfo }> = ({ personalInfo }) => (
 
 // Experience Component
 const Experience: React.FC<{ experience: ExperienceItem[] }> = ({ experience }) => (
-  <section className="mb-8 bg-gray-800 p-6 rounded-lg">
-    <h2 className="text-2xl font-bold mb-4 border-b-2 border-blue-500 pb-2 text-white">Experience</h2>
+  <section className="mb-2 p-6 border-b-2 border-gray-200">
+    <h2 className="text-2xl font-bold mb-4 pb-2">Experience</h2>
     {experience.map((item, index) => (
       <div key={index} className="mb-6">
-        <h3 className="text-xl font-semibold text-blue-400">{item.position}</h3>
-        <p className="text-lg text-gray-300">{item.company}</p>
-        <p className="text-sm text-gray-400 mb-2">{item.startDate} - {item.endDate}</p>
-        <p className="text-gray-300">{item.description}</p>
+        <h3 className="text-xl font-semibold">{item.position}</h3>
+        <p className="text-lg text-gray-600">{item.company}</p>
+        <p className="text-sm text-gray-500 mb-2">{item.startDate} - {item.endDate}</p>
+        <p>{item.description}</p>
       </div>
     ))}
   </section>
@@ -95,14 +93,14 @@ const Experience: React.FC<{ experience: ExperienceItem[] }> = ({ experience }) 
 
 // Education Component
 const Education: React.FC<{ education: EducationItem[] }> = ({ education }) => (
-  <section className="mb-8 bg-gray-800 p-6 rounded-lg">
-    <h2 className="text-2xl font-bold mb-4 border-b-2 border-blue-500 pb-2 text-white">Education</h2>
+  <section className="mb-2 p-6 border-b-2 border-gray-200">
+    <h2 className="text-2xl font-bold mb-4 pb-2">Education</h2>
     {education.map((item, index) => (
       <div key={index} className="mb-6">
-        <h3 className="text-xl font-semibold text-blue-400">{item.degree}</h3>
-        <p className="text-lg text-gray-300">{item.institution}</p>
-        <p className="text-sm text-gray-400 mb-2">{item.startDate} - {item.endDate}</p>
-        <p className="text-gray-300">{item.description}</p>
+        <h3 className="text-xl font-semibold">{item.degree}</h3>
+        <p className="text-lg text-gray-600">{item.institution}</p>
+        <p className="text-sm text-gray-500 mb-2">{item.startDate} - {item.endDate}</p>
+        <p>{item.description}</p>
       </div>
     ))}
   </section>
@@ -110,11 +108,11 @@ const Education: React.FC<{ education: EducationItem[] }> = ({ education }) => (
 
 // Skills Component
 const Skills: React.FC<{ skills: string[] }> = ({ skills }) => (
-  <section className="mb-8 bg-gray-800 p-6 rounded-lg">
-    <h2 className="text-2xl font-bold mb-4 border-b-2 border-blue-500 pb-2 text-white">Skills</h2>
+  <section className="mb-2 p-6 border-b-2 border-gray-200">
+    <h2 className="text-2xl font-bold mb-4 pb-2">Skills</h2>
     <div className="flex flex-wrap gap-2">
       {skills.map((skill, index) => (
-        <span key={index} className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+        <span key={index} className="border border-gray-300 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
           {skill}
         </span>
       ))}
@@ -124,13 +122,13 @@ const Skills: React.FC<{ skills: string[] }> = ({ skills }) => (
 
 // Languages Component
 const Languages: React.FC<{ languages: Language[] }> = ({ languages }) => (
-  <section className="mb-8 bg-gray-800 p-6 rounded-lg">
-    <h2 className="text-2xl font-bold mb-4 border-b-2 border-blue-500 pb-2 text-white">Languages</h2>
+  <section className="mb-2 p-6 border-b-2 border-gray-200">
+    <h2 className="text-2xl font-bold mb-4 pb-2">Languages</h2>
     <ul className="space-y-2">
       {languages.map((lang, index) => (
         <li key={index} className="flex items-center justify-between">
-          <span className="font-medium text-gray-300">{lang.language}</span>
-          <span className="text-blue-400 bg-gray-700 px-2 py-1 rounded-full text-sm">
+          <span className="font-medium">{lang.language}</span>
+          <span className="text-gray-600 border border-gray-300 px-2 py-1 rounded-full text-sm">
             {lang.proficiency}
           </span>
         </li>
@@ -141,19 +139,19 @@ const Languages: React.FC<{ languages: Language[] }> = ({ languages }) => (
 
 // Projects Component
 const Projects: React.FC<{ projects: Project[] }> = ({ projects }) => (
-  <section className="mb-8 bg-gray-800 p-6 rounded-lg">
-    <h2 className="text-2xl font-bold mb-4 border-b-2 border-blue-500 pb-2 text-white">Projects</h2>
+  <section className="mb-2 p-6 border-b-2 border-gray-200">
+    <h2 className="text-2xl font-bold mb-4 pb-2">Projects</h2>
     {projects.map((project, index) => (
       <div key={index} className="mb-6">
         <h3 className="text-xl font-semibold">
-          <a href={project.link} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+          <a href={project.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
             {project.name}
           </a>
         </h3>
-        <p className="text-gray-300 mb-2">{project.description}</p>
+        <p className="mb-2">{project.description}</p>
         <div className="flex flex-wrap gap-2 mt-2">
           {project.technologies.map((tech, techIndex) => (
-            <span key={techIndex} className="bg-gray-700 text-blue-300 px-2 py-1 rounded-full text-xs font-medium">
+            <span key={techIndex} className="border border-gray-300 text-gray-600 px-2 py-1 rounded-full text-xs font-medium">
               {tech}
             </span>
           ))}
@@ -165,15 +163,15 @@ const Projects: React.FC<{ projects: Project[] }> = ({ projects }) => (
 
 // Interests Component
 const Interests: React.FC<{ interests: string[] }> = ({ interests }) => (
-  <section className="mb-8 bg-gray-800 p-6 rounded-lg">
-    <h2 className="text-2xl font-bold mb-4 border-b-2 border-blue-500 pb-2 text-white">Interests</h2>
+  <section className="p-6">
+    <h2 className="text-2xl font-bold mb-4 pb-2">Interests</h2>
     <ul className="grid grid-cols-2 gap-2">
       {interests.map((interest, index) => (
         <li key={index} className="flex items-center">
-          <svg className="w-4 h-4 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <svg className="w-4 h-4 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
-          <span className="text-gray-300">{interest}</span>
+          <span>{interest}</span>
         </li>
       ))}
     </ul>
@@ -183,12 +181,12 @@ const Interests: React.FC<{ interests: string[] }> = ({ interests }) => (
 // Main Resume Component
 const Resume: React.FC = () => {
   return (
-    <div id="resume" className="mx-auto my-10 p-8 bg-gray-900 text-white shadow-lg rounded-lg print:shadow-none print:rounded-none">
+    <div id="resume" className="mx-auto my-10 p-2 text-black dark:text-white bg-white dark:bg-gray-900 print:bg-white print:text-black">
       <Header personalInfo={resumeData.personalInfo} />
       
-      <section className="mb-8 print:mb-4">
-        <h2 className="text-2xl font-bold mb-4 border-b-2 border-blue-500 pb-2 print:text-xl">Summary</h2>
-        <p className="text-gray-300 print:text-gray-800">{resumeData.personalInfo.summary}</p>
+      <section className="mb-2 print:mb-4 p-6 border-b-2 border-gray-200 dark:border-gray-700">
+        <h2 className="text-2xl font-bold mb-4 pb-2 print:text-xl">Summary</h2>
+        <p className="print:text-gray-800 dark:text-gray-300">{resumeData.personalInfo.summary}</p>
       </section>
 
       <Experience experience={resumeData.experience} />
