@@ -1,8 +1,9 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
+import { Octokit } from '@octokit/rest';
 import ProjectCard from './ProjectCard';
-import { Loader } from 'lucide-react';
+import { Loader, GitBranch, User } from 'lucide-react';
 
 interface Project {
   title: string;
@@ -14,7 +15,10 @@ interface Project {
   forks: number;
   lastUpdated: string;
   latestCommitDate: string;
+  isOwn: boolean;
 }
+
+const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
 const ProjectsGrid: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -22,20 +26,41 @@ const ProjectsGrid: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>('All');
   const [technologies, setTechnologies] = useState<string[]>(['All']);
+  const [activeTab, setActiveTab] = useState<'own' | 'contributed'>('own');
 
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const response = await fetch('https://api.github.com/users/medevs/repos?per_page=100');
-      if (!response.ok) {
-        throw new Error('Failed to fetch repositories');
-      }
-      const data = await response.json();
+      const username = 'medevs';
 
-      const projectsWithCommits = await Promise.all(data.map(async (repo: any) => {
-        const commitResponse = await fetch(`https://api.github.com/repos/medevs/${repo.name}/commits?per_page=1`);
-        const commitData = await commitResponse.json();
-        const latestCommitDate = commitData[0]?.commit?.author?.date || repo.updated_at;
+      const { data: ownRepos } = await octokit.repos.listForUser({
+        username,
+        per_page: 100,
+        sort: 'updated',
+      });
+
+      const { data: contributedRepos } = await octokit.repos.listForUser({
+        username,
+        type: 'all',
+        per_page: 100,
+        sort: 'updated',
+      });
+
+      const allProjects: Project[] = await Promise.all([...ownRepos, ...contributedRepos].map(async (repo) => {
+        const { data: commits } = await octokit.repos.listCommits({
+          owner: repo.owner.login,
+          repo: repo.name,
+          per_page: 1,
+        });
+
+        const getValidDateString = (dateString: string | null | undefined): string => {
+          if (dateString && !isNaN(Date.parse(dateString))) {
+            return new Date(dateString).toISOString();
+          }
+          return new Date().toISOString();
+        };
+
+        const latestCommitDate = commits[0]?.commit?.author?.date || repo.updated_at;
 
         return {
           title: repo.name,
@@ -43,14 +68,15 @@ const ProjectsGrid: React.FC = () => {
           technologies: repo.topics || [],
           githubLink: repo.html_url,
           liveLink: repo.homepage || undefined,
-          stars: repo.stargazers_count,
-          forks: repo.forks_count,
-          lastUpdated: new Date(repo.updated_at).toLocaleDateString(),
-          latestCommitDate: latestCommitDate,
+          stars: repo.stargazers_count || 0,
+          forks: repo.forks_count || 0,
+          lastUpdated: getValidDateString(repo.updated_at),
+          latestCommitDate: getValidDateString(latestCommitDate),
+          isOwn: repo.owner.login === username,
         };
       }));
 
-      const sortedProjects = projectsWithCommits.sort((a, b) =>
+      const sortedProjects = allProjects.sort((a, b) =>
         new Date(b.latestCommitDate).getTime() - new Date(a.latestCommitDate).getTime()
       );
 
@@ -70,14 +96,15 @@ const ProjectsGrid: React.FC = () => {
     fetchProjects();
   }, []);
 
-  const filteredProjects = filter === 'All'
-    ? projects
-    : projects.filter(project => project.technologies.includes(filter));
+  const filteredProjects = projects.filter(project => 
+    (filter === 'All' || project.technologies.includes(filter)) &&
+    (activeTab === 'own' ? project.isOwn : !project.isOwn)
+  );
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">My Projects</h2>
+    <div className="space-y-6 p-6 bg-gray-50 dark:bg-gray-900 rounded-lg shadow-lg">
+      <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+        <h2 className="text-3xl font-bold text-gray-800 dark:text-white">My GitHub Projects</h2>
         <select
           className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
           value={filter}
@@ -91,19 +118,54 @@ const ProjectsGrid: React.FC = () => {
         </select>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <Loader className="animate-spin text-indigo-500" size={48} />
-        </div>
-      ) : error ? (
-        <div className="text-red-500 text-center">{error}</div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-          {filteredProjects.map((project, index) => (
-            <ProjectCard key={index} {...project} />
-          ))}
-        </div>
-      )}
+      <div className="flex space-x-4 border-b border-gray-200 dark:border-gray-700">
+        <button
+          className={`py-2 px-4 font-medium focus:outline-none ${
+            activeTab === 'own'
+              ? 'text-indigo-600 border-b-2 border-indigo-600'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+          onClick={() => setActiveTab('own')}
+        >
+          <User className="w-4 h-4 inline-block mr-2" />
+          My Projects
+        </button>
+        <button
+          className={`py-2 px-4 font-medium focus:outline-none ${
+            activeTab === 'contributed'
+              ? 'text-indigo-600 border-b-2 border-indigo-600'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+          onClick={() => setActiveTab('contributed')}
+        >
+          <GitBranch className="w-4 h-4 inline-block mr-2" />
+          Contributed Projects
+        </button>
+      </div>
+
+      {renderProjects(filteredProjects, loading, error)}
+    </div>
+  );
+};
+
+const renderProjects = (projects: Project[], loading: boolean, error: string | null) => {
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader className="animate-spin text-indigo-500" size={48} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="text-red-500 text-center">{error}</div>;
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {projects.map((project, index) => (
+        <ProjectCard key={index} {...project} />
+      ))}
     </div>
   );
 };
