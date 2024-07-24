@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -8,7 +8,7 @@ const DownloadButton: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleDownloadPDF = async () => {
+  const handleDownloadPDF = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
@@ -16,9 +16,12 @@ const DownloadButton: React.FC = () => {
       const resumeElement = document.getElementById('resume');
       if (!resumeElement) throw new Error('Resume element not found');
 
-      // Temporarily apply light mode styles
-      document.body.classList.remove('dark');
-      resumeElement.classList.add('print-light-mode');
+      // Store the original classes as a string
+      const originalClasses = resumeElement.className;
+
+      // Apply light mode classes for PDF generation
+      resumeElement.classList.remove('dark');
+      resumeElement.classList.add('light', 'print-light-mode');
 
       const canvas = await html2canvas(resumeElement, {
         scale: 2,
@@ -26,9 +29,8 @@ const DownloadButton: React.FC = () => {
         logging: false,
       });
 
-      // Restore original styles
-      document.body.classList.add('dark');
-      resumeElement.classList.remove('print-light-mode');
+      // Restore original classes immediately after canvas generation
+      resumeElement.className = originalClasses;
 
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
@@ -56,7 +58,7 @@ const DownloadButton: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   return (
     <div>
