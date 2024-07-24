@@ -110,9 +110,9 @@ const Education: React.FC<{ education: EducationItem[] }> = ({ education }) => (
 const Skills: React.FC<{ skills: string[] }> = ({ skills }) => (
   <section className="mb-2 p-6 border-b-2 border-gray-200">
     <h2 className="text-2xl font-bold mb-4 pb-2">Skills</h2>
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-4">
       {skills.map((skill, index) => (
-        <span key={index} className="border border-gray-300 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
+        <span key={index} className="border border-gray-300 text-gray-700 px-3 py-1 rounded-full text-md font-medium">
           {skill}
         </span>
       ))}

@@ -63,31 +63,33 @@
     "Node.js",
     "Express.js",
     "MongoDB",
-    "Redux",
-    "Jest",
-    "Webpack",
-    "GraphQL"
+    "PHP",
+    "Laravel",
+    "ExtJs",
+    "Openai",
+    "LangChain",
+    "WebixJS"
   ],
   "languages": [
     {
-      "language": "Arabic",
-      "proficiency": "Native"
-    },
-    {
       "language": "Berber (Tamazight)",
       "proficiency": "Native"
-    },
-    {
-      "language": "English",
-      "proficiency": "Professional working proficiency"
     },
     {
       "language": "German",
       "proficiency": "Professional working proficiency"
     },
     {
-      "language": "French",
+      "language": "English",
       "proficiency": "Professional working proficiency"
+    },
+    {
+      "language": "French",
+      "proficiency": "Intermediate"
+    },
+    {
+      "language": "Arabic",
+      "proficiency": "Native"
     }
   ],
   "projects": [
@@ -119,9 +121,7 @@
   "interests": [
     "Web Development",
     "Open Source Contributions",
-    "UI/UX Design",
     "Continuous Learning",
-    "Tech Blogging",
-    "Mobile App Development"
+    "Tech Blogging"
   ]
 }
