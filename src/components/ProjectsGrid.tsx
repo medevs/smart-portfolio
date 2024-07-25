@@ -39,16 +39,19 @@ const ProjectsGrid: React.FC = () => {
         sort: 'updated',
       });
 
-      const { data: contributedRepos } = await octokit.repos.listForUser({
-        username,
-        type: 'all',
+      const { data: contributedRepos } = await octokit.search.repos({
+        q: `user:${username}+is:public+fork:only`,
         per_page: 100,
         sort: 'updated',
       });
 
-      const allProjects: Project[] = await Promise.all([...ownRepos, ...contributedRepos].map(async (repo) => {
+      const allRepos = [...ownRepos, ...contributedRepos.items];
+      const uniqueRepos = Array.from(new Set(allRepos.map(repo => repo.id)))
+        .map(id => allRepos.find(repo => repo.id === id)!);
+
+      const allProjects: Project[] = await Promise.all(uniqueRepos.map(async (repo) => {
         const { data: commits } = await octokit.repos.listCommits({
-          owner: repo.owner.login,
+          owner: repo.owner?.login ?? username,
           repo: repo.name,
           per_page: 1,
         });
@@ -72,7 +75,7 @@ const ProjectsGrid: React.FC = () => {
           forks: repo.forks_count || 0,
           lastUpdated: getValidDateString(repo.updated_at),
           latestCommitDate: getValidDateString(latestCommitDate),
-          isOwn: repo.owner.login === username,
+          isOwn: repo.owner?.login === username,
         };
       }));
 
