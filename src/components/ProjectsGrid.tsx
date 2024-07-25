@@ -33,23 +33,14 @@ const ProjectsGrid: React.FC = () => {
     try {
       const username = 'medevs';
 
-      const { data: ownRepos } = await octokit.repos.listForUser({
+      const { data: allRepos } = await octokit.repos.listForUser({
         username,
         per_page: 100,
         sort: 'updated',
+        type: 'all', // This includes both owned and forked repositories
       });
 
-      const { data: contributedRepos } = await octokit.search.repos({
-        q: `user:${username}+is:public+fork:only`,
-        per_page: 100,
-        sort: 'updated',
-      });
-
-      const allRepos = [...ownRepos, ...contributedRepos.items];
-      const uniqueRepos = Array.from(new Set(allRepos.map(repo => repo.id)))
-        .map(id => allRepos.find(repo => repo.id === id)!);
-
-      const allProjects: Project[] = await Promise.all(uniqueRepos.map(async (repo) => {
+      const allProjects: Project[] = await Promise.all(allRepos.map(async (repo) => {
         const { data: commits } = await octokit.repos.listCommits({
           owner: repo.owner?.login ?? username,
           repo: repo.name,
@@ -75,7 +66,7 @@ const ProjectsGrid: React.FC = () => {
           forks: repo.forks_count || 0,
           lastUpdated: getValidDateString(repo.updated_at),
           latestCommitDate: getValidDateString(latestCommitDate),
-          isOwn: repo.owner?.login === username,
+          isOwn: !repo.fork, // If it's not a fork, it's your own project
         };
       }));
 
@@ -142,7 +133,7 @@ const ProjectsGrid: React.FC = () => {
           onClick={() => setActiveTab('contributed')}
         >
           <GitBranch className="w-4 h-4 inline-block mr-2" />
-          Contributed Projects
+          Forked Projects
         </button>
       </div>
 
