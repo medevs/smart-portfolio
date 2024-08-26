@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import heroImage from "@/assets/Ahmed.jpg";
+import heroImage from "@/assets/Ahmed.jpeg";
 import { Twitter, GithubIcon, Linkedin } from 'lucide-react';
 
 const AboutMe: React.FC = () => {
