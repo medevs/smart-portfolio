@@ -1,6 +1,6 @@
 import React from 'react';
 import resumeData from '../data/resumeDtata.json';
-import heroImage from "@/assets/Ahmed.jpg";
+import heroImage from "@/assets/Ahmed.jpeg";
 import Image from 'next/image';
 
 // Interfaces

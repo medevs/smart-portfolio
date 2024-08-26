@@ -13,54 +13,57 @@ interface TimelineItem {
 const educationItems: TimelineItem[] = [
   {
     type: 'education',
-    title: 'Fachinformatiker Anwendungsentwicklung',
+    title: 'Fachinformatiker Anwendungsentwicklung Ausbildung',
     organization: 'Schulzentrum SII Utbremen Bremen',
-    date: 'Sep 2021 - May 2024',
+    date: 'Sep 2021 - Mai 2024',
+    description: 'Ausbildung zum Fachinformatiker mit Schwerpunkt Anwendungsentwicklung. Fokus auf moderne Webtechnologien und Softwareentwicklungspraktiken.',
+    skills: ['JavaScript', 'React', 'Node.js', 'SQL', 'Agile Methoden']
   },
   {
     type: 'education',
-    title: 'Networks and Telecommunications',
+    title: 'Bachelor in Netzwerke und Telekommunikation',
     organization: 'Université du Littoral Côte d\'Opale',
-    date: 'Oct 2018 - Nov 2019',
-    description: 'Bachelor\'s degree in Network Admin, IT Security, and Web Dev.',
-    skills: ['PHP', 'JavaScript', 'Network Admin', 'IT Security', 'MySQL']
+    date: 'Okt 2018 - Nov 2019',
+    description: 'Französisches Staatsdiplom mit Schwerpunkt auf Netzwerkadministration, IT-Sicherheit und Webentwicklung. Vorbereitung auf CISCO-Zertifizierungen (CCNA1 bis CCNA4).',
+    skills: ['Netzwerkadministration', 'IT-Sicherheit', 'PHP', 'MySQL', 'Projektmanagement', 'CISCO CCNA']
   },
   {
     type: 'education',
-    title: 'Computer Development Techniques',
+    title: 'Ausbildung in Techniken der Computerentwicklung',
     organization: 'OFPPT Ouarzazate',
     date: 'Sep 2016 - Jul 2018',
-    description: 'Comprehensive IT skills training program.',
-    skills: ['PHP', 'SQL', 'JavaScript', 'HTML', 'CSS', 'jQuery', 'C#']
+    description: 'Umfassende Ausbildung in IT-Fähigkeiten, einschließlich Programmierung, Webentwicklung, Datenbankmanagement und Netzwerke.',
+    skills: ['C#', 'HTML', 'CSS', 'JavaScript', 'SQL', 'WordPress', 'Bootstrap', 'UML']
   }
 ];
 
 const experienceItems: TimelineItem[] = [
   {
     type: 'experience',
-    title: 'Software Developer',
+    title: 'Softwareentwickler',
     organization: 'ePhilos AG',
-    date: 'Aug 2021 - Present · 3 yrs',
-    location: 'Bremen, Germany · Hybrid',
-    skills: ['PHP', 'SQL', 'JavaScript', 'HTML', 'CSS']
+    date: 'Aug 2021 - Jetzt · 3 Jahre 1 Monat',
+    location: 'Bremen, Deutschland · Hybrid',
+    description: 'Verantwortlich für die Weiterentwicklung von Comfortmarkt (CM), einer Software auf Basis von PHP, Ext JS, Webix und MySQL. Optimierung und Erweiterung bestehender Webtechnologien.',
+    skills: ['PHP', 'Ext JS', 'Webix', 'MySQL', 'JavaScript', 'HTML', 'CSS']
   },
   {
     type: 'experience',
-    title: 'Freelance Web Developer',
-    organization: 'Self-employed',
-    date: 'Jan 2020 - Jul 2020 · 7 mos',
-    location: 'Remote',
-    description: 'Developed custom websites and web applications for various clients.',
-    skills: ['React', 'Node.js', 'MongoDB', 'Tailwind CSS']
+    title: 'NodeJS Webentwickler (Praktikum)',
+    organization: 'HM Communication',
+    date: 'Juni 2019 - Sep 2019 · 4 Monate',
+    location: 'Marrakesch, Marokko',
+    description: 'Entwicklung von Webanwendungen mit Node.js. Arbeit an verschiedenen Kundenprojekten und Verbesserung der Backend-Fähigkeiten.',
+    skills: ['Node.js', 'Express.js', 'MongoDB', 'RESTful APIs', 'Git']
   },
   {
     type: 'experience',
-    title: 'Software Development Intern',
-    organization: 'TechStart Solutions',
-    date: 'Jun 2019 - DSep 2019 · 3 mos',
-    location: 'Marrakech Morocco',
-    description: 'Assisted in developing and testing web applications.',
-    skills: ['Wordpress', 'jquery', 'Git', 'Agile methodologies']
+    title: 'PHP Entwickler (Praktikum)',
+    organization: 'HM Communication',
+    date: 'Juli 2018 - August 2018 · 2 Monate',
+    location: 'Marrakesch, Marokko',
+    description: 'Mitarbeit an der Entwicklung von PHP-basierten Webanwendungen. Fokus auf Backend-Entwicklung und Datenbankintegration.',
+    skills: ['PHP', 'MySQL', 'Laravel', 'HTML', 'CSS', 'JavaScript']
   }
 ];
 
@@ -94,16 +97,16 @@ const TimelineItem: React.FC<{ item: TimelineItem }> = ({ item }) => (
 const Timeline: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto p-4 bg-gray-100 dark:bg-gray-900 rounded-lg shadow">
-      <h1 className="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">My Journey</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">Mein Werdegang</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
-          <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Experience</h2>
+          <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Berufserfahrung</h2>
           {experienceItems.map((item, index) => (
             <TimelineItem key={index} item={item} />
           ))}
         </div>
         <div>
-          <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Education</h2>
+          <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Ausbildung</h2>
           {educationItems.map((item, index) => (
             <TimelineItem key={index} item={item} />
           ))}

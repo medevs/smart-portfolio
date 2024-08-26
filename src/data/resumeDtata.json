@@ -1,127 +1,126 @@
 {
   "personalInfo": {
     "name": "Ahmed Oublihi",
-    "title": "Software Developer",
+    "title": "Softwareentwickler",
     "email": "oublihi.a@gmail.com",
-    "phone": "+212 6XX XXX XXX",
-    "location": "Oujda, Morocco",
+    "phone": "04915751239715",
+    "location": "Bremen, Deutschland",
     "github": "https://github.com/medevs",
     "linkedin": "https://www.linkedin.com/in/ahmed-oublihi/",
     "website": "https://medevs.xyz",
-    "summary": " I'm a Software Developer based in Bremen, Germany. I dive deep into JavaScript and love crafting sleek, efficient web apps. With an eye for detail and a hunger for learning, I'm all about delivering high-quality solutions that meet both user needs and business objectives.",
+    "summary": "Erfahrener Softwareentwickler mit Fokus auf JavaScript und effizienten Webanwendungen. Mit einem Blick für Details und einer Leidenschaft für KI entwickle ich Lösungen, die Nutzerbedürfnisse und Geschäftsziele vereinen.",
     "image": "https://avatars.githubusercontent.com/u/40724828?v=4"
   },
   "experience": [
     {
-      "company": "Freelance",
-      "position": "Software Developer",
-      "startDate": "Jan 2021",
-      "endDate": "Present",
-      "description": "Developing responsive web applications using React.js and Next.js. Collaborating with clients to understand requirements and deliver high-quality solutions. Implementing modern UI/UX designs and ensuring cross-browser compatibility."
+      "company": "ePhilos AG",
+      "position": "Softwareentwickler",
+      "startDate": "Aug 2021",
+      "endDate": "Jetzt",
+      "description": "Verantwortlich für die Weiterentwicklung von Comfortmarkt (CM), einer Software auf Basis von PHP, Ext JS, Webix und MySQL. Schwerpunkte meiner Arbeit sind die Optimierung und Erweiterung der bestehenden Webtechnologien."
     },
     {
-      "company": "Halead",
-      "position": "Software Developer",
-      "startDate": "Sep 2022",
-      "endDate": "Mar 2023",
-      "description": "Worked on developing and maintaining web applications using React.js and Next.js. Collaborated with the backend team to integrate APIs and improve user experience. Implemented responsive designs and optimized application performance."
+      "company": "HM Communication",
+      "position": "NodeJS Webentwickler (Praktikum)",
+      "startDate": "Juni 2019",
+      "endDate": "Sep 2019",
+      "description": "Praktikum als NodeJS Webentwickler in Marrakesch, Marokko."
+    },
+    {
+      "company": "HM Communication",
+      "position": "PHP Entwickler (Praktikum)",
+      "startDate": "Juli 2018",
+      "endDate": "August 2018",
+      "description": "Praktikum als PHP Entwickler in Marrakesch, Marokko."
     }
   ],
   "education": [
     {
-      "institution": "Mohammed First University",
-      "degree": "Bachelor's degree in Computer Science",
-      "startDate": "2017",
-      "endDate": "2021",
-      "description": "Focused on web development technologies, software engineering principles, and computer science fundamentals. Participated in various coding projects and hackathons."
+      "institution": "Schulzentrum SII Utbremen Bremen",
+      "degree": "Fachinformatiker Anwendungsentwicklung Ausbildung",
+      "startDate": "Sep 2021",
+      "endDate": "Mai 2024",
+      "description": "Ausbildung zum Fachinformatiker mit Schwerpunkt Anwendungsentwicklung."
     },
     {
-      "institution": "Udacity",
-      "degree": "Nanodegree in React Development",
-      "startDate": "2022",
-      "endDate": "2022",
-      "description": "Completed an intensive program focusing on advanced React concepts, state management with Redux, and building complex user interfaces. Developed several projects showcasing proficiency in React ecosystem."
+      "institution": "Université du Littoral Côte d'Opale",
+      "degree": "Bachelor in Netzwerke und Telekommunikation",
+      "startDate": "Okt 2018",
+      "endDate": "Nov 2019",
+      "description": "Abschluss eines Bachelor-Studiengangs in Netzwerken und Telekommunikation, einem französischen Staatsdiplom mit Schwerpunkt auf Netzwerkadministration, IT-Sicherheit und Webentwicklung. Das Programm beinhaltete die Vorbereitung auf CISCO-Zertifizierungen (CCNA1 bis CCNA4)."
     },
     {
-      "institution": "FreeCodeCamp",
-      "degree": "Full Stack Development Certification",
-      "startDate": "2020",
-      "endDate": "2021",
-      "description": "Completed a comprehensive curriculum covering both frontend and backend technologies. Earned certifications in Responsive Web Design, JavaScript Algorithms and Data Structures, and Frontend Libraries."
+      "institution": "OFPPT Ouarzazate",
+      "degree": "Ausbildung in Techniken der Computerentwicklung",
+      "startDate": "Sep 2016",
+      "endDate": "Juli 2018",
+      "description": "Zweijährige Ausbildung in Techniken der Computerentwicklung, die ein umfassendes Spektrum an IT-Fähigkeiten vermittelte."
     }
   ],
   "skills": [
-    "JavaScript",
-    "TypeScript",
-    "React.js",
-    "Next.js",
-    "Tailwind CSS",
-    "HTML5",
-    "CSS3",
-    "Git",
-    "RESTful APIs",
-    "Node.js",
-    "Express.js",
-    "MongoDB",
-    "PHP",
-    "Laravel",
-    "ExtJs",
-    "Openai",
-    "LangChain",
-    "WebixJS"
+    "HTML/CSS",
+    "Javascript/Typescript",
+    "React/Next JS",
+    "Ext JS/Webix JS",
+    "PHP/Laravel",
+    "Mysql/MongoDB",
+    "Git/SVN",
+    "Docker",
+    "Node js"
   ],
   "languages": [
     {
-      "language": "Berber (Tamazight)",
-      "proficiency": "Native"
+      "language": "Deutsch",
+      "proficiency": "Fließend"
     },
     {
-      "language": "German",
-      "proficiency": "Professional working proficiency"
+      "language": "Englisch",
+      "proficiency": "Fließend"
     },
     {
-      "language": "English",
-      "proficiency": "Professional working proficiency"
+      "language": "Französisch",
+      "proficiency": "Fortgeschritten"
     },
     {
-      "language": "French",
-      "proficiency": "Intermediate"
+      "language": "Berberisch (Tamazight)",
+      "proficiency": "Muttersprache"
     },
     {
-      "language": "Arabic",
-      "proficiency": "Native"
+      "language": "Arabisch",
+      "proficiency": "Muttersprache"
     }
   ],
   "projects": [
     {
-      "name": "SpeedFleet",
-      "description": "A web application for car rental companies to manage their fleet and bookings. Implemented real-time updates and an intuitive booking system.",
-      "technologies": ["Next.js", "TypeScript", "Tailwind CSS", "MongoDB", "Socket.io"],
-      "link": "https://github.com/medevs/speedfleet"
+      "name": "yourdailyway",
+      "description": "Astro & React Blog",
+      "technologies": ["Astro", "React"],
+      "link": "http://yourdailyway.com/"
     },
     {
-      "name": "Quran Tafsir",
-      "description": "A comprehensive web application providing Quran translations and interpretations in multiple languages. Features include search functionality and audio recitations.",
-      "technologies": ["React.js", "TypeScript", "Tailwind CSS", "RESTful API", "IndexedDB"],
-      "link": "https://github.com/medevs/quran-tafsir"
+      "name": "Smart Portfolio",
+      "description": "Eine Portfolio-Website mit einem KI-Chatbot, der jede Frage über Sie beantworten kann.",
+      "technologies": ["AI", "Web Development"],
+      "link": "https://medevs.xyz"
     },
     {
-      "name": "NextChat",
-      "description": "A real-time chat application built with Next.js and Socket.io. Includes features like private messaging, group chats, and message encryption.",
-      "technologies": ["Next.js", "Socket.io", "Tailwind CSS", "JWT Authentication"],
-      "link": "https://github.com/medevs/next-chat"
-    },
-    {
-      "name": "Portfolio Website",
-      "description": "Personal portfolio website showcasing projects and skills. Includes a blog section and contact form.",
-      "technologies": ["Next.js", "React", "Tailwind CSS", "Vercel"],
-      "link": "https://medevs.netlify.app"
+      "name": "Blog Genius",
+      "description": "Gliederung und Artikel mit KI erstellen.",
+      "technologies": ["AI", "Web Development"],
+      "link": "https://blog-genius.vercel.app/"
     }
   ],
   "interests": [
-    "Web Development",
-    "Open Source Contributions",
-    "Continuous Learning",
-    "Tech Blogging"
+    "Coding",
+    "Gitarre",
+    "Reisen",
+    "Natur"
+  ],
+  "certifications": [
+    {
+      "name": "Microsoft Certified Professional (MCP)",
+      "date": "Mai 2018",
+      "description": "HTM, CSS, JAVASCRIPT"
+    }
   ]
 }
