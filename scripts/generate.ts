@@ -23,7 +23,7 @@ async function generateEmbeddings() {
   );
 
   // Load data.js from assets folder
-  const dataLoader = new TextLoader("src/assets/data.js");
+  const dataLoader = new TextLoader("src/data/resumeDtata.js");
 
   const docs = (await loader.load())
     .filter((doc) => doc.metadata.source.endsWith("page.tsx") || doc.metadata.source.includes("/components/"))
@@ -48,15 +48,8 @@ async function generateEmbeddings() {
       };
     });
 
-  // Load and process data.js
-  const dataDocs = await dataLoader.load();
-  const processedDataDocs = dataDocs.map((doc): DocumentInterface => ({
-    pageContent: doc.pageContent,
-    metadata: { url: "/assets/data" },
-  }));
-
   // Combine all documents
-  const allDocs = [...docs, ...processedDataDocs];
+  const allDocs = [...docs];
 
   const splitter = RecursiveCharacterTextSplitter.fromLanguage("html");
   const splitDocs = await splitter.splitDocuments(allDocs);
