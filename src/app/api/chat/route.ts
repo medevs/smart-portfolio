@@ -52,13 +52,7 @@ export async function POST(req: Request) {
       cache,
     });
 
-    const retriever = (await getVectorStore()).asRetriever({
-      searchType: "mmr",
-      searchKwargs: {
-        fetchK: 20,
-        lambda: 0.5,
-      },  // Retrieve top 5 most relevant chunks
-    });
+    const retriever = (await getVectorStore()).asRetriever();
 
     const rephrasePrompt = ChatPromptTemplate.fromMessages([
       new MessagesPlaceholder("chat_history"),
