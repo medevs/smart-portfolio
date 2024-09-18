@@ -53,7 +53,11 @@ export async function POST(req: Request) {
     });
 
     const retriever = (await getVectorStore()).asRetriever({
-      searchKwargs: { k: 5 },  // Retrieve top 5 most relevant chunks
+      searchType: "mmr",
+      searchKwargs: {
+        fetchK: 20,
+        lambda: 0.5,
+      },  // Retrieve top 5 most relevant chunks
     });
 
     const rephrasePrompt = ChatPromptTemplate.fromMessages([
