@@ -22,7 +22,6 @@ export async function POST(req: Request) {
     const body = await req.json();
     const messages = body.messages;
 
-    // Extract chat history, converting user messages to HumanMessage and AI messages to AIMessage
     const chatHistory = messages
       .slice(0, -1)
       .map((m: VercelChatMessage) =>
@@ -37,34 +36,34 @@ export async function POST(req: Request) {
       client: Redis.fromEnv(),
     });
 
-    // Create a stream and handlers for managing streaming responses
     const { stream, handlers } = LangChainStream();
 
-    // Initialize the ChatOpenAI model for generating chat responses with specific settings
     const chatModel = new ChatOpenAI({
-      modelName: "gpt-4o",
+      modelName: "gpt-4o-mini",
       streaming: true,
       callbacks: [handlers],
       verbose: true,
       cache,
     });
 
-    // Initialize another ChatOpenAI model for rephrasing queries
     const rephrasingModel = new ChatOpenAI({
-      modelName: "gpt-4o",
+      modelName: "gpt-4o-mini",
       verbose: true,
       cache,
     });
 
-    const retriever = (await getVectorStore()).asRetriever();
+    const retriever = (await getVectorStore()).asRetriever({
+      searchKwargs: { k: 5 },  // Retrieve top 5 most relevant chunks
+    });
 
     const rephrasePrompt = ChatPromptTemplate.fromMessages([
       new MessagesPlaceholder("chat_history"),
       ["user", "{input}"],
       [
         "user",
-        "Given the above conversation, generate a search query to look up in order to get information relevant to the current question. " +
-          "Don't leave out any relevant keywords. Only return the query and no other text.",
+        "Given the above conversation, generate a search query to look up information relevant to the current question. " +
+        "Focus on keywords related to skills, experiences, projects, or specific details about the portfolio owner. " +
+        "Only return the query and no other text.",
       ],
     ]);
 
@@ -77,17 +76,20 @@ export async function POST(req: Request) {
     const prompt = ChatPromptTemplate.fromMessages([
       [
         "system",
-        "You are a chatbot for a personal portfolio website. You impersonate the website's owner. " +
-          "Answer the user's questions based on the below context. " +
-          "Whenever it makes sense, provide links to pages that contain more information about the topic from the given context. " +
-          "Format your messages in markdown format.\n\n" +
-          "Context:\n{context}",
+        `You are a chatbot for a personal portfolio website. You should answer as if you are the owner of the portfolio. 
+        Use the following context to answer questions about the portfolio owner's skills, experiences, projects, and other relevant information.
+        Always strive to provide accurate and specific information based on the context provided.
+        If asked about skills or experiences, refer to the most up-to-date information in the context.
+        Whenever it makes sense, provide links to pages that contain more information about the topic from the given context. 
+        Format your messages in markdown format.
+
+        Context:
+        {context}`,
       ],
       new MessagesPlaceholder("chat_history"),
       ["user", "{input}"],
     ]);
 
-    // Create a chain that combines document responses using the chat model and prompt
     const combineDocsChain = await createStuffDocumentsChain({
       llm: chatModel,
       prompt,
@@ -97,19 +99,16 @@ export async function POST(req: Request) {
       documentSeparator: "\n--------\n",
     });
 
-    // Create a retrieval chain that uses the combiner and history-aware retriever
     const retrievalChain = await createRetrievalChain({
       combineDocsChain,
       retriever: historyAwareRetrieverChain,
     });
 
-    // Invoke the retrieval chain with the user's input and chat history
     retrievalChain.invoke({
       input: currentMessageContent,
       chat_history: chatHistory,
     });
 
-    // Return a streaming text response
     return new StreamingTextResponse(stream);
   } catch (error) {
     console.error(error);

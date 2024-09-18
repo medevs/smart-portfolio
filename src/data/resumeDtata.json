@@ -59,12 +59,19 @@
   ],
   "skills": [
     "HTML/CSS",
+    "CSS",
     "Javascript/Typescript",
+    "Typescript",
     "React/Next JS",
+    "Next JS",
     "Ext JS/Webix JS",
+    "Webix JS",
     "PHP/Laravel",
+    "Laravel",
     "Mysql/MongoDB",
+    "MongoDB",
     "Git/SVN",
+    "SVN",
     "Docker",
     "Node js"
   ],
@@ -87,26 +94,26 @@
     },
     {
       "language": "Arabisch",
-      "proficiency": "Muttersprache"
+      "proficiency": "Fließend"
     }
   ],
   "projects": [
     {
       "name": "yourdailyway",
-      "description": "Astro & React Blog",
-      "technologies": ["Astro", "React"],
+      "description": "Static Blog mit Astro & React",
+      "technologies": ["Astro", "React", "Typescript"],
       "link": "http://yourdailyway.com/"
     },
     {
       "name": "Smart Portfolio",
       "description": "Eine Portfolio-Website mit einem KI-Chatbot, der jede Frage über Sie beantworten kann.",
-      "technologies": ["AI", "Web Development"],
+      "technologies": ["AI", "Web Development", "Next.js", "Typescript", "langchain"],
       "link": "https://medevs.xyz"
     },
     {
       "name": "Blog Genius",
       "description": "Gliederung und Artikel mit KI erstellen.",
-      "technologies": ["AI", "Web Development"],
+      "technologies": ["AI", "Web Development", "OpenAI", "Next.js", "Typescript"],
       "link": "https://blog-genius.vercel.app/"
     }
   ],

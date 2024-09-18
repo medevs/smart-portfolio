@@ -21,10 +21,10 @@
     "memberSince": "10.10.2018"
   },
   "websiteExistingPages": {
-    "homePage": "/",
-    "projectsPage": "/projects",
-    "blogPage": "/blog",
-    "gtihubStatistics": "/github-stats"
+    "homePage": "https://medevs.xyz/",
+    "projectsPage": "https://medevs.xyz/projects",
+    "blogPage": "https://medevs.xyz/blog",
+    "gtihubStatistics": "https://medevs.xyz/github-stats"
   },
   "technologies": [
     "JavaScript", "TypeScript", "React", "Next.js", "Tailwind CSS",

@@ -1,10 +1,11 @@
 import dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
-// Configure dotenv before other imports
+
 import { DocumentInterface } from "@langchain/core/documents";
 import { Redis } from "@upstash/redis";
 import { DirectoryLoader } from "langchain/document_loaders/fs/directory";
 import { TextLoader } from "langchain/document_loaders/fs/text";
+import { JSONLoader } from "langchain/document_loaders/fs/json";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { getEmbeddingsCollection, getVectorStore } from "../src/lib/astradb";
 
@@ -18,42 +19,58 @@ async function generateEmbeddings() {
     "src/",
     {
       ".tsx": (path) => new TextLoader(path),
+      ".json": (path) => new JSONLoader(path),
     },
     true,
   );
 
-  // Load data.js from assets folder
-  const dataLoader = new TextLoader("src/data/resumeDtata.js");
+  const docs = await loader.load();
 
-  const docs = (await loader.load())
-    .filter((doc) => doc.metadata.source.endsWith("page.tsx") || doc.metadata.source.includes("/components/"))
-    .map((doc): DocumentInterface => {
-      let url;
-      if (doc.metadata.source.endsWith("page.tsx")) {
-        url = doc.metadata.source
-          .replace(/\\/g, "/")
-          .split("/src/app")[1]
-          .split("/page.")[0] || "/";
-      } else if (doc.metadata.source.includes("/components/")) {
-        url = `/components${doc.metadata.source.split("/components")[1].replace(/\.tsx$/, "")}`;
-      }
-      const pageContentTrimmed = doc.pageContent
-        .replace(/^import.*$/gm, "") // Remove all import statements
-        .replace(/ className=(["']).*?\1| className={.*?}/g, "") // Remove all className props
-        .replace(/^\s*[\r]/gm, "") // remove empty lines
+  const processedDocs = docs.map((doc): DocumentInterface => {
+    let url;
+    if (doc.metadata.source.endsWith("page.tsx")) {
+      url = doc.metadata.source
+        .replace(/\\/g, "/")
+        .split("/src/app")[1]
+        .split("/page.")[0] || "/";
+    } else if (doc.metadata.source.includes("/components/")) {
+      url = `/components${doc.metadata.source.split("/components")[1].replace(/\.tsx$/, "")}`;
+    } else if (doc.metadata.source.includes("/data/")) {
+      url = `/data${doc.metadata.source.split("/data")[1]}`;
+    }
+
+    let pageContent = doc.pageContent;
+
+    if (doc.metadata.source.endsWith(".tsx")) {
+      pageContent = pageContent
+        .replace(/^import.*$/gm, "")
+        .replace(/ className=(["']).*?\1| className={.*?}/g, "")
+        .replace(/^\s*[\r]/gm, "")
         .trim();
-      return {
-        pageContent: pageContentTrimmed,
-        metadata: { url },
-      };
-    });
+    }
 
-  // Combine all documents
-  const allDocs = [...docs];
+    return {
+      pageContent,
+      metadata: { url, source: doc.metadata.source },
+    };
+  });
 
-  const splitter = RecursiveCharacterTextSplitter.fromLanguage("html");
+  // Add custom document for website structure
+  // const websiteStructure = {
+  //   pageContent: "Website structure: Home page at /, Blog at /blog, Projects at /projects, Resume at /resume",
+  //   metadata: { url: "/structure", source: "custom" },
+  // };
+
+  const allDocs = [...processedDocs];
+
+  const splitter = RecursiveCharacterTextSplitter.fromLanguage("html", {
+    chunkSize: 1000,
+    chunkOverlap: 200,
+  });
   const splitDocs = await splitter.splitDocuments(allDocs);
   await vectorStore.addDocuments(splitDocs);
+
+  console.log("Embeddings generated successfully!");
 }
 
 generateEmbeddings();
