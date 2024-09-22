@@ -129,7 +129,7 @@ const GitHubStats: React.FC = () => {
           href={`https://github.com/${userData?.login}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-block bg-gray-800 dark:bg-gray-600 text-white font-medium py-2 px-4 rounded hover:bg-gray-700 dark:hover:bg-gray-500 transition-colors mr-2"
+          className="inline-block bg-gray-800 dark:bg-gray-600 text-white font-medium py-2 px-4 rounded hover:bg-gray-700 dark:hover:bg-gray-500 transition-colors mr-2 mb-2"
         >
           View Profile
         </a>
