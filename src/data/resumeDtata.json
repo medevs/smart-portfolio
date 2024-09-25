@@ -1,133 +1,151 @@
 {
   "personalInfo": {
     "name": "Ahmed Oublihi",
-    "title": "Softwareentwickler",
+    "title": "Full Stack Developer",
     "email": "oublihi.a@gmail.com",
     "phone": "04915751239715",
-    "location": "Bremen, Deutschland",
+    "location": "Bremen, Germany",
     "github": "https://github.com/medevs",
     "linkedin": "https://www.linkedin.com/in/ahmed-oublihi/",
     "website": "https://medevs.xyz",
-    "summary": "Erfahrener Softwareentwickler mit Fokus auf JavaScript und effizienten Webanwendungen. Mit einem Blick für Details und einer Leidenschaft für KI entwickle ich Lösungen, die Nutzerbedürfnisse und Geschäftsziele vereinen.",
+    "summary": "Full Stack Developer specializing in JavaScript, PHP, and modern web technologies. Experienced in developing efficient web applications and optimizing enterprise software. Combining technical expertise with a passion for AI to create innovative solutions.",
     "image": "https://avatars.githubusercontent.com/u/40724828?v=4"
   },
   "experience": [
     {
       "company": "ePhilos AG",
-      "position": "Softwareentwickler",
+      "position": "Full Stack Developer",
       "startDate": "Aug 2021",
-      "endDate": "Jetzt",
-      "description": "Verantwortlich für die Weiterentwicklung von Comfortmarkt (CM), einer Software auf Basis von PHP, Ext JS, Webix und MySQL. Schwerpunkte meiner Arbeit sind die Optimierung und Erweiterung der bestehenden Webtechnologien."
+      "endDate": "Present",
+      "description": "Further development of the enterprise software Comfortmarkt (PHP, MySQL, Ext and Webix js). Optimization of database queries and performance. Implementation of new features focusing on user-friendliness. Application of best practices in software development and code optimization. Conducting unit tests and collaborating on CI/CD processes.",
+      "companyUrl": "https://ephilos.de"
+    },
+    {
+      "company": "Freelancer",
+      "position": "Web Developer",
+      "startDate": "Mar 2020",
+      "endDate": "Jun 2021",
+      "description": "Development of responsive websites (HTML, CSS, Bootstrap, jQuery, WordPress). Customizations and SEO optimization. Close collaboration with clients to implement tailored solutions.",
+      "location": "Remote - Morocco"
     },
     {
       "company": "HM Communication",
-      "position": "NodeJS Webentwickler (Praktikum)",
-      "startDate": "Juni 2019",
+      "position": "NodeJS Developer (Internship)",
+      "startDate": "Jul 2019",
       "endDate": "Sep 2019",
-      "description": "Praktikum als NodeJS Webentwickler in Marrakesch, Marokko."
-    },
-    {
-      "company": "HM Communication",
-      "position": "PHP Entwickler (Praktikum)",
-      "startDate": "Juli 2018",
-      "endDate": "August 2018",
-      "description": "Praktikum als PHP Entwickler in Marrakesch, Marokko."
+      "description": "Development of web applications with Node.js and Express.js. Working with MongoDB and RESTful APIs.",
+      "location": "Marrakech, Morocco"
     }
   ],
   "education": [
     {
       "institution": "Schulzentrum SII Utbremen Bremen",
-      "degree": "Fachinformatiker Anwendungsentwicklung Ausbildung",
-      "startDate": "Sep 2021",
-      "endDate": "Mai 2024",
-      "description": "Ausbildung zum Fachinformatiker mit Schwerpunkt Anwendungsentwicklung."
+      "degree": "Vocational Training in Application Development",
+      "startDate": "Aug 2021",
+      "endDate": "May 2024",
+      "description": "Dual education: Theory and practice in Full Stack Development. Modern web technologies and agile methods.",
+      "institutionUrl": "https://www.szut.de/"
     },
     {
       "institution": "Université du Littoral Côte d'Opale",
-      "degree": "Bachelor in Netzwerke und Telekommunikation",
-      "startDate": "Okt 2018",
+      "degree": "Bachelor in Networks and Telecommunications",
+      "startDate": "Oct 2018",
       "endDate": "Nov 2019",
-      "description": "Abschluss eines Bachelor-Studiengangs in Netzwerken und Telekommunikation, einem französischen Staatsdiplom mit Schwerpunkt auf Netzwerkadministration, IT-Sicherheit und Webentwicklung. Das Programm beinhaltete die Vorbereitung auf CISCO-Zertifizierungen (CCNA1 bis CCNA4)."
+      "description": "Network administration, IT security, web development. CISCO certifications (CCNA1-CCNA4).",
+      "institutionUrl": "https://www.univ-littoral.fr"
     },
     {
       "institution": "OFPPT Ouarzazate",
-      "degree": "Ausbildung in Techniken der Computerentwicklung",
+      "degree": "Training in Computer Development Techniques",
       "startDate": "Sep 2016",
-      "endDate": "Juli 2018",
-      "description": "Zweijährige Ausbildung in Techniken der Computerentwicklung, die ein umfassendes Spektrum an IT-Fähigkeiten vermittelte."
+      "endDate": "Jul 2018",
+      "description": "Comprehensive training in IT skills, including programming, web development, database management, and networks.",
+      "institutionUrl": "https://www.ofppt.ma/"
     }
   ],
   "skills": [
-    "HTML/CSS",
-    "CSS",
-    "Javascript/Typescript",
-    "Typescript",
-    "React/Next JS",
-    "Next JS",
-    "Ext JS/Webix JS",
-    "Webix JS",
-    "PHP/Laravel",
+    "React",
+    "Next.js",
+    "Astro",
+    "Javascript",
+    "TypeScript",
+    "HTML5",
+    "CSS3",
+    "Tailwind CSS",
+    "PHP",
+    "Node.js",
+    "Express.js",
     "Laravel",
-    "Mysql/MongoDB",
+    "Python",
+    "MySQL",
     "MongoDB",
-    "Git/SVN",
-    "SVN",
+    "Git",
     "Docker",
-    "Node js"
+    "Jest",
+    "CI/CD",
+    "VS Code",
+    "OpenAI",
+    "Langchain"
   ],
   "languages": [
     {
-      "language": "Deutsch",
-      "proficiency": "Fließend"
+      "language": "German",
+      "proficiency": "B2-C1"
     },
     {
-      "language": "Englisch",
-      "proficiency": "Fließend"
+      "language": "English",
+      "proficiency": "B2"
     },
     {
-      "language": "Französisch",
-      "proficiency": "Fortgeschritten"
+      "language": "French",
+      "proficiency": "B1"
     },
     {
-      "language": "Berberisch (Tamazight)",
-      "proficiency": "Muttersprache"
+      "language": "Berber",
+      "proficiency": "Native"
     },
     {
-      "language": "Arabisch",
-      "proficiency": "Fließend"
+      "language": "Arabic",
+      "proficiency": "Native"
     }
   ],
   "projects": [
     {
-      "name": "yourdailyway",
-      "description": "Static Blog mit Astro & React",
-      "technologies": ["Astro", "React", "Typescript"],
-      "link": "http://yourdailyway.com/"
-    },
-    {
       "name": "Smart Portfolio",
-      "description": "Eine Portfolio-Website mit einem KI-Chatbot, der jede Frage über Sie beantworten kann.",
-      "technologies": ["AI", "Web Development", "Next.js", "Typescript", "langchain"],
+      "description": "Portfolio website with AI chatbot. Next.js, React.js, AI integration. Dynamic chatbot for answering questions. Modern web design for optimal UX.",
+      "technologies": ["Next.js", "React", "AI", "OpenAI", "Langchain", "Tailwind CSS"],
       "link": "https://medevs.xyz"
     },
     {
       "name": "Blog Genius",
-      "description": "Gliederung und Artikel mit KI erstellen.",
-      "technologies": ["AI", "Web Development", "OpenAI", "Next.js", "Typescript"],
+      "description": "AI-powered tool for creating blog articles. React, Next.js, OpenAI integration. Generation of outlines and content. Intuitive user interface.",
+      "technologies": ["React", "Next.js", "AI", "OpenAI", "Node.js"],
       "link": "https://blog-genius.vercel.app/"
+    },
+    {
+      "name": "Your Daily Way",
+      "description": "High-performance blog with Astro and React. Focus on performance optimization and SEO. Markdown integration for easy content creation.",
+      "technologies": ["Astro", "React", "TypeScript", "SEO", "Markdown"],
+      "link": "http://yourdailyway.com/"
     }
   ],
   "interests": [
-    "Coding",
-    "Gitarre",
-    "Reisen",
-    "Natur"
+    "Open Source Contributions",
+    "AI and Machine Learning",
+    "Software Architecture",
+    "Problem Solving and Logical Thinking"
   ],
   "certifications": [
     {
       "name": "Microsoft Certified Professional (MCP)",
-      "date": "Mai 2018",
-      "description": "HTM, CSS, JAVASCRIPT"
+      "date": "May 2018",
+      "description": "Focus: HTML, CSS, JavaScript"
     }
+  ],
+  "softSkills": [
+    "Problem Solving",
+    "Logical Thinking",
+    "Teamwork",
+    "Communication"
   ]
 }
