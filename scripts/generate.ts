@@ -14,7 +14,7 @@ async function generateEmbeddings() {
   const vectorStore = await getVectorStore();
   (await getEmbeddingsCollection()).deleteMany({});
 
-  // Load files from src/app/ and components/
+  // Load files from src/app/, components/, and data/
   const loader = new DirectoryLoader(
     "src/",
     {
@@ -54,12 +54,6 @@ async function generateEmbeddings() {
       metadata: { url, source: doc.metadata.source },
     };
   });
-
-  // Add custom document for website structure
-  // const websiteStructure = {
-  //   pageContent: "Website structure: Home page at /, Blog at /blog, Projects at /projects, Resume at /resume",
-  //   metadata: { url: "/structure", source: "custom" },
-  // };
 
   const allDocs = [...processedDocs];
 

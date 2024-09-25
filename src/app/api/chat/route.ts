@@ -1,3 +1,5 @@
+// File: src/lib/chatbot.ts
+
 import { getVectorStore } from "@/lib/astradb";
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
 import {
@@ -27,7 +29,7 @@ export async function POST(req: Request) {
       .map((m: VercelChatMessage) =>
         m.role === "user"
           ? new HumanMessage(m.content)
-          : new AIMessage(m.content),
+          : new AIMessage(m.content)
       );
 
     const currentMessageContent = messages[messages.length - 1].content;
@@ -39,7 +41,7 @@ export async function POST(req: Request) {
     const { stream, handlers } = LangChainStream();
 
     const chatModel = new ChatOpenAI({
-      modelName: "gpt-4o-mini",
+      modelName: "gpt-4-1106-preview",
       streaming: true,
       callbacks: [handlers],
       verbose: true,
@@ -47,12 +49,14 @@ export async function POST(req: Request) {
     });
 
     const rephrasingModel = new ChatOpenAI({
-      modelName: "gpt-4o-mini",
+      modelName: "gpt-4-1106-preview",
       verbose: true,
       cache,
     });
 
-    const retriever = (await getVectorStore()).asRetriever();
+    const retriever = (await getVectorStore()).asRetriever({
+      k: 5 // Increased number of documents to retrieve
+    });
 
     const rephrasePrompt = ChatPromptTemplate.fromMessages([
       new MessagesPlaceholder("chat_history"),
@@ -74,13 +78,16 @@ export async function POST(req: Request) {
     const prompt = ChatPromptTemplate.fromMessages([
       [
         "system",
-        `You are a chatbot for a personal portfolio website. You should answer as if you are the owner of the portfolio. 
+        `You are a chatbot for a personal portfolio website. You should answer as if you are the owner of the portfolio.
         Use the following context to answer questions about the portfolio owner's skills, experiences, projects, and other relevant information.
-        Always strive to provide accurate and specific information based on the context provided.
+        Always strive to provide accurate, specific, and comprehensive information based on the context provided.
+        When discussing experiences or skills, ensure you cover all relevant details from the context.
         If asked about skills or experiences, refer to the most up-to-date information in the context.
-        Whenever it makes sense, provide links to pages that contain more information about the topic from the given context. 
+        Whenever it makes sense, provide links to pages that contain more information about the topic from the given context.
+        When providing links, use the standard Markdown format: [link text](URL)
+        Do not generate or suggest any HTML or React components.
         Format your messages in markdown format.
-
+        
         Context:
         {context}`,
       ],
@@ -102,14 +109,21 @@ export async function POST(req: Request) {
       retriever: historyAwareRetrieverChain,
     });
 
-    retrievalChain.invoke({
+    const result = await retrievalChain.invoke({
       input: currentMessageContent,
       chat_history: chatHistory,
     });
+
+    const sanitizedResponse = sanitizeResponse(result.answer);
 
     return new StreamingTextResponse(stream);
   } catch (error) {
     console.error(error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
   }
+}
+
+function sanitizeResponse(response: string): string {
+  // Remove any HTML-like tags
+  return response.replace(/<\/?[^>]+(>|$)/g, "");
 }
