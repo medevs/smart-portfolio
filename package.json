@@ -10,7 +10,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@datastax/astra-db-ts": "^0.1.4",
     "@langchain/openai": "^0.0.13",
     "@nextui-org/avatar": "^2.0.30",
     "@nextui-org/card": "^2.0.31",
@@ -27,7 +26,6 @@
     "framer-motion": "^11.3.2",
     "gray-matter": "^4.0.3",
     "html2canvas": "^1.4.1",
-    "html2pdf.js": "^0.10.2",
     "jspdf": "^2.5.1",
     "langchain": "^0.1.11",
     "lucide-react": "^0.320.0",
