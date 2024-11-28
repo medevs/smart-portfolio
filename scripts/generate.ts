@@ -3,13 +3,12 @@ dotenv.config({ path: ".env.local" });
 
 import { DocumentInterface } from "@langchain/core/documents";
 import { Redis } from "@upstash/redis";
-import { DirectoryLoader } from "langchain/document_loaders/fs/directory";
-import { TextLoader } from "langchain/document_loaders/fs/text";
 import { JSONLoader } from "langchain/document_loaders/fs/json";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { getEmbeddingsCollection, getVectorStore } from "../src/lib/supabase";
 
 async function generateEmbeddings() {
+  // Clear Redis cache
   await Redis.fromEnv().flushdb();
   const vectorStore = await getVectorStore();
   
@@ -20,57 +19,33 @@ async function generateEmbeddings() {
     return;
   }
 
-  // Load files from src/app/, components/, and data/
-  const loader = new DirectoryLoader(
-    "src/",
-    {
-      ".tsx": (path) => new TextLoader(path),
-      ".json": (path) => new JSONLoader(path),
-    },
-    true,
+  // Load resume data
+  const loader = new JSONLoader(
+    "src/data/resumeDtata.json",
+    ["/personalInfo", "/experience", "/education", "/skills", "/projects", "/interests"]
   );
 
   const docs = await loader.load();
 
   const processedDocs = docs.map((doc): DocumentInterface => {
-    let url;
-    if (doc.metadata.source.endsWith("page.tsx")) {
-      url = doc.metadata.source
-        .replace(/\\/g, "/")
-        .split("/src/app")[1]
-        .split("/page.")[0] || "/";
-    } else if (doc.metadata.source.includes("/components/")) {
-      url = `/components${doc.metadata.source.split("/components")[1].replace(/\.tsx$/, "")}`;
-    } else if (doc.metadata.source.includes("/data/")) {
-      url = `/data${doc.metadata.source.split("/data")[1]}`;
-    }
-
-    let pageContent = doc.pageContent;
-
-    if (doc.metadata.source.endsWith(".tsx")) {
-      pageContent = pageContent
-        .replace(/^import.*$/gm, "")
-        .replace(/ className=(["']).*?\1| className={.*?}/g, "")
-        .replace(/^\s*[\r]/gm, "")
-        .trim();
-    }
-
     return {
-      pageContent,
-      metadata: { url, source: doc.metadata.source },
+      pageContent: doc.pageContent,
+      metadata: {
+        source: "resume",
+        section: doc.metadata.source
+      },
     };
   });
 
-  const allDocs = [...processedDocs];
-
-  const splitter = RecursiveCharacterTextSplitter.fromLanguage("html", {
+  const splitter = new RecursiveCharacterTextSplitter({
     chunkSize: 1000,
     chunkOverlap: 200,
   });
-  const splitDocs = await splitter.splitDocuments(allDocs);
+  
+  const splitDocs = await splitter.splitDocuments(processedDocs);
   await vectorStore.addDocuments(splitDocs);
 
-  console.log("Embeddings generated successfully!");
+  console.log("Resume embeddings generated successfully!");
 }
 
 generateEmbeddings();
