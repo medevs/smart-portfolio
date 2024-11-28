@@ -1,8 +1,11 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import { Octokit } from '@octokit/rest';
+import { githubService } from '@/lib/github';
 import { ChevronLeft, ChevronRight, Loader } from 'lucide-react';
+import type { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods';
+
+type SearchRepoItem = RestEndpointMethodTypes["search"]["repos"]["response"]["data"]["items"][0];
 
 interface TrendingRepo {
   id: number;
@@ -15,8 +18,6 @@ interface TrendingRepo {
   topics: string[];
 }
 
-const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-
 const GitHubTrends: React.FC = () => {
   const [trendingRepos, setTrendingRepos] = useState<TrendingRepo[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -28,11 +29,18 @@ const GitHubTrends: React.FC = () => {
     const fetchTrendingRepos = async () => {
       setLoading(true);
       try {
+        // First validate the token
+        const isValid = await githubService.isTokenValid();
+        if (!isValid) {
+          throw new Error('GitHub token is invalid or not set');
+        }
+
         const date = new Date();
         date.setDate(date.getDate() - 7); // Get repos from the last week
         const formattedDate = date.toISOString().split('T')[0];
 
-        const response = await octokit.search.repos({
+        console.log('Fetching trending repositories...');
+        const response = await githubService.octokit.search.repos({
           q: `created:>${formattedDate}`,
           sort: 'stars',
           order: 'desc',
@@ -40,7 +48,8 @@ const GitHubTrends: React.FC = () => {
           page: page
         });
 
-        const mappedRepos: TrendingRepo[] = response.data.items.map(item => ({
+        console.log('Trending repos response:', response);
+        const mappedRepos: TrendingRepo[] = response.data.items.map((item: SearchRepoItem) => ({
           id: item.id,
           full_name: item.full_name,
           html_url: item.html_url,
@@ -53,8 +62,8 @@ const GitHubTrends: React.FC = () => {
 
         setTrendingRepos(mappedRepos);
       } catch (err) {
-        setError('Failed to fetch trending repositories');
         console.error('Error fetching trending repos:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch trending repositories. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -63,10 +72,41 @@ const GitHubTrends: React.FC = () => {
     fetchTrendingRepos();
   }, [page]);
 
+  const handlePrevPage = () => {
+    if (page > 1) setPage(page - 1);
+  };
+
+  const handleNextPage = () => {
+    setPage(page + 1);
+  };
+
   if (loading) return <div className="flex justify-center items-center h-64">
     <Loader className="animate-spin text-indigo-500" size={48} />
   </div>;
-  if (error) return <div className="text-red-600 dark:text-red-400">{error}</div>;
+
+  if (error) return (
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+      <div className="text-red-600 dark:text-red-400 mb-4">{error}</div>
+      <div className="text-gray-600 dark:text-gray-400">
+        <p>Please check:</p>
+        <ul className="list-disc ml-6">
+          <li>GitHub token is properly set in environment variables</li>
+          <li>You have internet connectivity</li>
+          <li>GitHub API is accessible</li>
+        </ul>
+      </div>
+    </div>
+  );
+
+  if (trendingRepos.length === 0) {
+    return (
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+        <div className="text-gray-600 dark:text-gray-400">
+          No trending repositories found. Please check your GitHub token and try again.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
@@ -100,21 +140,21 @@ const GitHubTrends: React.FC = () => {
           </div>
         ))}
       </div>
-      <div className="mt-6 flex justify-between">
+      <div className="flex justify-between mt-6">
         <button
-          onClick={() => setPage(p => Math.max(1, p - 1))}
+          onClick={handlePrevPage}
           disabled={page === 1}
-          className="px-4 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors disabled:bg-gray-100 dark:disabled:bg-gray-600"
+          className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <ChevronLeft />
+          <ChevronLeft className="w-5 h-5 mr-1" />
+          Previous
         </button>
-        <span className="text-gray-800 dark:text-gray-200">Page {page} of 5</span>
         <button
-          onClick={() => setPage(p => Math.min(5, p + 1))}
-          disabled={page === 5}
-          className="px-4 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors disabled:bg-gray-100 dark:disabled:bg-gray-600"
+          onClick={handleNextPage}
+          className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
         >
-          <ChevronRight />
+          Next
+          <ChevronRight className="w-5 h-5 ml-1" />
         </button>
       </div>
     </div>

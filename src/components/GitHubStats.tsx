@@ -1,9 +1,23 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import { Octokit } from '@octokit/rest';
+import { githubService } from '@/lib/github';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Loader } from 'lucide-react';
+import type { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods';
+
+type GitHubRepo = RestEndpointMethodTypes["repos"]["listForUser"]["response"]["data"][0];
+
+interface RepoData {
+  name: string;
+  stargazers_count: number;
+  language: string;
+}
+
+interface LanguageData {
+  name: string;
+  value: number;
+}
 
 interface UserData {
   login: string;
@@ -17,19 +31,6 @@ interface UserData {
   bio: string | null;
 }
 
-interface RepoData {
-  name: string;
-  stargazers_count: number;
-  language: string | null;
-}
-
-interface LanguageData {
-  name: string;
-  value: number;
-}
-
-const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
 const GitHubStats: React.FC = () => {
@@ -42,18 +43,18 @@ const GitHubStats: React.FC = () => {
   useEffect(() => {
     const fetchGitHubData = async () => {
       try {
-        const userResponse = await octokit.users.getByUsername({ username: 'medevs' });
+        const userResponse = await githubService.getUserData('medevs');
         setUserData(userResponse.data as UserData);
 
-        const reposResponse = await octokit.repos.listForUser({ username: 'medevs', per_page: 100 });
-        setRepos(reposResponse.data.map((repo): RepoData => ({
+        const reposResponse = await githubService.getRepositories('medevs', { per_page: 100 });
+        setRepos(reposResponse.data.map((repo: GitHubRepo): RepoData => ({
           name: repo.name,
-          stargazers_count: repo.stargazers_count ?? 0, // Use nullish coalescing to default to 0
+          stargazers_count: repo.stargazers_count ?? 0,
           language: repo.language ?? ''
         })));
 
         const languageCounts: { [key: string]: number } = {};
-        reposResponse.data.forEach((repo) => {
+        reposResponse.data.forEach((repo: GitHubRepo) => {
           if (repo.language) {
             languageCounts[repo.language] = (languageCounts[repo.language] || 0) + 1;
           }
@@ -66,7 +67,7 @@ const GitHubStats: React.FC = () => {
 
         setLanguages(languageData);
       } catch (err) {
-        setError('Failed to fetch GitHub data');
+        setError('Failed to fetch GitHub data. Please try again later.');
         console.error('Error fetching GitHub data:', err);
       } finally {
         setLoading(false);

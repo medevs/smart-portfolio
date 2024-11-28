@@ -1,9 +1,13 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import { Octokit } from '@octokit/rest';
+import { githubService } from '@/lib/github';
 import ProjectCard from './ProjectCard';
 import { Loader, GitBranch, User } from 'lucide-react';
+import type { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods';
+
+type GitHubRepo = RestEndpointMethodTypes["repos"]["listForUser"]["response"]["data"][0];
+type GitHubCommit = RestEndpointMethodTypes["repos"]["listCommits"]["response"]["data"][0];
 
 interface Project {
   title: string;
@@ -18,8 +22,6 @@ interface Project {
   isOwn: boolean;
 }
 
-const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-
 const ProjectsGrid: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,19 +35,18 @@ const ProjectsGrid: React.FC = () => {
     try {
       const username = 'medevs';
 
-      const { data: allRepos } = await octokit.repos.listForUser({
-        username,
+      const { data: allRepos } = await githubService.getRepositories(username, {
         per_page: 100,
         sort: 'updated',
-        type: 'all', // This includes both owned and forked repositories
+        type: 'all',
       });
 
-      const allProjects: Project[] = await Promise.all(allRepos.map(async (repo) => {
-        const { data: commits } = await octokit.repos.listCommits({
-          owner: repo.owner?.login ?? username,
-          repo: repo.name,
-          per_page: 1,
-        });
+      const allProjects: Project[] = await Promise.all(allRepos.map(async (repo: GitHubRepo) => {
+        const { data: commits } = await githubService.getRepositoryCommits(
+          repo.owner?.login ?? username,
+          repo.name,
+          { per_page: 1 }
+        );
 
         const getValidDateString = (dateString: string | null | undefined): string => {
           if (dateString && !isNaN(Date.parse(dateString))) {
@@ -66,7 +67,7 @@ const ProjectsGrid: React.FC = () => {
           forks: repo.forks_count || 0,
           lastUpdated: getValidDateString(repo.updated_at),
           latestCommitDate: getValidDateString(latestCommitDate),
-          isOwn: !repo.fork, // If it's not a fork, it's your own project
+          isOwn: !repo.fork,
         };
       }));
 
@@ -79,8 +80,8 @@ const ProjectsGrid: React.FC = () => {
       const allTechs = Array.from(new Set(sortedProjects.flatMap(project => project.technologies)));
       setTechnologies(['All', ...allTechs]);
     } catch (err) {
-      setError('Error fetching projects. Please try again later.');
-      console.error(err);
+      setError('Error fetching projects. Please try refreshing the page.');
+      console.error('Error fetching projects:', err);
     } finally {
       setLoading(false);
     }
