@@ -1,6 +1,6 @@
 // File: src/lib/chatbot.ts
 
-import { getVectorStore } from "@/lib/astradb";
+import { getVectorStore } from "@/lib/supabase";
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
 import {
   ChatPromptTemplate,
@@ -13,7 +13,7 @@ import {
   StreamingTextResponse,
   Message as VercelChatMessage,
 } from "ai";
-import { UpstashRedisCache } from "langchain/cache/upstash_redis";
+import { UpstashRedisCache } from "@langchain/community/caches/upstash_redis";
 import { Redis } from "@upstash/redis";
 import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
 import { createHistoryAwareRetriever } from "langchain/chains/history_aware_retriever";
@@ -99,7 +99,7 @@ export async function POST(req: Request) {
       llm: chatModel,
       prompt,
       documentPrompt: PromptTemplate.fromTemplate(
-        "Page URL: {url}\n\nPage content:\n{page_content}",
+        "{page_content}",
       ),
       documentSeparator: "\n--------\n",
     });

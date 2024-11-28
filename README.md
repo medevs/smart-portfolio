@@ -39,7 +39,7 @@ This project is a personal portfolio website built with Next.js, featuring an AI
 │   │   ├── GitHubTrends.tsx
 │   │   └── Chatbot.tsx
 │   └── lib/
-│       ├── astradb.ts
+│       ├── supabase.ts
 │       └── github.ts
 ├── public/
 ├── scripts/
@@ -68,10 +68,8 @@ This project is a personal portfolio website built with Next.js, featuring an AI
    ```
    GITHUB_TOKEN=your_github_personal_access_token
    OPENAI_API_KEY=your_openai_api_key
-   ASTRADB_ID=your_astradb_id
-   ASTRADB_REGION=your_astradb_region
-   ASTRADB_KEYSPACE=your_astradb_keyspace
-   ASTRADB_APPLICATION_TOKEN=your_astradb_application_token
+   SUPABASE_URL=your_supabase_project_url
+   SUPABASE_ANON_KEY=your_supabase_anon_key
    ```
 
 4. Generate embeddings for the chatbot:

@@ -7,12 +7,18 @@ import { DirectoryLoader } from "langchain/document_loaders/fs/directory";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { JSONLoader } from "langchain/document_loaders/fs/json";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { getEmbeddingsCollection, getVectorStore } from "../src/lib/astradb";
+import { getEmbeddingsCollection, getVectorStore } from "../src/lib/supabase";
 
 async function generateEmbeddings() {
   await Redis.fromEnv().flushdb();
   const vectorStore = await getVectorStore();
-  (await getEmbeddingsCollection()).deleteMany({});
+  
+  // Clear existing documents from Supabase
+  const { error } = await (await getEmbeddingsCollection()).delete().neq('id', 0);
+  if (error) {
+    console.error('Error clearing documents:', error);
+    return;
+  }
 
   // Load files from src/app/, components/, and data/
   const loader = new DirectoryLoader(
