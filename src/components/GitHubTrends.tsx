@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import { githubService } from '@/lib/github';
 import { ChevronLeft, ChevronRight, Loader } from 'lucide-react';
 import type { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods';
 
@@ -23,47 +22,21 @@ const GitHubTrends: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState<number>(1);
-  const perPage = 6; // 6 projects per page, 5 pages total for 30 projects
 
   useEffect(() => {
     const fetchTrendingRepos = async () => {
       setLoading(true);
       try {
-        // First validate the token
-        const isValid = await githubService.isTokenValid();
-        if (!isValid) {
-          throw new Error('GitHub token is invalid or not set');
+        const response = await fetch(`/api/github/trends?page=${page}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch trending repositories');
         }
-
-        const date = new Date();
-        date.setDate(date.getDate() - 7); // Get repos from the last week
-        const formattedDate = date.toISOString().split('T')[0];
-
-        console.log('Fetching trending repositories...');
-        const response = await githubService.octokit.search.repos({
-          q: `created:>${formattedDate}`,
-          sort: 'stars',
-          order: 'desc',
-          per_page: perPage,
-          page: page
-        });
-
-        console.log('Trending repos response:', response);
-        const mappedRepos: TrendingRepo[] = response.data.items.map((item: SearchRepoItem) => ({
-          id: item.id,
-          full_name: item.full_name,
-          html_url: item.html_url,
-          description: item.description,
-          stargazers_count: item.stargazers_count,
-          forks_count: item.forks_count,
-          language: item.language,
-          topics: item.topics || []
-        }));
-
-        setTrendingRepos(mappedRepos);
+        const data = await response.json();
+        setTrendingRepos(data);
+        setError(null);
       } catch (err) {
         console.error('Error fetching trending repos:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch trending repositories. Please try again later.');
+        setError(err instanceof Error ? err.message : 'Failed to fetch trending repositories');
       } finally {
         setLoading(false);
       }
@@ -102,7 +75,7 @@ const GitHubTrends: React.FC = () => {
     return (
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
         <div className="text-gray-600 dark:text-gray-400">
-          No trending repositories found. Please check your GitHub token and try again.
+          No trending repositories found. Please try again later.
         </div>
       </div>
     );

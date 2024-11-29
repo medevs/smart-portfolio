@@ -2,11 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { Github, Star, GitFork, Activity, GithubIcon, Loader } from 'lucide-react';
-import { githubService } from '@/lib/github';
-import type { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods';
-
-type SearchRepoItem = RestEndpointMethodTypes["search"]["repos"]["response"]["data"]["items"][0];
+import { Loader } from 'lucide-react';
 
 interface LanguageData {
   name: string;
@@ -18,9 +14,10 @@ interface RepoData {
   stars: number;
 }
 
-interface EventData {
-  type: string;
-  count: number;
+interface InsightsResponse {
+  languages: LanguageData[];
+  topRepos: RepoData[];
+  error?: string;
 }
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82ca9d', '#ffc658'];
@@ -34,54 +31,23 @@ const GitHubInsightsCharts: React.FC = () => {
   useEffect(() => {
     const fetchInsights = async () => {
       try {
-        // First validate the token
-        const isValid = await githubService.isTokenValid();
-        if (!isValid) {
-          throw new Error('GitHub token is invalid or not set');
+        const response = await fetch('/api/github/insights');
+        const data: InsightsResponse = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to fetch GitHub insights');
         }
 
-        // Fetch top languages
-        console.log('Fetching top languages...');
-        const langResponse = await githubService.octokit.search.repos({
-          q: 'stars:>10000',
-          sort: 'stars',
-          order: 'desc',
-          per_page: 100
-        });
-
-        console.log('Language response:', langResponse);
-        const languageCounts: { [key: string]: number } = {};
-        langResponse.data.items.forEach((repo: SearchRepoItem) => {
-          if (repo.language) {
-            languageCounts[repo.language] = (languageCounts[repo.language] || 0) + 1;
-          }
-        });
-
-        const languageData = Object.entries(languageCounts)
-          .map(([name, value]) => ({ name, value }))
-          .sort((a, b) => b.value - a.value)
-          .slice(0, 7);
-        setLanguages(languageData);
-
-        // Fetch top repositories
-        console.log('Fetching top repositories...');
-        const repoResponse = await githubService.octokit.search.repos({
-          q: 'stars:>50000',
-          sort: 'stars',
-          order: 'desc',
-          per_page: 10
-        });
-
-        console.log('Repository response:', repoResponse);
-        const topReposData = repoResponse.data.items.map((repo: SearchRepoItem) => ({
-          name: repo.name,
-          stars: repo.stargazers_count
-        }));
-        setTopRepos(topReposData);
-
+        if (data.languages && data.topRepos) {
+          setLanguages(data.languages);
+          setTopRepos(data.topRepos);
+          setError(null);
+        } else {
+          throw new Error('Invalid data format received from server');
+        }
       } catch (err) {
-        console.error('Error fetching GitHub insights:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch GitHub insights. Please try again later.');
+        console.error('Error fetching insights:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch GitHub insights');
       } finally {
         setLoading(false);
       }
@@ -90,55 +56,59 @@ const GitHubInsightsCharts: React.FC = () => {
     fetchInsights();
   }, []);
 
-  if (loading) return <div className="flex justify-center items-center h-64">
-    <Loader className="animate-spin text-indigo-500" size={48} />
-  </div>;
-
-  if (error) return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-      <div className="text-red-600 dark:text-red-400 mb-4">{error}</div>
-      <div className="text-gray-600 dark:text-gray-400">
-        <p>Please check:</p>
-        <ul className="list-disc ml-6">
-          <li>GitHub token is properly set in environment variables</li>
-          <li>You have internet connectivity</li>
-          <li>GitHub API is accessible</li>
-        </ul>
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader className="animate-spin text-indigo-500" size={48} />
       </div>
-    </div>
-  );
+    );
+  }
 
-  if (languages.length === 0 && topRepos.length === 0) {
+  if (error) {
+    return (
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+        <div className="text-red-600 dark:text-red-400 mb-4">{error}</div>
+        <div className="text-gray-600 dark:text-gray-400">
+          <p>Please check:</p>
+          <ul className="list-disc ml-6">
+            <li>GitHub token is properly set in environment variables</li>
+            <li>GitHub username is configured correctly</li>
+            <li>You have internet connectivity</li>
+            <li>GitHub API is accessible</li>
+          </ul>
+        </div>
+      </div>
+    );
+  }
+
+  if (languages.length === 0 || topRepos.length === 0) {
     return (
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
         <div className="text-gray-600 dark:text-gray-400">
-          No data available. Please check your GitHub token and try again.
+          No GitHub data available. Make sure you have public repositories.
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200 flex items-center">
-        <GithubIcon className="mr-2" /> GitHub Insights
-      </h2>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div>
-          <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">Top Languages</h3>
-          <ResponsiveContainer width="100%" height={300}>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+        <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Languages Distribution</h3>
+        <div className="h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={languages}
                 cx="50%"
                 cy="50%"
+                labelLine={false}
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
                 label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
               >
-                {languages.map((entry, index) => (
+                {languages.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
@@ -146,15 +116,21 @@ const GitHubInsightsCharts: React.FC = () => {
             </PieChart>
           </ResponsiveContainer>
         </div>
+      </div>
 
-        <div>
-          <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">Top Repositories by Stars</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={topRepos} layout="vertical" margin={{ left: 100 }}>
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+        <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Top Repositories by Stars</h3>
+        <div className="h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={topRepos} layout="vertical" margin={{ left: 20, right: 20 }}>
               <XAxis type="number" />
-              <YAxis type="category" dataKey="name" />
+              <YAxis type="category" dataKey="name" width={120} />
               <Tooltip />
-              <Bar dataKey="stars" fill="#8884d8" />
+              <Bar dataKey="stars" fill="#8884d8">
+                {topRepos.map((_, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
