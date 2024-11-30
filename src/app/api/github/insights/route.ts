@@ -7,14 +7,33 @@ type Repo = RestEndpointMethodTypes["repos"]["listForUser"]["response"]["data"][
 export async function GET() {
   try {
     const username = process.env.GITHUB_USERNAME;
+    console.log('GitHub Username:', username);
+    
     if (!username) {
-      return NextResponse.json({ error: 'GitHub username not configured' }, { status: 400 });
+      console.error('GitHub username not found in environment variables');
+      return NextResponse.json({ 
+        error: 'GitHub username not configured',
+        details: 'Username is not set in environment variables'
+      }, { status: 400 });
     }
 
     // First validate the token
-    const isValid = await githubService.isTokenValid();
-    if (!isValid) {
-      return NextResponse.json({ error: 'GitHub token is invalid or not set' }, { status: 401 });
+    try {
+      const isValid = await githubService.isTokenValid();
+      console.log('GitHub Token Valid:', isValid);
+      
+      if (!isValid) {
+        return NextResponse.json({ 
+          error: 'GitHub token is invalid or not set',
+          details: 'Token validation failed'
+        }, { status: 401 });
+      }
+    } catch (authError) {
+      console.error('Token validation error:', authError);
+      return NextResponse.json({ 
+        error: 'GitHub authentication failed',
+        details: authError instanceof Error ? authError.message : 'Unknown authentication error'
+      }, { status: 401 });
     }
 
     const repos = await githubService.octokit.repos.listForUser({
@@ -22,6 +41,7 @@ export async function GET() {
       sort: 'updated',
       per_page: 100
     });
+    console.log('Fetched Repos Count:', repos.data.length); // Debug log
 
     // Get language stats
     const languageMap = new Map<string, number>();

@@ -17,6 +17,7 @@ class GitHubService {
     const token = process.env.GITHUB_TOKEN;
     if (!token) {
       console.error('GitHub token is not set in environment variables');
+      throw new Error('GitHub token is not set in environment variables');
     }
     this.octokit = new Octokit({
       auth: token,
@@ -103,7 +104,8 @@ class GitHubService {
 
   async isTokenValid(): Promise<boolean> {
     try {
-      await this.octokit.users.getAuthenticated();
+      const response = await this.octokit.users.getAuthenticated();
+      console.log('GitHub Authentication Success:', response.data.login);
       return true;
     } catch (error) {
       console.error('GitHub token validation error:', error);
