@@ -14,7 +14,7 @@ class GitHubService {
   private readonly RETRY_DELAY = 1000; // 1 second
 
   private constructor() {
-    const token = process.env.GITHUB_TOKEN;
+    const token = process.env.NEXT_PUBLIC_GITHUB_TOKEN;
     if (!token) {
       console.error('GitHub token is not set in environment variables');
       throw new Error('GitHub token is not set in environment variables');
