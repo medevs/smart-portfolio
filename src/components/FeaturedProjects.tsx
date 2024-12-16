@@ -16,7 +16,7 @@ const projects: Omit<ProjectCardProps, 'stars' | 'forks' | 'lastUpdated'>[] = [
   {
     title: "Portfolio",
     description: "A Portfolio Website with an AI chatbot that can answer any question about you.",
-    technologies: ["Next.js", "Langchain", "MongoDB", "Stripe", "tailwind"],
+    technologies: ["Next.js", "Langchain", "MongoDB", "Supabase", "tailwind"],
     githubLink: "https://github.com/medevs/smart-portfolio",
     liveLink: "https://medevs.xyz"
   },

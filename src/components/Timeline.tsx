@@ -45,7 +45,7 @@ const experienceItems: TimelineItem[] = [
     date: 'Aug 2021 - Present · 2 years 8 months',
     location: 'Bremen, Germany · Hybrid',
     description: 'Responsible for the further development of Comfortmarkt (CM), a software based on PHP, Ext JS, Webix, and MySQL. Optimization of database queries and performance. Implementation of new features focusing on user-friendliness. Application of best practices in software development and code optimization. Conducting unit tests and collaborating on CI/CD processes.',
-    skills: ['PHP', 'Ext JS', 'Webix', 'MySQL', 'JavaScript', 'HTML', 'CSS', 'CI/CD']
+    skills: ['PHP', 'Ext JS', 'Webix', 'MySQL', 'JavaScript', 'HTML', 'CSS', 'Unit Testing']
   },
   {
     type: 'experience',
