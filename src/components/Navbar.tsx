@@ -11,8 +11,6 @@ const navLinks = [
   { name: "Home", href: "/", icon: Home },
   { name: "Projects", href: "/projects", icon: Briefcase },
   { name: "Blog", href: "/blog", icon: BookOpen },
-  { name: "Github in Magic", href: "/github-stats", icon: Github },
-  { name: "Resume", href: "/resume", icon: FileText },
 ];
 
 export default function Navbar() {

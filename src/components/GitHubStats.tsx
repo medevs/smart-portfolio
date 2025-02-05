@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { githubService } from '@/lib/github';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { Loader } from 'lucide-react';
 import type { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods';
 
 type GitHubRepo = RestEndpointMethodTypes["repos"]["listForUser"]["response"]["data"][0];
@@ -77,9 +76,33 @@ const GitHubStats: React.FC = () => {
     fetchGitHubData();
   }, []);
 
-  if (loading) return <div className="flex justify-center items-center h-64">
-    <Loader className="animate-spin text-indigo-500" size={48} />
-  </div>;
+  if (loading) {
+    return (
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex-grow">
+        <div className="animate-pulse space-y-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-gray-100 dark:bg-gray-700 p-4 rounded-md shadow">
+                <div className="h-6 bg-gray-200 dark:bg-gray-600 rounded mb-2"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-2/3"></div>
+              </div>
+            ))}
+          </div>
+          <div>
+            <div className="h-6 bg-gray-200 dark:bg-gray-600 rounded w-1/4 mb-8"></div>
+            <div className="h-[200px] bg-gray-200 dark:bg-gray-600 rounded"></div>
+          </div>
+          <div className="space-y-4">
+            <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/3"></div>
+            <div className="flex justify-center space-x-4">
+              <div className="h-10 bg-gray-200 dark:bg-gray-600 rounded w-32"></div>
+              <div className="h-10 bg-gray-200 dark:bg-gray-600 rounded w-32"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   if (error) return <div className="text-red-600 dark:text-red-400">{error}</div>;
 
   const totalStars = repos.reduce((sum, repo) => sum + repo.stargazers_count, 0);
