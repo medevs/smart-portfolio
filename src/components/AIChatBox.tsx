@@ -16,11 +16,48 @@ export default function AIChatBox({ open, onClose }: AIChatBoxProps) {
     messages,
     input,
     handleInputChange,
-    handleSubmit,
+    handleSubmit: originalHandleSubmit,
     setMessages,
     isLoading,
     error,
-  } = useChat();
+  } = useChat({
+    api: '/api/chat',
+    onResponse: (response) => {
+      if (!response.ok) {
+        console.error('Response error:', response.statusText);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    },
+    onFinish: (message) => {
+      console.log('Chat finished successfully');
+    },
+    onError: (error) => {
+      console.error("Chat error:", error);
+      const errorMessage: Message = {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: `An error occurred: ${error?.message || 'Something went wrong. Please try refreshing the page if this persists.'}`,
+      };
+      setMessages([...messages, errorMessage]);
+    }
+  });
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+    
+    try {
+      await originalHandleSubmit(e);
+    } catch (err: any) {
+      console.error("Failed to send message:", err);
+      const errorMessage: Message = {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: `Failed to send message: ${err?.message || 'Please try again.'}`,
+      };
+      setMessages([...messages, errorMessage]);
+    }
+  };
 
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -61,20 +98,16 @@ export default function AIChatBox({ open, onClose }: AIChatBoxProps) {
             <ChatMessage message={message} key={message.id} />
           ))}
           {isLoading && lastMessageIsUser && (
-            <ChatMessage
-              message={{
-                id: "loading",
-                role: "assistant",
-                content: "🤖 is Thinking...",
-              }}
-            />
+            <div className="flex items-center gap-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-purple-500"></div>
+            </div>
           )}
           {error && (
             <ChatMessage
               message={{
                 id: "error",
                 role: "assistant",
-                content: "Something went wrong. Please try again!",
+                content: error?.message || "Something went wrong. Please try again!",
               }}
             />
           )}

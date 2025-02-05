@@ -13,8 +13,6 @@ import {
   StreamingTextResponse,
   Message as VercelChatMessage,
 } from "ai";
-import { UpstashRedisCache } from "@langchain/community/caches/upstash_redis";
-import { Redis } from "@upstash/redis";
 import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
 import { createHistoryAwareRetriever } from "langchain/chains/history_aware_retriever";
 import { createRetrievalChain } from "langchain/chains/retrieval";
@@ -34,28 +32,21 @@ export async function POST(req: Request) {
 
     const currentMessageContent = messages[messages.length - 1].content;
 
-    const cache = new UpstashRedisCache({
-      client: Redis.fromEnv(),
-    });
-
     const { stream, handlers } = LangChainStream();
 
-    const chatModel = new ChatOpenAI({
+    const retrievalModel = new ChatOpenAI({
+      modelName: "gpt-4-1106-preview",
+      streaming: false,
+    });
+
+    const streamingModel = new ChatOpenAI({
       modelName: "gpt-4-1106-preview",
       streaming: true,
       callbacks: [handlers],
-      verbose: true,
-      cache,
-    });
-
-    const rephrasingModel = new ChatOpenAI({
-      modelName: "gpt-4-1106-preview",
-      verbose: true,
-      cache,
     });
 
     const retriever = (await getVectorStore()).asRetriever({
-      k: 5 // Increased number of documents to retrieve
+      k: 5
     });
 
     const rephrasePrompt = ChatPromptTemplate.fromMessages([
@@ -70,7 +61,7 @@ export async function POST(req: Request) {
     ]);
 
     const historyAwareRetrieverChain = await createHistoryAwareRetriever({
-      llm: rephrasingModel,
+      llm: retrievalModel,
       retriever,
       rephrasePrompt,
     });
@@ -78,15 +69,21 @@ export async function POST(req: Request) {
     const prompt = ChatPromptTemplate.fromMessages([
       [
         "system",
-        `You are a chatbot for a personal portfolio website. You should answer as if you are the owner of the portfolio.
-        Use the following context to answer questions about the portfolio owner's skills, experiences, projects, and other relevant information.
-        Always strive to provide accurate, specific, and comprehensive information based on the context provided.
-        When discussing experiences or skills, ensure you cover all relevant details from the context.
-        If asked about skills or experiences, refer to the most up-to-date information in the context.
-        Whenever it makes sense, provide links to pages that contain more information about the topic from the given context.
-        When providing links, use the standard Markdown format: [link text](URL)
-        Do not generate or suggest any HTML or React components.
-        Format your messages in markdown format.
+        `You are a chatbot representing me on my personal portfolio website. Your responses must be:
+        1. Personal - Always speak in first person ("I", "my", "me")
+        2. Detailed but concise - Provide meaningful information without being overwhelming
+        3. Based strictly on the provided context
+        4. Engaging and professional
+
+        Rules:
+        - Always respond as if you are me, the portfolio owner
+        - When information is not in the context, suggest relevant portfolio sections:
+          - For projects: "You can explore more of my projects on the [Projects](/projects) page"
+          - For skills: "Check out my [GitHub](https://github.com/medevs) for an overview of my technical skills"
+          - For experience: "Visit my [LinkedIn](https://www.linkedin.com/in/ahmed-oublihi/) for my complete professional history"
+        - Include 2-3 relevant details when discussing skills or experiences
+        - Use markdown links to reference portfolio sections or external profiles
+        - Keep responses informative but conversational
         
         Context:
         {context}`,
@@ -96,7 +93,7 @@ export async function POST(req: Request) {
     ]);
 
     const combineDocsChain = await createStuffDocumentsChain({
-      llm: chatModel,
+      llm: streamingModel,
       prompt,
       documentPrompt: PromptTemplate.fromTemplate(
         "{page_content}",
@@ -109,21 +106,42 @@ export async function POST(req: Request) {
       retriever: historyAwareRetrieverChain,
     });
 
-    const result = await retrievalChain.invoke({
+    const resultPromise = retrievalChain.invoke({
       input: currentMessageContent,
       chat_history: chatHistory,
     });
 
-    const sanitizedResponse = sanitizeResponse(result.answer);
+    const response = new StreamingTextResponse(stream);
 
-    return new StreamingTextResponse(stream);
-  } catch (error) {
-    console.error(error);
-    return Response.json({ error: "Internal server error" }, { status: 500 });
+    resultPromise.then((result) => {
+      if (!result.answer) {
+        handlers.handleLLMError(new Error("No response generated"), "no_response");
+        return;
+      }
+    }).catch((error) => {
+      handlers.handleLLMError(error, "chain_error");
+    });
+
+    return response;
+  } catch (error: any) {
+    console.error("Chat API error:", error);
+    
+    const errorMessage = error?.message || "Unknown error occurred";
+    return Response.json(
+      { 
+        error: "Chat processing failed", 
+        details: errorMessage,
+        code: error?.code || "UNKNOWN_ERROR"
+      }, 
+      { status: 500 }
+    );
   }
 }
 
 function sanitizeResponse(response: string): string {
-  // Remove any HTML-like tags
-  return response.replace(/<\/?[^>]+(>|$)/g, "");
+  if (!response) return "";
+  
+  return response
+    .replace(/<\/?[^>]+(>|$)/g, "")
+    .trim();
 }
