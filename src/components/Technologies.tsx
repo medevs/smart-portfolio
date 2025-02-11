@@ -1,68 +1,44 @@
 import React from 'react';
-import { 
-  Code, 
-  FileJson, 
-  Atom, 
-  Zap, 
-  Palette, 
-  Globe, 
-  BarChart, 
-  Server, 
-  FileCode, 
-  Database, 
-  Table, 
-  GitBranch, 
-  Github, 
-  GitCommit, 
-  Container, 
-  Terminal, 
-  Rocket, 
-  Bot, 
-  Link
-} from 'lucide-react';
-
-const skills = [
-  { icon: <Code />, name: "JavaScript" },
-  { icon: <FileJson />, name: "TypeScript" },
-  { icon: <Atom />, name: "React" },
-  { icon: <Zap />, name: "Next.js" },
-  { icon: <Palette />, name: "Tailwind CSS" },
-  { icon: <Globe />, name: "Webix JS" },
-  { icon: <BarChart />, name: "Ext JS" },
-  { icon: <Server />, name: "Node.js" },
-  { icon: <FileCode />, name: "PHP" },
-  { icon: <Database />, name: "MongoDB" },
-  { icon: <Table />, name: "MySQL" },
-  { icon: <GitBranch />, name: "Prisma" },
-  { icon: <GitCommit />, name: "Git" },
-  { icon: <Github />, name: "GitHub" },
-  { icon: <GitCommit />, name: "SVN" },
-  { icon: <Container />, name: "Docker" },
-  { icon: <Terminal />, name: "VS Code" },
-  { icon: <Rocket />, name: "Astro" },
-  { icon: <Bot />, name: "OpenAI" },
-  { icon: <Link />, name: "Langchain" },
-];
+import { skills } from '../data/skills';
+import * as Si from 'react-icons/si';
 
 const Technologies: React.FC = () => {
+  // Create a mapping of icon names to actual components
+  const iconComponents: { [key: string]: React.ElementType } = {};
+  Object.keys(Si).forEach(key => {
+    iconComponents[key] = (Si as any)[key];
+  });
+
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg md:col-span-2 lg:col-span-3 transition-all duration-300 hover:shadow-xl flex-grow">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white text-center">Technologies</h2>
-      <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        {skills.map((skill, index) => (
-          <li 
-            key={index}
-            className="flex flex-col items-center p-4 rounded-lg bg-gray-100 dark:bg-gray-700 transition-all duration-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:scale-105 transform"
-          >
-            <div className="text-gray-600 dark:text-gray-300 mb-2">
-              {React.cloneElement(skill.icon, { size: 24 })}
+    <div className="bg-white dark:bg-[#151B28] rounded-lg p-4 h-full transition-colors">
+      <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-blue-600 mb-4">
+        Technologies
+      </h2>
+      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+        {skills.map((skill, index) => {
+          const IconComponent = iconComponents[skill.icon];
+          return (
+            <div
+              key={index}
+              className="flex flex-col items-center justify-center p-3 bg-gray-50 dark:bg-[#1E2330] rounded-lg transition-all hover:scale-105 hover:bg-gray-100 dark:hover:bg-[#252B3B] group"
+            >
+              {IconComponent && (
+                <div 
+                  className="w-8 h-8 mb-2 text-gray-600 dark:text-gray-400 group-hover:text-[#000000] dark:group-hover:text-white transition-colors"
+                  style={{ color: skill.color }}
+                >
+                  <IconComponent className="w-full h-full" />
+                </div>
+              )}
+              <span className="text-xs font-medium text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+                {skill.name}
+              </span>
             </div>
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">{skill.name}</span>
-          </li>
-        ))}
-      </ul>
+          );
+        })}
+      </div>
     </div>
   );
-}
+};
 
 export default Technologies;

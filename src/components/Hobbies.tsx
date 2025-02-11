@@ -17,21 +17,24 @@ interface HobbyCardProps {
   index: number;
 }
 
-const HobbyCard: React.FC<HobbyCardProps> = ({ hobby, index }) => (
-  <div
-    className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 flex flex-col items-center justify-center transform hover:scale-105 transition duration-300 ease-in-out"
-    style={{ animationDelay: `${index * 100}ms` }}
-  >
-    <span className="text-4xl mb-2">{hobby.icon}</span>
-    <h3 className="text-xl font-semibold text-gray-800 dark:text-white">{hobby.name}</h3>
+const HobbyCard: React.FC<HobbyCardProps> = ({ hobby }) => (
+  <div className="flex flex-col items-center justify-center p-3 transition-all hover:bg-gray-100 dark:hover:bg-[#252B3B] rounded-lg">
+    <div className="text-3xl mb-2 transform group-hover:scale-110 transition-all duration-300">
+      {hobby.icon}
+    </div>
+    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white">
+      {hobby.name}
+    </span>
   </div>
 );
 
 const Hobbies: React.FC = () => {
   return (
-    <div>
-      <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-6 animate-fade-in-down">Hobbies</h2>
-      <div className="grid grid-cols-2 md:grid-cols-2 gap-6">
+    <div className="bg-white dark:bg-[#151B28] rounded-lg p-4 shadow-md">
+      <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent mb-4 px-2">
+        Hobbies
+      </h2>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1">
         {hobbies.map((hobby, index) => (
           <HobbyCard key={hobby.name} hobby={hobby} index={index} />
         ))}

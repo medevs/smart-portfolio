@@ -11,57 +11,51 @@ import Hobbies from '@/components/Hobbies';
 
 const HomePage: React.FC = () => {
   return (
-    <div className="min-h-screen p-4 md:p-8">
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-      <div className="sm:col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-6">
-        <AboutMe />
-      </div>
-      
-      <div className="sm:col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="flex flex-col">
+    <main className="min-h-screen p-2 max-w-7xl mx-auto space-y-2">
+      {/* Hero Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+        <div className="lg:col-span-2">
+          <AboutMe />
+        </div>
+        <div>
           <GitHubStats />
         </div>
-        <div className="flex flex-col">
+      </div>
+
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+        {/* Featured Projects - Spans 2 columns */}
+        <div className="lg:col-span-2">
+          <FeaturedProjects />
+        </div>
+
+        {/* Technologies Stack */}
+        <div>
           <Technologies />
         </div>
-      </div>
-      
-      <div className="sm:col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-6">
-        <FeaturedProjects />
-      </div>
 
-      <div className="sm:col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-6">
-        <Timeline />
-      </div>
-      
-      <div className="sm:col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="flex flex-col">
+        {/* Timeline - Spans full width */}
+        <div className="lg:col-span-3">
+          <Timeline />
+        </div>
+
+        {/* Latest Posts */}
+        <div className="lg:col-span-2">
           <LatestPosts />
         </div>
-        <div className="flex flex-col">
-        <div className="sm:col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-6 grid grid-cols-1 lg:grid-cols-2 gap-4 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-gray-900 dark:to-indigo-900 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col">
-          <Languages />
-        </div>
-        <div className="flex flex-col">
-          <Hobbies />
-        </div>
-      </div>
-        </div>
-      </div>
 
-      {/* <div className="sm:col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-6 grid grid-cols-1 lg:grid-cols-2 gap-4 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-gray-900 dark:to-indigo-900 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col">
+        {/* Languages */}
+        <div>
           <Languages />
         </div>
-        <div className="flex flex-col">
+
+        {/* Hobbies */}
+        <div className="lg:col-span-3">
           <Hobbies />
         </div>
-      </div> */}
-      
-    </div>
-  </div>
+      </div>
+    </main>
   );
-}
+};
 
 export default HomePage;
