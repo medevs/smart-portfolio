@@ -20,5 +20,9 @@ export const skills: Skill[] = [
   { name: 'Docker', icon: 'SiDocker', color: '#2496ED' },
   { name: 'VSCode', icon: 'SiVisualstudiocode', color: '#007ACC' },
   { name: 'Astro', icon: 'SiAstro', color: '#FF5D01' },
-  { name: 'OpenAI', icon: 'SiOpenai', color: '#412991' }
+  { name: 'OpenAI', icon: 'SiOpenai', color: '#412991' },
+  { name: 'PHP', icon: 'SiPhp', color: '#777BB4' },
+  { name: 'Laravel', icon: 'SiLaravel', color: '#FF2D20' },
+  { name: 'Python', icon: 'SiPython', color: '#3776AB' },
+  { name: 'SVN', icon: 'SiSubversion', color: '#809CC9' }
 ];

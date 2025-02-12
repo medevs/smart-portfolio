@@ -29,7 +29,7 @@ const projects = [
     description: 'A Portfolio Website with an AI chatbot that can answer any question about you.',
     techStack: ['Next.js', 'OpenAI', 'TypeScript', 'TailwindCSS'],
     github: 'https://github.com/medevs/smart-portfolio',
-    demo: 'https://portfolio.medevs.com',
+    demo: 'https://medevs.xyz',
     stars: 10,
     forks: 1
   },
@@ -38,7 +38,7 @@ const projects = [
     description: 'A comprehensive supplements directory with detailed information and user reviews.',
     techStack: ['React', 'Node.js', 'MongoDB', 'TailwindCSS'],
     github: 'https://github.com/medevs/supp-directory',
-    demo: 'https://supplements.medevs.com',
+    demo: 'https://supp-directory.vercel.app',
     stars: 0,
     forks: 0
   },
@@ -47,7 +47,7 @@ const projects = [
     description: 'Inventory management system with real-time tracking and analytics.',
     techStack: ['Laravel', 'PHP', 'MySQL', 'Docker'],
     github: 'https://github.com/medevs/i-managments',
-    demo: 'https://i-managments.medevs.com',
+    // demo: 'https://i-managments.medevs.com',
     stars: 0,
     forks: 0
   },
@@ -56,7 +56,7 @@ const projects = [
     description: 'AI-powered career guidance and job matching platform.',
     techStack: ['Next.js', 'OpenAI', 'Prisma', 'TypeScript'],
     github: 'https://github.com/medevs/careerai',
-    demo: 'https://careerai.medevs.com',
+    // demo: 'https://careerai.medevs.com',
     stars: 0,
     forks: 0
   }
@@ -115,14 +115,16 @@ const FeaturedProjects: React.FC = () => {
                 >
                   <GithubIcon className="w-4 h-4" />
                 </a>
-                <a
-                  href={project.demo}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                </a>
+                {project.demo && (
+                  <a
+                    href={project.demo}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                )}
               </div>
             </div>
           </div>
