@@ -12,7 +12,6 @@ const languages: Language[] = [
   { name: 'French', level: 'Fluent', flag: '🇫🇷' },
   { name: 'Tamazight', level: 'Native', flag: 'ⵣ' },
   { name: 'Arabic', level: 'Fluent', flag: '🇲🇦' },
-  { name: 'Spanish', level: 'Learning', flag: '🇪🇸' },
 ];
 
 interface LanguageCardProps {
@@ -32,13 +31,13 @@ const LanguageCard: React.FC<LanguageCardProps> = ({ language, index }) => (
       </div>
     </div>
     <div className="h-1.5 w-24 bg-gray-100 dark:bg-[#252B3B] rounded-full overflow-hidden">
-      <div 
-        className="h-full bg-gradient-to-r from-blue-500 to-blue-400" 
-        style={{ 
-          width: language.level === 'Native' ? '100%' : 
-                 language.level === 'Fluent' ? '90%' : 
-                 language.level === 'Learning' ? '40%' : '0%' 
-        }} 
+      <div
+        className="h-full bg-gradient-to-r from-blue-500 to-blue-400"
+        style={{
+          width: language.level === 'Native' ? '100%' :
+            language.level === 'Fluent' ? '90%' :
+              language.level === 'Learning' ? '40%' : '0%'
+        }}
       />
     </div>
   </div>

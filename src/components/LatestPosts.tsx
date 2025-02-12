@@ -9,13 +9,13 @@ const LatestPosts: React.FC = async () => {
 
   return (
     <div className="bg-white dark:bg-[#151B28] rounded-lg p-4 h-full transition-colors">
-      <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-blue-600 mb-4">
+      <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-blue-600 mb-6">
         Latest Posts
       </h2>
       <div className="space-y-3 h-[calc(100%-3rem)]">
         {latestPosts.map((post: PostData) => (
           <Link key={post.id} href={`/blog/${post.id}`}>
-            <div className="group cursor-pointer p-3 bg-gray-50 dark:bg-[#1E2330] rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-[#252B3B]">
+            <div className="group cursor-pointer p-3 mb-8 bg-gray-50 dark:bg-[#1E2330] rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-[#252B3B]">
               <h3 className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-2 line-clamp-2">
                 {post.title}
               </h3>
@@ -33,14 +33,14 @@ const LatestPosts: React.FC = async () => {
             </div>
           </Link>
         ))}
-      </div>
-      <Link href="/blog" 
-        className="inline-flex items-center text-sm mt-6 px-4 py-2 rounded-lg
+        <Link href="/blog"
+          className="inline-flex items-center text-sm mt-6 px-4 py-2 rounded-lg
         bg-gray-100 dark:bg-blue-500/10 text-gray-700 dark:text-blue-400 
         hover:bg-gray-200 dark:hover:bg-blue-500/20 transition-all">
-        View all posts
-        <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1" />
-      </Link>
+          View all posts
+          <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1" />
+        </Link>
+      </div>
     </div>
   );
 };

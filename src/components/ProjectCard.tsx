@@ -1,11 +1,15 @@
 import React from 'react';
 import { Github, ExternalLink, Star, GitFork, Clock } from 'lucide-react';
-import TechIcon from './TechIcon';
+import * as Si from 'react-icons/si';
 
 interface ProjectCardProps {
   title: string;
   description: string;
-  technologies: string[];
+  technologies: Array<{
+    name: string;
+    icon: string;
+    color?: string;
+  }>;
   githubLink: string;
   liveLink?: string;
   stars: number;
@@ -23,6 +27,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   forks,
   lastUpdated
 }) => {
+  // Create a mapping of icon names to actual components
+  const iconComponents: { [key: string]: React.ElementType } = {};
+  Object.keys(Si).forEach(key => {
+    iconComponents[key] = (Si as any)[key];
+  });
+
   // Function to format the date
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -41,9 +51,25 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         <p className="mb-4 text-gray-600 dark:text-gray-300 flex-grow md:block hidden">{description}</p>
         <div className="mt-auto space-y-4">
           <div className="flex flex-wrap gap-2 md:block hidden">
-            {technologies.map((tech, index) => (
-              <TechIcon key={index} name={tech} />
-            ))}
+            {technologies.map((tech, index) => {
+              const IconComponent = iconComponents[tech.icon];
+              return IconComponent ? (
+                <div
+                  key={index}
+                  className="inline-flex items-center bg-gray-100 dark:bg-gray-700 rounded-md px-2 py-1 mr-2"
+                >
+                  <div 
+                    className="w-4 h-4 mr-1"
+                    style={{ color: tech.color }}
+                  >
+                    <IconComponent className="w-full h-full" />
+                  </div>
+                  <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                    {tech.name}
+                  </span>
+                </div>
+              ) : null;
+            })}
           </div>
           <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-400">
             <div className="flex items-center space-x-4">

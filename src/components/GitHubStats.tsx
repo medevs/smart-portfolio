@@ -117,7 +117,7 @@ const GitHubStats: React.FC = () => {
         <h3 className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-2">
           Most Used Languages
         </h3>
-        <div className="h-[180px]">
+        <div className="h-[210px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
