@@ -36,6 +36,9 @@ const ProjectsGrid: React.FC = () => {
   const [filter, setFilter] = useState<string>('All');
   const [technologies, setTechnologies] = useState<string[]>(['All']);
   const [activeTab, setActiveTab] = useState<'own' | 'contributed'>('own');
+  const [sortBy, setSortBy] = useState<'stars' | 'updated' | 'forks' | 'name'>('updated');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Function to map GitHub topics to our icon format
   const mapTopicToTechnology = (topic: string): Technology => {
@@ -144,74 +147,165 @@ const ProjectsGrid: React.FC = () => {
     fetchProjects();
   }, []);
 
-  const filteredProjects = projects.filter(project =>
-    (filter === 'All' || project.technologies.some(tech => tech.name === filter)) &&
-    (activeTab === 'own' ? project.isOwn : !project.isOwn)
-  );
+  const getSortedAndFilteredProjects = () => {
+    let filteredProjects = [...projects];
+
+    // Filter by search query
+    if (searchQuery) {
+      filteredProjects = filteredProjects.filter(project => 
+        project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        project.technologies.some(tech => tech.name.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+    }
+
+    // Filter by technology
+    if (filter !== 'All') {
+      filteredProjects = filteredProjects.filter(project =>
+        project.technologies.some(tech => tech.name === filter)
+      );
+    }
+
+    // Filter by ownership
+    filteredProjects = filteredProjects.filter(project =>
+      activeTab === 'own' ? project.isOwn : !project.isOwn
+    );
+
+    // Sort projects
+    return filteredProjects.sort((a, b) => {
+      let comparison = 0;
+      switch (sortBy) {
+        case 'stars':
+          comparison = b.stars - a.stars;
+          break;
+        case 'forks':
+          comparison = b.forks - a.forks;
+          break;
+        case 'updated':
+          comparison = new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime();
+          break;
+        case 'name':
+          comparison = a.title.localeCompare(b.title);
+          break;
+      }
+      return sortOrder === 'asc' ? -comparison : comparison;
+    });
+  };
+
+  const resetAllFilters = () => {
+    setFilter('All');
+    setActiveTab('own');
+    setSortBy('updated');
+    setSortOrder('desc');
+    setSearchQuery('');
+  };
 
   return (
-    <div className="space-y-6 p-6 bg-gray-50 dark:bg-gray-900 rounded-lg shadow-lg">
-      <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-        <h2 className="text-3xl font-bold text-gray-800 dark:text-white">Projects on Github</h2>
+    <div className="space-y-4">
+      {/* Search Bar */}
+      <div className="w-full">
+        <input
+          type="text"
+          placeholder="Search projects..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full px-4 py-2 rounded-lg bg-gray-800/50 border border-gray-700/50 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent"
+        />
+      </div>
+
+      {/* Filters Row */}
+      <div className="flex flex-wrap gap-2 items-center justify-center">
+        <div className="flex items-center gap-2">
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as 'stars' | 'updated' | 'forks' | 'name')}
+            className="px-3 py-1.5 rounded-lg bg-gray-800/50 border border-gray-700/50 text-gray-100"
+          >
+            <option value="updated">Last Updated</option>
+            <option value="stars">Stars</option>
+            <option value="forks">Forks</option>
+            <option value="name">Name</option>
+          </select>
+          
+          <button
+            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+            className="p-1.5 rounded-lg bg-gray-800/50 border border-gray-700/50 text-gray-100 w-8 h-8 flex items-center justify-center"
+          >
+            {sortOrder === 'asc' ? '↑' : '↓'}
+          </button>
+        </div>
+
         <select
-          className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
+          className="px-3 py-1.5 rounded-lg bg-gray-800/50 border border-gray-700/50 text-gray-100"
         >
-          {technologies.map((tech) => (
+          <option value="All">All Technologies</option>
+          {technologies.filter(tech => tech !== 'All').map((tech) => (
             <option key={tech} value={tech}>
               {tech}
             </option>
           ))}
         </select>
+
+        <button
+          onClick={resetAllFilters}
+          className="px-3 py-1.5 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 border border-gray-700/50 text-gray-300 flex items-center gap-1.5 transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
+          Clear All
+        </button>
       </div>
 
-      <div className="flex space-x-4 border-b border-gray-200 dark:border-gray-700">
+      {/* Tabs */}
+      <div className="flex gap-2 justify-center">
         <button
-          className={`py-2 px-4 font-medium focus:outline-none ${activeTab === 'own'
-              ? 'text-indigo-600 border-b-2 border-indigo-600'
-              : 'text-gray-500 hover:text-gray-700'
-            }`}
           onClick={() => setActiveTab('own')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
+            activeTab === 'own'
+              ? 'bg-blue-500 text-white'
+              : 'bg-gray-800/50 text-gray-300 border border-gray-700/50'
+          }`}
         >
-          <User className="w-4 h-4 inline-block mr-2" />
+          <User size={16} />
           My Projects
         </button>
         <button
-          className={`py-2 px-4 font-medium focus:outline-none ${activeTab === 'contributed'
-              ? 'text-indigo-600 border-b-2 border-indigo-600'
-              : 'text-gray-500 hover:text-gray-700'
-            }`}
           onClick={() => setActiveTab('contributed')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
+            activeTab === 'contributed'
+              ? 'bg-blue-500 text-white'
+              : 'bg-gray-800/50 text-gray-300 border border-gray-700/50'
+          }`}
         >
-          <GitBranch className="w-4 h-4 inline-block mr-2" />
-          Forked Projects
+          <GitBranch size={16} />
+          Contributed
         </button>
       </div>
 
-      {renderProjects(filteredProjects, loading, error)}
-    </div>
-  );
-};
-
-const renderProjects = (projects: Project[], loading: boolean, error: string | null) => {
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <Loader className="animate-spin text-indigo-500" size={48} />
+      {/* Projects Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {loading ? (
+          <div className="col-span-full flex justify-center items-center py-12">
+            <Loader className="w-8 h-8 animate-spin text-blue-500" />
+          </div>
+        ) : error ? (
+          <div className="col-span-full text-red-500 text-center py-12">{error}</div>
+        ) : (
+          getSortedAndFilteredProjects().map((project, index) => (
+            <ProjectCard key={index} {...project} />
+          ))
+        )}
       </div>
-    );
-  }
 
-  if (error) {
-    return <div className="text-red-500 text-center">{error}</div>;
-  }
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-      {projects.map((project, index) => (
-        <ProjectCard key={index} {...project} />
-      ))}
+      {/* No Results Message */}
+      {!loading && !error && getSortedAndFilteredProjects().length === 0 && (
+        <div className="text-center text-gray-400 py-12">
+          No projects found matching your criteria
+        </div>
+      )}
     </div>
   );
 };
