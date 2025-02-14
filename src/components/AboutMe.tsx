@@ -5,7 +5,7 @@ import { Twitter, GithubIcon, Linkedin } from 'lucide-react';
 
 const AboutMe: React.FC = () => {
   return (
-    <div className="bg-white dark:bg-[#151B28] rounded-lg p-4 h-full transition-colors">
+    <div className="bg-[#F8FAFC] dark:bg-[#151B28] rounded-lg p-4 h-full transition-colors">
       <div className="flex flex-col h-full">
         <div className="flex flex-col md:flex-row gap-6 mt-8">
           <div className="flex-shrink-0">

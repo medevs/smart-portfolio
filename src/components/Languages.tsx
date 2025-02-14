@@ -45,7 +45,7 @@ const LanguageCard: React.FC<LanguageCardProps> = ({ language, index }) => (
 
 const Languages: React.FC = () => {
   return (
-    <div className="bg-white dark:bg-[#151B28] rounded-lg p-6 shadow-md">
+    <div className="bg-[#F8FAFC] dark:bg-[#151B28] rounded-lg p-6 shadow-md">
       <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent mb-6">
         Languages
       </h2>

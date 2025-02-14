@@ -8,7 +8,7 @@ const LatestPosts: React.FC = async () => {
   const latestPosts = allPosts.slice(0, 3);
 
   return (
-    <div className="bg-white dark:bg-[#151B28] rounded-lg p-4 h-full transition-colors">
+    <div className="bg-[#F8FAFC] dark:bg-[#151B28] rounded-lg p-4 h-full transition-colors">
       <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-blue-600 mb-6">
         Latest Posts
       </h2>

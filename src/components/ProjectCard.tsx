@@ -47,10 +47,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     <div className="group relative overflow-hidden rounded-xl p-1 transition-all duration-500 hover:scale-[1.02] hover:shadow-xl flex-grow">
       <div className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 opacity-75 transition-all duration-500 group-hover:opacity-100"></div>
       <div className="relative h-full rounded-lg bg-white p-6 dark:bg-gray-800 transition-all duration-500 dark:bg-opacity-80 backdrop-blur-sm flex flex-col">
-        <h3 className="mb-3 text-2xl font-bold text-gray-800 dark:text-white md:block hidden">{title}</h3>
-        <p className="mb-4 text-gray-600 dark:text-gray-300 flex-grow md:block hidden">{description}</p>
+        <h3 className="mb-3 text-xl md:text-2xl font-bold text-gray-800 dark:text-white">{title}</h3>
+        <p className="mb-4 text-sm md:text-base text-gray-600 dark:text-gray-300 flex-grow">{description}</p>
         <div className="mt-auto space-y-4">
-          <div className="flex flex-wrap gap-2 md:block hidden">
+          <div className="flex flex-wrap gap-2">
             {technologies.map((tech, index) => {
               const IconComponent = iconComponents[tech.icon];
               return IconComponent ? (
@@ -75,11 +75,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             <div className="flex items-center space-x-4">
               <span className="flex items-center">
                 <Star size={16} className="mr-1" />
-                <span className="md:inline hidden">{stars}</span>
+                <span>{stars}</span>
               </span>
               <span className="flex items-center">
                 <GitFork size={16} className="mr-1" />
-                <span className="md:inline hidden">{forks}</span>
+                <span>{forks}</span>
               </span>
             </div>
           </div>
@@ -91,7 +91,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
               className="flex items-center text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100 transition-colors duration-300"
             >
               <Github className="mr-1" size={20} />
-              <span className="text-sm md:inline hidden">GitHub</span>
+              <span className="text-sm">GitHub</span>
             </a>
             {liveLink && (
               <a
@@ -101,7 +101,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                 className="flex items-center text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100 transition-colors duration-300"
               >
                 <ExternalLink className="mr-1" size={20} />
-                <span className="text-sm md:inline hidden">Live Demo</span>
+                <span className="text-sm">Live Demo</span>
               </a>
             )}
           </div>
