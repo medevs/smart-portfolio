@@ -15,7 +15,7 @@ export const useStackState = (historyManager: React.MutableRefObject<HistoryMana
       setNodes(prevState.nodes);
       setEdges(prevState.edges);
     }
-  }, [setNodes, setEdges]);
+  }, [setNodes, setEdges, historyManager]);
 
   const handleRedo = useCallback(() => {
     const nextState = historyManager.current.redo();
@@ -23,7 +23,7 @@ export const useStackState = (historyManager: React.MutableRefObject<HistoryMana
       setNodes(nextState.nodes);
       setEdges(nextState.edges);
     }
-  }, [setNodes, setEdges]);
+  }, [setNodes, setEdges, historyManager]);
 
   const onConnect = useCallback(
     (connection: Connection) => {
@@ -33,7 +33,7 @@ export const useStackState = (historyManager: React.MutableRefObject<HistoryMana
         return newEdges;
       });
     },
-    [setEdges, nodes]
+    [setEdges, nodes, historyManager]
   );
 
   const handleNodeChanges = useCallback(
@@ -41,7 +41,7 @@ export const useStackState = (historyManager: React.MutableRefObject<HistoryMana
       onNodesChange(changes);
       historyManager.current.pushState({ nodes, edges });
     },
-    [onNodesChange, nodes, edges]
+    [onNodesChange, nodes, edges, historyManager]
   );
 
   const handleEdgeChanges = useCallback(
@@ -49,7 +49,7 @@ export const useStackState = (historyManager: React.MutableRefObject<HistoryMana
       onEdgesChange(changes);
       historyManager.current.pushState({ nodes, edges });
     },
-    [onEdgesChange, nodes, edges]
+    [onEdgesChange, nodes, edges, historyManager]
   );
 
   return {

@@ -11,20 +11,37 @@ interface ValidationResult {
   isValid: boolean;
   message: string;
   details?: string;
+  overall_score: number;
+  analysis: {
+    strengths: string[];
+  };
+  compatibility_issues: string[];
 }
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+const defaultErrorResult: ValidationResult = {
+  isValid: false,
+  message: '',
+  details: '',
+  overall_score: 0,
+  analysis: {
+    strengths: []
+  },
+  compatibility_issues: []
+};
+
 export async function POST(request: Request): Promise<NextResponse> {
   if (!process.env.OPENAI_API_KEY) {
     return NextResponse.json(
-      { 
-        isValid: false,
+      {
+        ...defaultErrorResult,
         message: 'Validation service is not configured',
-        details: 'OpenAI API key is missing'
-      } as ValidationResult,
+        details: 'OpenAI API key is missing',
+        compatibility_issues: ['Service not configured']
+      },
       { status: 500 }
     );
   }
@@ -35,9 +52,10 @@ export async function POST(request: Request): Promise<NextResponse> {
     if (!nodes?.length) {
       return NextResponse.json(
         {
-          isValid: false,
+          ...defaultErrorResult,
           message: 'No technologies to validate',
-        } as ValidationResult,
+          compatibility_issues: ['No technologies provided']
+        },
         { status: 400 }
       );
     }
@@ -62,28 +80,42 @@ Always respond with a JSON object in this exact format:
 {
   "isValid": boolean,
   "message": "A brief, clear summary of whether the stack is valid and why",
-  "details": "A detailed explanation of the analysis, including specific recommendations if there are issues"
+  "details": "A detailed explanation of the analysis, including specific recommendations if there are issues",
+  "overall_score": number,
+  "analysis": {
+    "strengths": string[]
+  },
+  "compatibility_issues": string[]
+}`;
+
+    const responseFormat = `{
+  "isValid": boolean,
+  "message": "A brief, clear summary of whether the stack is valid and why",
+  "details": "A detailed explanation of the analysis, including specific recommendations if there are issues",
+  "overall_score": number,
+  "analysis": {
+    "strengths": ["List of key strengths in the tech stack"]
+  },
+  "compatibility_issues": ["List of potential compatibility or architectural issues"]
 }`;
 
     const userPrompt = `Analyze this technology stack:
-
 Technologies:
-${technologies.map((tech: TechNode) => `- ${tech.name} (${tech.type})`).join('\n')}
+${technologies.map(tech => `- ${tech.name} (${tech.type})`).join('\n')}
 
 Connections:
-${connections.map((conn: { source: string | undefined; target: string | undefined }) => 
+${connections.length ? connections.map((conn: { source: string | undefined; target: string | undefined }) => 
   `- ${conn.source} → ${conn.target}`
-).join('\n')}
+).join('\n') : 'No connections defined'}
 
-Consider:
-1. Technology compatibility
-2. Architecture patterns
-3. Common practices
-4. Potential issues
-5. Performance implications
-6. Scalability concerns
+Provide a detailed analysis of the technology stack, including:
+1. Overall validity of the stack
+2. Compatibility between chosen technologies
+3. Key strengths and potential issues
+4. A score from 0-100 based on the stack's overall quality
 
-Provide a thorough analysis in the required JSON format.`;
+Return the analysis in the following JSON format:
+${responseFormat}`;
 
     const completion = await openai.chat.completions.create({
       messages: [
@@ -102,28 +134,38 @@ Provide a thorough analysis in the required JSON format.`;
     }
 
     try {
-      const result = JSON.parse(response) as ValidationResult;
-      if (typeof result.isValid !== 'boolean' || typeof result.message !== 'string') {
-        throw new Error('Invalid response format');
-      }
-      return NextResponse.json(result);
+      const validationResult = JSON.parse(response) as ValidationResult;
+      
+      // Ensure all required properties exist with default values if missing
+      return NextResponse.json({
+        isValid: validationResult.isValid ?? false,
+        message: validationResult.message ?? 'No validation message provided',
+        details: validationResult.details,
+        overall_score: validationResult.overall_score ?? 0,
+        analysis: {
+          strengths: validationResult.analysis?.strengths ?? []
+        },
+        compatibility_issues: validationResult.compatibility_issues ?? []
+      } as ValidationResult);
     } catch (error) {
       console.error('Error parsing OpenAI response:', error);
       console.error('Raw response:', response);
       return NextResponse.json({
-        isValid: false,
+        ...defaultErrorResult,
         message: 'Error analyzing tech stack',
         details: `Failed to parse validation results. Raw response: ${response}`,
+        compatibility_issues: ['Failed to parse validation results']
       } as ValidationResult);
     }
   } catch (error) {
-    console.error('Validation error:', error);
+    console.error('Error:', error);
     return NextResponse.json(
       {
-        isValid: false,
+        ...defaultErrorResult,
         message: 'Failed to validate tech stack',
         details: error instanceof Error ? error.message : 'Unknown error occurred',
-      } as ValidationResult,
+        compatibility_issues: ['Failed to validate tech stack']
+      },
       { status: 500 }
     );
   }

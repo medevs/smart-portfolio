@@ -19,6 +19,11 @@ export const useStackValidation = (nodes: Node[], edges: Edge[]) => {
         isValid: false,
         message: 'Failed to validate tech stack.',
         details: error instanceof Error ? error.message : 'Unknown error occurred',
+        overall_score: 0,
+        analysis: {
+          strengths: []
+        },
+        compatibility_issues: ['Validation failed']
       });
       setShowValidationModal(true);
     } finally {

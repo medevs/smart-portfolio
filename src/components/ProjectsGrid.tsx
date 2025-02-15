@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { githubService } from '@/lib/github';
 import ProjectCard from './ProjectCard';
 import { Loader, GitBranch, User } from 'lucide-react';
@@ -84,7 +84,7 @@ const ProjectsGrid: React.FC = () => {
     };
   };
 
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     setLoading(true);
     try {
       const username = 'medevs';
@@ -141,11 +141,11 @@ const ProjectsGrid: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchProjects();
-  }, []);
+  }, [fetchProjects]);
 
   const getSortedAndFilteredProjects = () => {
     let filteredProjects = [...projects];

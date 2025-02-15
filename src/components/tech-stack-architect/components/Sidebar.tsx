@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { Technology } from '../techDataFetcher';
 import { TechStack } from '../stackUtils';
 import { Search } from 'lucide-react';
+import Image from 'next/image';
 
 interface SidebarProps {
   technologies: Record<string, Technology[]>;
@@ -88,10 +89,12 @@ const Sidebar: React.FC<SidebarProps> = ({
             >
               <div className="flex items-center">
                 {tech.icon && (
-                  <img
+                  <Image
                     src={tech.icon}
                     alt={tech.name}
-                    className="w-5 h-5 mr-2"
+                    width={20}
+                    height={20}
+                    className="mr-2"
                   />
                 )}
                 <span className="group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors text-sm">{tech.name}</span>

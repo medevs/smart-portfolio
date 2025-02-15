@@ -4,6 +4,11 @@ export interface ValidationResult {
   isValid: boolean;
   message: string;
   details?: string;
+  overall_score: number;
+  analysis: {
+    strengths: string[];
+  };
+  compatibility_issues: string[];
 }
 
 export async function validateTechStack(nodes: Node[], edges: Edge[]): Promise<ValidationResult> {
@@ -11,6 +16,11 @@ export async function validateTechStack(nodes: Node[], edges: Edge[]): Promise<V
     return {
       isValid: false,
       message: 'Stack is empty. Please add some technologies.',
+      overall_score: 0,
+      analysis: {
+        strengths: []
+      },
+      compatibility_issues: ['Stack is empty']
     };
   }
 
@@ -29,7 +39,10 @@ export async function validateTechStack(nodes: Node[], edges: Edge[]): Promise<V
 
     const result = await response.json();
     
-    if (!result || typeof result.isValid !== 'boolean') {
+    if (!result || typeof result.isValid !== 'boolean' || 
+        typeof result.overall_score !== 'number' || 
+        !Array.isArray(result.analysis?.strengths) ||
+        !Array.isArray(result.compatibility_issues)) {
       throw new Error('Invalid response format from validation API');
     }
 
@@ -40,6 +53,11 @@ export async function validateTechStack(nodes: Node[], edges: Edge[]): Promise<V
       isValid: false,
       message: 'Failed to validate tech stack.',
       details: error instanceof Error ? error.message : 'Unknown error occurred',
+      overall_score: 0,
+      analysis: {
+        strengths: []
+      },
+      compatibility_issues: ['Validation failed']
     };
   }
 }
