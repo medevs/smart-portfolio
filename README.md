@@ -1,82 +1,77 @@
-# Next.js Portfolio with AI Chatbot
+# Smart Portfolio with AI Integration
 
-This project is a personal portfolio website built with Next.js, featuring an AI-powered chatbot that can answer questions about the website's content and the owner's projects.
+This project is a modern portfolio website built with Next.js 14, featuring AI-powered components including a chatbot, tech stack validation, and interactive visualizations.
 
-## Features
+## Key Features
 
-- Responsive portfolio website showcasing projects and skills
-- AI chatbot integrated into the website
-- Dynamic content management for projects and blog posts
-- GitHub integration to display repositories and contributions
-- Dark mode support
+- AI-powered chatbot for interactive portfolio exploration
+- Tech stack architecture visualization and validation
+- Dynamic GitHub statistics and contribution graphs
+- Fully responsive design with dark/light mode
 - Vector search capabilities using Supabase pgvector
+- Real-time data updates and caching with Upstash Redis
 
 ## Tech Stack
 
-- Next.js 14
-- React
-- TypeScript
-- Tailwind CSS
-- Octokit (for GitHub API integration)
-- Langchain (for AI chatbot functionality)
-- Supabase (for vector storage)
-- OpenAI (for embeddings and chat)
-- Upstash Redis (for caching)
-- Vercel (for deployment)
+- **Framework**: Next.js 14 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS, NextUI
+- **Database**: Supabase (with pgvector)
+- **AI/ML**: 
+  - Langchain
+  - OpenAI
+  - D3.js for visualizations
+- **Authentication**: NextAuth.js
+- **Caching**: Upstash Redis
+- **Deployment**: Vercel
 
-## Project Structure
+## Prerequisites
 
-```
-/
-├── src/
-│   ├── app/
-│   │   ├── page.tsx
-│   │   ├── layout.tsx
-│   │   └── [...other pages]
-│   ├── components/
-│   │   ├── AboutMe.tsx
-│   │   ├── GitHubStats.tsx
-│   │   ├── Technologies.tsx
-│   │   ├── FeaturedProjects.tsx
-│   │   ├── LatestPosts.tsx
-│   │   ├── InteractiveCode.tsx
-│   │   ├── GitHubTrends.tsx
-│   │   └── Chatbot.tsx
-│   └── lib/
-│       ├── supabase.ts
-│       └── github.ts
-├── public/
-├── scripts/
-│   └── generate.ts
-├── data.json
-├── .env.local
-├── next.config.js
-├── package.json
-└── tailwind.config.js
-```
+Before you begin, ensure you have:
+- Node.js 18.17 or later
+- npm or yarn package manager
+- Git
 
-## Setup and Installation
+## Installation Guide
 
-1. Clone the repository:
+1. **Clone the Repository**
    ```bash
    git clone https://github.com/medevs/smart-portfolio.git
-   cd portfolio-chatbot
+   cd smart-portfolio
    ```
 
-2. Install dependencies:
+2. **Install Dependencies**
    ```bash
    npm install
+   # or
+   yarn install
    ```
 
-3. Set up Supabase:
-   - Create a new Supabase project at https://supabase.com
-   - Enable the Vector extension in your Supabase database
-   - Run the following SQL in your Supabase SQL editor:
+3. **Environment Setup**
+   Create a `.env.local` file in the root directory with the following variables:
+   ```env
+   # OpenAI
+   OPENAI_API_KEY=your_openai_api_key
+
+   # Supabase
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+   # GitHub
+   GITHUB_ACCESS_TOKEN=your_github_token
+
+   # Upstash Redis
+   UPSTASH_REDIS_REST_URL=your_upstash_redis_url
+   UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_token
+   ```
+
+4. **Database Setup**
+   Run the following SQL in your Supabase SQL editor:
    ```sql
    -- Enable the pgvector extension
    create extension if not exists vector;
 
-   -- Create a table to store your documents and embeddings
+   -- Create documents table for vector storage
    create table if not exists documents (
      id bigserial primary key,
      content text,
@@ -97,104 +92,70 @@ This project is a personal portfolio website built with Next.js, featuring an AI
    )
    language plpgsql
    as $$
-   #variable_conflict use_column
    begin
      return query
      select
-       documents.id,
-       documents.content,
-       documents.metadata,
+       id,
+       content,
+       metadata,
        1 - (documents.embedding <=> query_embedding) as similarity
      from documents
-     where case
-       when filter::text = '{}'::text then true
-       else documents.metadata @> filter
-     end
+     where metadata @> filter
      order by documents.embedding <=> query_embedding
      limit match_count;
    end;
    $$;
-
-   -- Create an index for faster similarity searches
-   create index if not exists documents_embedding_idx on documents
-   using ivfflat (embedding vector_cosine_ops)
-   with (lists = 100);
    ```
 
-4. Set up Upstash Redis:
-   - Create a new Redis database at https://upstash.com
-   - Copy your Redis REST URL and token
-
-5. Create a `.env.local` file in the root directory and add the following environment variables:
-   ```
-   GITHUB_TOKEN=your_github_personal_access_token
-   OPENAI_API_KEY=your_openai_api_key
-   
-   # Supabase configuration
-   SUPABASE_URL=your_supabase_project_url
-   SUPABASE_ANON_KEY=your_supabase_anon_key
-   
-   # Redis configuration
-   UPSTASH_REDIS_REST_URL=your_redis_rest_url
-   UPSTASH_REDIS_REST_TOKEN=your_redis_rest_token
-   ```
-
-6. Generate embeddings for the chatbot:
-   ```bash
-   npm run generate
-   ```
-
-7. Run the development server:
+5. **Development Server**
    ```bash
    npm run dev
+   # or
+   yarn dev
    ```
+   The application will be available at `http://localhost:3000`
 
-8. Open [http://localhost:3000](http://localhost:3000) in your browser to see the result.
-
-## How It Works
-
-The chatbot uses several key technologies to provide intelligent responses:
-
-1. **Content Embedding**: The `generate.ts` script processes your website content and generates embeddings using OpenAI's text-embedding-3-small model.
-
-2. **Vector Storage**: These embeddings are stored in Supabase using the pgvector extension, enabling efficient similarity searches.
-
-3. **Retrieval Chain**: When a user asks a question:
-   - The question is analyzed to generate a relevant search query
-   - Similar content is retrieved from the vector store
-   - The matching content is used as context for the AI to generate a response
-
-4. **Caching**: Upstash Redis is used to cache responses, improving performance and reducing API costs.
-
-## Deployment
-
-This project is set up for easy deployment on Vercel:
-
-1. Push your code to GitHub
-2. Connect your repository to Vercel
-3. Add all environment variables in your Vercel project settings
-4. Deploy!
-
-## Updating Content
-
-To update the chatbot's knowledge:
-
-1. Modify the content in your website files
-2. Run the embedding generation script:
+6. **Build for Production**
    ```bash
-   npm run generate
+   npm run build
+   # or
+   yarn build
    ```
 
-The script will:
-- Clear the existing Redis cache
-- Process all content files
-- Generate new embeddings
-- Store them in your Supabase database
+## Project Structure
+
+```
+/
+├── src/
+│   ├── app/              # Next.js app router pages
+│   ├── components/       # React components
+│   │   ├── tech-stack-architect/  # Tech stack visualization
+│   │   ├── github-stats/          # GitHub integration
+│   │   └── chat/                  # AI chatbot components
+│   ├── lib/             # Utility functions and API clients
+│   └── styles/          # Global styles and Tailwind
+├── public/              # Static assets
+├── scripts/             # Build and generation scripts
+├── posts/              # Blog posts and content
+└── utils/              # Helper functions
+```
+
+## Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run generate` - Generate static content
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
 
 ## Contributing
 
-Feel free to submit issues and enhancement requests!
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
