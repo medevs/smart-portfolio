@@ -82,6 +82,8 @@ const MainFlow: React.FC<MainFlowProps> = ({
           onConnect={onConnect}
           onNodeClick={handleNodeClick}
           onInit={onInit}
+          onUndo={onUndo}
+          onRedo={onRedo}
         />
       </div>
 

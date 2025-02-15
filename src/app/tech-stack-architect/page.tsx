@@ -20,17 +20,18 @@ const StackBuilder = dynamic(
 const TechStackArchitectPage = () => {
   return (
     <main className="min-h-screen p-4 max-w-7xl mx-auto">
-      <div className="space-y-6">
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">Tech Stack Architect</h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+      <div className="container mx-auto px-4 py-6 space-y-6">
+        <div className="text-center mb-6">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">
+            Tech Stack Architect
+          </h1>
+          <p className="text-lg text-gray-600 dark:text-gray-300">
             Design, validate, and visualize your project&apos;s technology stack with this interactive tool.
-            Drag and drop components to create your perfect architecture.
           </p>
         </div>
 
         {/* Main content area */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
           <StackBuilder />
         </div>
 
@@ -38,7 +39,7 @@ const TechStackArchitectPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
           <FeatureCard
             title="Interactive Builder"
-            description="Drag and drop technologies to build your stack. Get real-time compatibility feedback and suggestions."
+            description="Drag and drop technologies to build your stack. Get real-time compatibility feedback."
             icon="🏗️"
           />
           <FeatureCard

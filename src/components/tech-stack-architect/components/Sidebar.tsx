@@ -42,7 +42,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   }, [technologies, selectedCategory, searchQuery]);
 
   return (
-    <div className="w-64 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white flex flex-col h-[calc(100vh-6rem)] overflow-hidden rounded-l-lg">
+    <div className="w-64 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white flex flex-col h-[calc(80vh-8rem)] overflow-hidden rounded-l-lg">
       {/* Search and Categories */}
       <div className="p-3 border-b border-gray-200 dark:border-gray-700 space-y-2 flex-shrink-0">
         <div className="relative">

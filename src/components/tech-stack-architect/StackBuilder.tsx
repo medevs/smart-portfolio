@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ReactFlowInstance, Node, Edge } from 'reactflow';
+import { ReactFlowInstance, Node, Edge, ReactFlowProvider } from 'reactflow';
 import 'reactflow/dist/style.css';
 
 // Data and Utils
@@ -163,53 +163,54 @@ const StackBuilder: React.FC = () => {
   }
 
   return (
-    <div className="h-[calc(100vh-6rem)] flex flex-col bg-gray-900 mx-auto mt-4 rounded-lg shadow-xl w-[98%]">
-      <div className="flex-1 flex" ref={reactFlowWrapper}>
-        <Sidebar
-          technologies={technologies}
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
-          savedStacks={savedStacks}
-          onLoadStack={handleLoadStack}
-          onDeleteStack={handleDeleteStack}
-        />
-
-        <MainFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={handleNodeChanges}
-          onEdgesChange={handleEdgeChanges}
-          onConnect={onConnect}
-          canUndo={historyManager.current.canUndo()}
-          canRedo={historyManager.current.canRedo()}
-          onUndo={handleUndo}
-          onRedo={handleRedo}
-          onShowTemplates={() => setShowTemplates(true)}
-          onInit={setReactFlowInstance}
-          selectedTech={selectedTech}
-          onTechSelect={setSelectedTech}
-          onSaveStack={handleSaveStack}
-          onExportJson={handleExportJson}
-          onExportImage={handleExportImage}
-          onValidateStack={handleValidateStack}
-          isValidating={isValidating}
-        />
-
-        {showValidationModal && validationResult && (
-          <ValidationModal
-            result={validationResult}
-            onClose={() => setShowValidationModal(false)}
+    <div className="h-[calc(80vh-8rem)] flex flex-col bg-gray-900 mx-auto rounded-lg shadow-xl w-full">
+      <ReactFlowProvider>
+        <div className="flex-1 flex" ref={reactFlowWrapper}>
+          <Sidebar
+            technologies={technologies}
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
+            savedStacks={savedStacks}
+            onLoadStack={handleLoadStack}
+            onDeleteStack={handleDeleteStack}
           />
-        )}
 
-        {showTemplates && (
-          <TemplateModal
-            isOpen={showTemplates}
-            onSelect={handleTemplateSelect}
-            onClose={() => setShowTemplates(false)}
+          <MainFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={handleNodeChanges}
+            onEdgesChange={handleEdgeChanges}
+            onConnect={onConnect}
+            canUndo={historyManager.current.canUndo()}
+            canRedo={historyManager.current.canRedo()}
+            onUndo={handleUndo}
+            onRedo={handleRedo}
+            onShowTemplates={() => setShowTemplates(true)}
+            onInit={setReactFlowInstance}
+            selectedTech={selectedTech}
+            onTechSelect={setSelectedTech}
+            onSaveStack={handleSaveStack}
+            onExportJson={handleExportJson}
+            onExportImage={handleExportImage}
+            onValidateStack={handleValidateStack}
+            isValidating={isValidating}
           />
-        )}
-      </div>
+        </div>
+      </ReactFlowProvider>
+      {showValidationModal && validationResult && (
+        <ValidationModal
+          result={validationResult}
+          onClose={() => setShowValidationModal(false)}
+        />
+      )}
+
+      {showTemplates && (
+        <TemplateModal
+          isOpen={showTemplates}
+          onSelect={handleTemplateSelect}
+          onClose={() => setShowTemplates(false)}
+        />
+      )}
     </div>
   );
 };
