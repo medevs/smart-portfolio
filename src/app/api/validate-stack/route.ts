@@ -1,121 +1,125 @@
+import { OpenAI } from 'openai';
 import { NextResponse } from 'next/server';
-import OpenAI from 'openai';
 import { Node, Edge } from 'reactflow';
-
-interface TechNode {
-  name: string;
-  type: string;
-}
-
-interface ValidationResult {
-  isValid: boolean;
-  message: string;
-  details?: string;
-  overall_score: number;
-  analysis: {
-    strengths: string[];
-  };
-  compatibility_issues: string[];
-}
+import { ValidationResult } from '@/components/tech-stack-architect/aiValidation';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const defaultErrorResult: ValidationResult = {
-  isValid: false,
-  message: '',
-  details: '',
-  overall_score: 0,
-  analysis: {
-    strengths: []
-  },
-  compatibility_issues: []
-};
-
-export async function POST(request: Request): Promise<NextResponse> {
-  if (!process.env.OPENAI_API_KEY) {
-    return NextResponse.json(
-      {
-        ...defaultErrorResult,
-        message: 'Validation service is not configured',
-        details: 'OpenAI API key is missing',
-        compatibility_issues: ['Service not configured']
-      },
-      { status: 500 }
-    );
-  }
-
-  try {
-    const { nodes, edges } = await request.json();
-
-    if (!nodes?.length) {
-      return NextResponse.json(
-        {
-          ...defaultErrorResult,
-          message: 'No technologies to validate',
-          compatibility_issues: ['No technologies provided']
-        },
-        { status: 400 }
-      );
-    }
-
-    const technologies: TechNode[] = nodes.map((node: Node) => ({
-      name: (node.data as any).name,
-      type: (node.data as any).type,
-    }));
-
-    const connections = edges.map((edge: Edge) => {
-      const sourceNode = nodes.find((node: Node) => node.id === edge.source);
-      const targetNode = nodes.find((node: Node) => node.id === edge.target);
-      return {
-        source: sourceNode?.data?.name,
-        target: targetNode?.data?.name,
-      };
-    });
-
-    const systemPrompt = `You are an expert software architect specializing in technology stack validation. 
-Your task is to analyze technology stacks and provide clear, concise feedback about their validity.
-Always respond with a JSON object in this exact format:
+const systemPrompt = `You are a technology stack validator. Analyze the provided technology stack and return a detailed analysis in JSON format with the following structure:
 {
   "isValid": boolean,
-  "message": "A brief, clear summary of whether the stack is valid and why",
-  "details": "A detailed explanation of the analysis, including specific recommendations if there are issues",
-  "overall_score": number,
-  "analysis": {
-    "strengths": string[]
+  "message": "A brief summary message",
+  "overall_score": number (0-100),
+  "scores": {
+    "overall": number (0-100),
+    "performance": number (0-100),
+    "scalability": number (0-100),
+    "maintainability": number (0-100),
+    "security": number (0-100),
+    "cost_efficiency": number (0-100)
   },
-  "compatibility_issues": string[]
-}`;
+  "analysis": {
+    "strengths": ["list of strengths"],
+    "weaknesses": ["list of weaknesses"],
+    "performance_impact": "detailed performance analysis",
+    "scalability_assessment": "detailed scalability analysis",
+    "security_considerations": "detailed security analysis",
+    "cost_efficiency": "detailed cost analysis",
+    "learning_curve": "learning curve assessment",
+    "community_support": "community support assessment"
+  },
+  "compatibility_matrix": {
+    "compatible_pairs": ["list of well-working technology combinations"],
+    "incompatible_pairs": ["list of problematic combinations"],
+    "suggestions": ["list of compatibility improvement suggestions"]
+  },
+  "recommendations": {
+    "immediate_actions": ["list of immediate actions to take"],
+    "future_considerations": ["list of things to consider for the future"],
+    "alternative_technologies": ["list of alternative technologies to consider"]
+  }
+}
 
-    const responseFormat = `{
-  "isValid": boolean,
-  "message": "A brief, clear summary of whether the stack is valid and why",
-  "details": "A detailed explanation of the analysis, including specific recommendations if there are issues",
-  "overall_score": number,
-  "analysis": {
-    "strengths": ["List of key strengths in the tech stack"]
+Provide a thorough analysis of how well the technologies work together, their strengths and weaknesses, and specific recommendations for improvement.
+Score each aspect from 0-100 based on industry best practices and real-world performance data.
+Be specific in your recommendations and provide actionable insights.`;
+
+const defaultResult: ValidationResult = {
+  isValid: false,
+  message: 'Error validating stack',
+  overall_score: 0,
+  scores: {
+    overall: 0,
+    performance: 0,
+    scalability: 0,
+    maintainability: 0,
+    security: 0,
+    cost_efficiency: 0
   },
-  "compatibility_issues": ["List of potential compatibility or architectural issues"]
-}`;
+  analysis: {
+    strengths: [],
+    weaknesses: [],
+    performance_impact: '',
+    scalability_assessment: '',
+    security_considerations: '',
+    cost_efficiency: '',
+    learning_curve: '',
+    community_support: ''
+  },
+  compatibility_matrix: {
+    compatible_pairs: [],
+    incompatible_pairs: [],
+    suggestions: []
+  },
+  recommendations: {
+    immediate_actions: [],
+    future_considerations: [],
+    alternative_technologies: []
+  }
+};
+
+interface NodeData {
+  label?: string;
+  [key: string]: any;
+}
+
+export async function POST(request: Request) {
+  try {
+    const { nodes, edges }: { nodes: Node<NodeData>[], edges: Edge[] } = await request.json();
+
+    if (!nodes || !Array.isArray(nodes) || nodes.length === 0) {
+      return NextResponse.json({
+        ...defaultResult,
+        message: 'No technologies provided'
+      });
+    }
+
+    const technologies = nodes
+      .map(node => (node.data?.label ?? ''))
+      .filter(Boolean)
+      .join(', ');
+
+    const relationships = edges
+      .map(edge => {
+        const sourceNode = nodes.find(n => n.id === edge.source);
+        const targetNode = nodes.find(n => n.id === edge.target);
+        const sourceLabel = sourceNode?.data?.label;
+        const targetLabel = targetNode?.data?.label;
+        
+        return sourceLabel && targetLabel 
+          ? `${sourceLabel} -> ${targetLabel}`
+          : null;
+      })
+      .filter((rel): rel is string => rel !== null)
+      .join(', ');
 
     const userPrompt = `Analyze this technology stack:
-Technologies:
-${technologies.map(tech => `- ${tech.name} (${tech.type})`).join('\n')}
+Technologies: ${technologies}
+${relationships ? `Relationships: ${relationships}` : 'No relationships defined'}
 
-Connections:
-${connections.length ? connections.map((conn: { source: string | undefined; target: string | undefined }) => 
-  `- ${conn.source} → ${conn.target}`
-).join('\n') : 'No connections defined'}
-
-Provide a detailed analysis of the technology stack, including:
-1. Overall validity of the stack
-2. Compatibility between chosen technologies
-3. Key strengths and potential issues
-4. A score from 0-100 based on the stack's overall quality
-
-Return the analysis in the following JSON format:
-${responseFormat}`;
+Provide a detailed analysis of the stack's viability, strengths, weaknesses, and recommendations.`;
 
     const completion = await openai.chat.completions.create({
       messages: [
@@ -128,45 +132,16 @@ ${responseFormat}`;
       response_format: { type: "json_object" }
     });
 
-    const response = completion.choices[0]?.message?.content;
-    if (!response) {
-      throw new Error('No response from OpenAI');
+    const content = completion.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error('No response content from OpenAI');
     }
 
-    try {
-      const validationResult = JSON.parse(response) as ValidationResult;
-      
-      // Ensure all required properties exist with default values if missing
-      return NextResponse.json({
-        isValid: validationResult.isValid ?? false,
-        message: validationResult.message ?? 'No validation message provided',
-        details: validationResult.details,
-        overall_score: validationResult.overall_score ?? 0,
-        analysis: {
-          strengths: validationResult.analysis?.strengths ?? []
-        },
-        compatibility_issues: validationResult.compatibility_issues ?? []
-      } as ValidationResult);
-    } catch (error) {
-      console.error('Error parsing OpenAI response:', error);
-      console.error('Raw response:', response);
-      return NextResponse.json({
-        ...defaultErrorResult,
-        message: 'Error analyzing tech stack',
-        details: `Failed to parse validation results. Raw response: ${response}`,
-        compatibility_issues: ['Failed to parse validation results']
-      } as ValidationResult);
-    }
+    const result = JSON.parse(content) as ValidationResult;
+    return NextResponse.json(result);
+
   } catch (error) {
-    console.error('Error:', error);
-    return NextResponse.json(
-      {
-        ...defaultErrorResult,
-        message: 'Failed to validate tech stack',
-        details: error instanceof Error ? error.message : 'Unknown error occurred',
-        compatibility_issues: ['Failed to validate tech stack']
-      },
-      { status: 500 }
-    );
+    console.error('Error in validate-stack:', error);
+    return NextResponse.json(defaultResult, { status: 500 });
   }
 }
