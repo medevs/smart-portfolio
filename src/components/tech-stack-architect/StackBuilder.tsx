@@ -1,214 +1,215 @@
-"use client"
-
-import React, { useState, useCallback, useEffect, useRef } from 'react';
-import {
-  useNodesState,
-  useEdgesState,
-  addEdge,
-  Connection,
-  MarkerType,
-  ReactFlowInstance,
-  Edge,
-} from 'reactflow';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { ReactFlowInstance, Node, Edge } from 'reactflow';
 import 'reactflow/dist/style.css';
+
+// Data and Utils
 import { fetchTechData } from './techDataFetcher';
-import type { Technology } from './techDataFetcher';
-import {
-  TechStack,
-  saveStack,
-  loadStacks,
-  deleteStack,
-  exportStackAsJson,
-  exportStackAsImage,
-} from './stackUtils';
-import { validateStack, getCompatibilityColor } from './compatibilityUtils';
+import { saveStack, loadStacks, deleteStack, TechStack } from './stackUtils';
+import { validateStack } from './compatibilityUtils';
+import { stackTemplates, StackTemplate } from './stackTemplates';
 import { HistoryManager } from './historyManager';
+import { Technology } from './techDataFetcher';
+import { generateStackId } from './utils';
+
+// Components
 import Sidebar from './components/Sidebar';
-import FlowArea from './components/FlowArea';
-import Toolbar from './components/Toolbar';
-import TechInfo from './TechInfo';
-import ValidationPanel from './ValidationPanel';
+import MainFlow from './components/MainFlow';
+import ValidationModal from './components/ValidationModal';
+import TemplateModal from './components/TemplateModal';
 
-const generateStackId = () => `stack-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+// Custom Hooks
+import { useStackState } from './hooks/useStackState';
+import { useStackExport } from './hooks/useStackExport';
+import { useStackValidation } from './hooks/useStackValidation';
 
-const StackBuilder = () => {
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [selectedCategory, setSelectedCategory] = useState('frontend');
-  const [technologies, setTechnologies] = useState<Record<string, Technology[]>>({});
-  const [loading, setLoading] = useState(true);
-  const [selectedTech, setSelectedTech] = useState<Technology | null>(null);
-  const [currentStack, setCurrentStack] = useState<TechStack | null>(null);
-  const [savedStacks, setSavedStacks] = useState<TechStack[]>([]);
-  const [validation, setValidation] = useState<ReturnType<typeof validateStack> | null>(null);
+const StackBuilder: React.FC = () => {
+  // Refs
+  const historyManager = useRef(new HistoryManager());
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
-  
-  // Initialize history manager
-  const historyManager = useRef(new HistoryManager({ nodes: [], edges: [] }));
 
+  // State
+  const [loading, setLoading] = useState(true);
+  const [technologies, setTechnologies] = useState<Record<string, Technology[]>>({});
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedTech, setSelectedTech] = useState<Technology | null>(null);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [savedStacks, setSavedStacks] = useState<TechStack[]>([]);
+
+  // Custom Hooks
+  const {
+    nodes,
+    edges,
+    setNodes,
+    setEdges,
+    currentStack,
+    setCurrentStack,
+    handleUndo,
+    handleRedo,
+    onConnect,
+    handleNodeChanges,
+    handleEdgeChanges,
+  } = useStackState(historyManager);
+
+  const {
+    exportStackAsImage,
+    handleExportJson,
+  } = useStackExport(nodes, edges, currentStack);
+
+  const {
+    validationResult,
+    showValidationModal,
+    setShowValidationModal,
+    handleValidateStack,
+    isValidating,
+  } = useStackValidation(nodes, edges);
+
+  // Load initial data
   useEffect(() => {
-    const loadTechData = async () => {
-      const data = await fetchTechData();
-      setTechnologies(data);
-      setSavedStacks(loadStacks());
-      setLoading(false);
+    const loadInitialData = async () => {
+      try {
+        const [techData, stacks] = await Promise.all([
+          fetchTechData(),
+          loadStacks(),
+        ]);
+        setTechnologies(techData);
+        setSavedStacks(stacks);
+        setSelectedCategory(Object.keys(techData)[0]);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error loading initial data:', error);
+        setLoading(false);
+      }
     };
-    loadTechData();
+    loadInitialData();
   }, []);
 
-  const onConnect = useCallback(
-    (params: Connection) => {
-      const newEdge = {
-        ...params,
-        type: 'smoothstep',
-        animated: true,
-        markerEnd: { type: MarkerType.ArrowClosed },
-        style: { stroke: '#94a3b8' }
-      };
-      
-      const updatedEdges = addEdge(newEdge, edges);
-      setEdges(updatedEdges);
-      
-      // Update history
-      historyManager.current.pushState({ nodes, edges: updatedEdges });
-    },
-    [edges, nodes, setEdges]
-  );
+  // Stack Management
+  const handleSaveStack = useCallback(async (name: string) => {
+    if (!nodes.length) return;
 
-  const handleSaveStack = () => {
-    const stackName = prompt('Enter a name for your tech stack:');
-    if (!stackName) return;
-
-    const stack: TechStack = {
-      id: currentStack?.id || generateStackId(),
-      name: stackName,
+    const stack: TechStack = currentStack ?? {
+      id: generateStackId(),
+      name,
       nodes,
       edges,
-      createdAt: currentStack?.createdAt || new Date().toISOString(),
+      createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 
-    if (saveStack(stack)) {
-      setCurrentStack(stack);
-      setSavedStacks(loadStacks());
-    }
-  };
+    const updatedStack: TechStack = {
+      ...stack,
+      name,
+      nodes,
+      edges,
+      updatedAt: new Date().toISOString(),
+    };
 
-  const handleLoadStack = (stack: TechStack) => {
+    try {
+      await saveStack(updatedStack);
+      const stacks = await loadStacks();
+      setSavedStacks(stacks);
+      setCurrentStack(updatedStack);
+    } catch (error) {
+      console.error('Error saving stack:', error);
+    }
+  }, [nodes, edges, currentStack, setCurrentStack]);
+
+  const handleDeleteStack = useCallback(async (id: string) => {
+    await deleteStack(id);
+    const stacks = await loadStacks();
+    setSavedStacks(stacks);
+    if (currentStack?.id === id) {
+      setCurrentStack(null);
+    }
+  }, [currentStack, setCurrentStack]);
+
+  const handleLoadStack = useCallback((stack: TechStack) => {
     setNodes(stack.nodes);
     setEdges(stack.edges);
     setCurrentStack(stack);
-    historyManager.current = new HistoryManager({ nodes: stack.nodes, edges: stack.edges });
-  };
+    historyManager.current.clear();
+    historyManager.current.pushState({ nodes: stack.nodes, edges: stack.edges });
+  }, [setNodes, setEdges, setCurrentStack]);
 
-  const handleDeleteStack = (stackId: string) => {
-    if (window.confirm('Are you sure you want to delete this stack?')) {
-      if (deleteStack(stackId)) {
-        setSavedStacks(loadStacks());
-        if (currentStack?.id === stackId) {
-          setCurrentStack(null);
-          setNodes([]);
-          setEdges([]);
-          historyManager.current = new HistoryManager({ nodes: [], edges: [] });
-        }
+  const handleTemplateSelect = useCallback((template: StackTemplate) => {
+    const newStack: TechStack = {
+      id: generateStackId(),
+      name: template.name,
+      nodes: template.nodes,
+      edges: template.edges,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    setNodes(newStack.nodes);
+    setEdges(newStack.edges);
+    setShowTemplates(false);
+    historyManager.current.clear();
+    historyManager.current.pushState({ nodes: newStack.nodes, edges: newStack.edges });
+  }, [setNodes, setEdges]);
+
+  const handleExportImage = useCallback(() => {
+    if (reactFlowWrapper.current) {
+      // Get the ReactFlow viewport element
+      const flowElement = reactFlowWrapper.current.querySelector('.react-flow__viewport');
+      if (flowElement) {
+        exportStackAsImage(flowElement as HTMLElement);
       }
     }
-  };
-
-  const handleExportJson = () => {
-    if (!currentStack) return;
-    exportStackAsJson(currentStack);
-  };
-
-  const handleExportImage = () => {
-    if (!reactFlowWrapper.current) return;
-    exportStackAsImage(reactFlowWrapper.current);
-  };
-
-  const handleUndo = () => {
-    const previousState = historyManager.current.undo();
-    if (previousState) {
-      setNodes(previousState.nodes);
-      setEdges(previousState.edges);
-    }
-  };
-
-  const handleRedo = () => {
-    const nextState = historyManager.current.redo();
-    if (nextState) {
-      setNodes(nextState.nodes);
-      setEdges(nextState.edges);
-    }
-  };
-
-  const handleValidate = () => {
-    const result = validateStack(nodes, edges);
-    setValidation(result);
-  };
-
-  const handleNodeClick = useCallback((event: React.MouseEvent, node: any) => {
-    const tech = technologies[node.data.type]?.find(t => t.name === node.data.name);
-    if (tech) {
-      setSelectedTech(tech);
-    }
-  }, [technologies]);
+  }, [exportStackAsImage]);
 
   if (loading) {
     return <div className="flex items-center justify-center h-[600px]">Loading technologies...</div>;
   }
 
   return (
-    <div className="flex h-[600px]" ref={reactFlowWrapper}>
-      <Sidebar
-        technologies={technologies}
-        selectedCategory={selectedCategory}
-        onCategoryChange={setSelectedCategory}
-        onSaveStack={handleSaveStack}
-        onExportJson={handleExportJson}
-        onExportImage={handleExportImage}
-        savedStacks={savedStacks}
-        onLoadStack={handleLoadStack}
-        onDeleteStack={handleDeleteStack}
-      />
-      
-      <div className="flex-1 relative">
-        <Toolbar
+    <div className="h-[calc(100vh-6rem)] flex flex-col bg-gray-900 mx-auto mt-4 rounded-lg shadow-xl w-[98%]">
+      <div className="flex-1 flex" ref={reactFlowWrapper}>
+        <Sidebar
+          technologies={technologies}
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+          savedStacks={savedStacks}
+          onLoadStack={handleLoadStack}
+          onDeleteStack={handleDeleteStack}
+        />
+
+        <MainFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={handleNodeChanges}
+          onEdgesChange={handleEdgeChanges}
+          onConnect={onConnect}
           canUndo={historyManager.current.canUndo()}
           canRedo={historyManager.current.canRedo()}
           onUndo={handleUndo}
           onRedo={handleRedo}
-          onValidate={handleValidate}
-        />
-        
-        <FlowArea
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          onNodeClick={handleNodeClick}
+          onShowTemplates={() => setShowTemplates(true)}
           onInit={setReactFlowInstance}
+          selectedTech={selectedTech}
+          onTechSelect={setSelectedTech}
+          onSaveStack={handleSaveStack}
+          onExportJson={handleExportJson}
+          onExportImage={handleExportImage}
+          onValidateStack={handleValidateStack}
+          isValidating={isValidating}
         />
+
+        {showValidationModal && validationResult && (
+          <ValidationModal
+            result={validationResult}
+            onClose={() => setShowValidationModal(false)}
+          />
+        )}
+
+        {showTemplates && (
+          <TemplateModal
+            isOpen={showTemplates}
+            onSelect={handleTemplateSelect}
+            onClose={() => setShowTemplates(false)}
+          />
+        )}
       </div>
-
-      {selectedTech && (
-        <TechInfo
-          tech={selectedTech}
-          onClose={() => setSelectedTech(null)}
-        />
-      )}
-
-      {validation && (
-        <ValidationPanel
-          validation={validation}
-          onClose={() => setValidation(null)}
-          onHighlightEdge={(edgeId) => {
-            // Implement edge highlighting logic
-            console.log('Highlight edge:', edgeId);
-          }}
-        />
-      )}
     </div>
   );
 };

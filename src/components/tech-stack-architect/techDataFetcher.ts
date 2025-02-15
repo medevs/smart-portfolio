@@ -1,6 +1,7 @@
 import { techCategories } from './techData';
 
 export interface Technology {
+  type: string;
   name: string;
   icon: string;
   description?: string;
@@ -137,6 +138,7 @@ export async function fetchTechData(): Promise<Record<string, Technology[]>> {
         icon: `${DEVICON_BASE_URL}/${name}/${name}-original.svg`,
         description: descriptions[name] || `${name.charAt(0).toUpperCase() + name.slice(1)} development tool`,
         category,
+        type: category,
         version: tech.versions?.[0]
       });
     });

@@ -1,7 +1,8 @@
 "use client"
 
-import React from 'react';
-import { X } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+import { X, ExternalLink, Github, Package } from 'lucide-react';
+import Image from 'next/image';
 import type { Technology } from './techDataFetcher';
 
 interface TechInfoProps {
@@ -10,83 +11,132 @@ interface TechInfoProps {
 }
 
 const TechInfo = ({ tech, onClose }: TechInfoProps) => {
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        panelRef.current && 
+        !panelRef.current.contains(event.target as Node) &&
+        event.target instanceof Node &&
+        overlayRef.current?.contains(event.target)
+      ) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [onClose]);
+
   if (!tech) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 w-80 bg-white dark:bg-gray-800 shadow-lg border-l dark:border-gray-700 p-4 transform transition-transform duration-200 ease-in-out">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-          Technology Details
-        </h3>
+    <>
+      {/* Overlay */}
+      <div 
+        ref={overlayRef}
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+      />
+      
+      {/* Tech Info Panel */}
+      <div 
+        ref={panelRef}
+        className="fixed inset-y-0 right-0 w-96 bg-gray-900 shadow-2xl border-l border-gray-800 overflow-hidden transform transition-all duration-300 ease-in-out z-50"
+      >
+        {/* Header with blur effect */}
+        <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-blue-500/20 to-transparent" />
+        
+        {/* Close button */}
         <button
           onClick={onClose}
-          className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          className="absolute top-4 right-4 p-2 rounded-full bg-gray-800/50 hover:bg-gray-700/50 transition-colors z-10"
         >
-          <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+          <X className="w-5 h-5 text-gray-300" />
         </button>
-      </div>
 
-      <div className="space-y-4">
-        <div className="flex items-center space-x-3">
-          <img src={tech.icon} alt={tech.name} className="w-12 h-12" />
+        {/* Content */}
+        <div className="h-full overflow-y-auto px-6 py-8 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+          {/* Tech Header */}
+          <div className="relative flex items-center space-x-4 mb-8">
+            <div className="relative w-16 h-16 bg-gray-800 rounded-xl overflow-hidden flex items-center justify-center">
+              {tech.icon ? (
+                <Image
+                  src={tech.icon}
+                  alt={tech.name}
+                  width={48}
+                  height={48}
+                  className="object-contain"
+                />
+              ) : (
+                <span className="text-2xl font-bold text-gray-400">
+                  {tech.name.charAt(0).toUpperCase()}
+                </span>
+              )}
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-white mb-1">{tech.name}</h3>
+              <p className="text-sm text-blue-400 font-medium">{tech.category}</p>
+            </div>
+          </div>
+
+          {/* Version Badge */}
+          {tech.version && (
+            <div className="inline-block px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-sm font-medium mb-6">
+              Version {tech.version}
+            </div>
+          )}
+
+          {/* Description */}
+          <div className="mb-8">
+            <h4 className="text-gray-300 font-semibold mb-2">About</h4>
+            <p className="text-gray-400 leading-relaxed">
+              {tech.description || `${tech.name} is a powerful technology used in modern software development.`}
+            </p>
+          </div>
+
+          {/* Use Cases */}
+          <div className="mb-8">
+            <h4 className="text-gray-300 font-semibold mb-3">Common Use Cases</h4>
+            <div className="space-y-2">
+              {['Web Development', 'Mobile Applications', 'Enterprise Solutions'].map((useCase) => (
+                <div key={useCase} className="flex items-center px-3 py-2 bg-gray-800/50 rounded-lg">
+                  <span className="text-gray-300 text-sm">{useCase}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Resources */}
           <div>
-            <h4 className="font-medium text-gray-900 dark:text-gray-100">{tech.name}</h4>
-            <p className="text-sm text-gray-500 dark:text-gray-400">{tech.category}</p>
-          </div>
-        </div>
-
-        {tech.version && (
-          <div>
-            <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Latest Version
-            </h5>
-            <p className="text-sm text-gray-600 dark:text-gray-400">{tech.version}</p>
-          </div>
-        )}
-
-        <div>
-          <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Description
-          </h5>
-          <p className="text-sm text-gray-600 dark:text-gray-400">{tech.description}</p>
-        </div>
-
-        <div>
-          <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Common Use Cases
-          </h5>
-          <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400">
-            <li>Web Development</li>
-            <li>Mobile Applications</li>
-            <li>Enterprise Solutions</li>
-          </ul>
-        </div>
-
-        <div>
-          <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Resources
-          </h5>
-          <div className="space-y-2">
-            <a
-              href={`https://github.com/topics/${tech.name.toLowerCase()}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block text-sm text-blue-500 hover:underline"
-            >
-              GitHub Projects
-            </a>
-            <a
-              href={`https://www.npmjs.com/search?q=${tech.name.toLowerCase()}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block text-sm text-blue-500 hover:underline"
-            >
-              NPM Packages
-            </a>
+            <h4 className="text-gray-300 font-semibold mb-3">Resources</h4>
+            <div className="space-y-3">
+              <a
+                href={`https://github.com/topics/${tech.name.toLowerCase()}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-3 px-4 py-3 bg-gray-800/50 rounded-lg hover:bg-gray-700/50 transition-colors group"
+              >
+                <Github className="w-5 h-5 text-gray-400 group-hover:text-blue-400" />
+                <span className="text-gray-300 group-hover:text-blue-400 text-sm">GitHub Projects</span>
+                <ExternalLink className="w-4 h-4 text-gray-500 ml-auto" />
+              </a>
+              <a
+                href={`https://www.npmjs.com/search?q=${tech.name.toLowerCase()}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-3 px-4 py-3 bg-gray-800/50 rounded-lg hover:bg-gray-700/50 transition-colors group"
+              >
+                <Package className="w-5 h-5 text-gray-400 group-hover:text-blue-400" />
+                <span className="text-gray-300 group-hover:text-blue-400 text-sm">NPM Packages</span>
+                <ExternalLink className="w-4 h-4 text-gray-500 ml-auto" />
+              </a>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

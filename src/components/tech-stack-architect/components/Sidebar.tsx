@@ -1,118 +1,138 @@
 "use client"
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Technology } from '../techDataFetcher';
 import { TechStack } from '../stackUtils';
-import { Save, Download, Image, Trash2 } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 interface SidebarProps {
   technologies: Record<string, Technology[]>;
   selectedCategory: string;
   onCategoryChange: (category: string) => void;
-  onSaveStack: () => void;
-  onExportJson: () => void;
-  onExportImage: () => void;
   savedStacks: TechStack[];
   onLoadStack: (stack: TechStack) => void;
-  onDeleteStack: (stackId: string) => void;
+  onDeleteStack: (id: string) => void;
 }
 
-const Sidebar = ({
+const Sidebar: React.FC<SidebarProps> = ({
   technologies,
   selectedCategory,
   onCategoryChange,
-  onSaveStack,
-  onExportJson,
-  onExportImage,
   savedStacks,
   onLoadStack,
   onDeleteStack,
-}: SidebarProps) => {
+}) => {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredTechnologies = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return technologies[selectedCategory] || [];
+    }
+
+    const query = searchQuery.toLowerCase();
+    return Object.values(technologies)
+      .flat()
+      .filter(
+        tech =>
+          tech.name.toLowerCase().includes(query) ||
+          tech.type.toLowerCase().includes(query) ||
+          (tech.description?.toLowerCase() || '').includes(query)
+      );
+  }, [technologies, selectedCategory, searchQuery]);
+
   return (
-    <div className="w-64 bg-gray-50 dark:bg-gray-900 p-4 border-r dark:border-gray-700 overflow-y-auto">
-      <div className="space-y-4">
-        {/* Stack controls */}
-        <div className="flex space-x-2">
-          <button
-            onClick={onSaveStack}
-            className="p-2 rounded-md bg-blue-500 hover:bg-blue-600 text-white"
-            title="Save Stack"
-          >
-            <Save className="w-4 h-4" />
-          </button>
-          <button
-            onClick={onExportJson}
-            className="p-2 rounded-md bg-green-500 hover:bg-green-600 text-white"
-            title="Export as JSON"
-          >
-            <Download className="w-4 h-4" />
-          </button>
-          <button
-            onClick={onExportImage}
-            className="p-2 rounded-md bg-purple-500 hover:bg-purple-600 text-white"
-            title="Export as Image"
-          >
-            <Image className="w-4 h-4" />
-          </button>
+    <div className="w-64 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white flex flex-col h-[calc(100vh-6rem)] overflow-hidden rounded-l-lg">
+      {/* Search and Categories */}
+      <div className="p-3 border-b border-gray-200 dark:border-gray-700 space-y-2 flex-shrink-0">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search technologies..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white pl-9 pr-3 py-1.5 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm border border-gray-200 dark:border-gray-600"
+          />
+          <Search className="absolute left-2.5 top-2 h-4 w-4 text-gray-400" />
         </div>
 
-        {/* Saved stacks */}
-        {savedStacks.length > 0 && (
-          <div className="space-y-2">
-            <h3 className="font-medium text-gray-900 dark:text-gray-100">Saved Stacks</h3>
-            {savedStacks.map(stack => (
-              <div
-                key={stack.id}
-                className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded-md"
-              >
-                <button
-                  onClick={() => onLoadStack(stack)}
-                  className="text-sm text-gray-900 dark:text-gray-100 hover:text-blue-500"
-                >
-                  {stack.name}
-                </button>
-                <button
-                  onClick={() => onDeleteStack(stack.id)}
-                  className="text-red-500 hover:text-red-600"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Category selector */}
         <select
-          className="w-full p-2 border dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           value={selectedCategory}
           onChange={(e) => onCategoryChange(e.target.value)}
+          className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-2 py-1.5 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm border border-gray-200 dark:border-gray-600"
         >
           {Object.keys(technologies).map((category) => (
             <option key={category} value={category}>
-              {category.charAt(0).toUpperCase() + category.slice(1).replace('_', ' ')}
+              {category.charAt(0).toUpperCase() + category.slice(1).replace(/_/g, ' ')}
             </option>
           ))}
         </select>
+      </div>
 
-        {/* Technology list */}
-        <div className="space-y-2">
-          {technologies[selectedCategory]?.map((tech) => (
+      {/* Technologies List */}
+      <div className="flex-1 overflow-y-auto py-2 px-3 border-b border-gray-200 dark:border-gray-700 space-y-1.5">
+        <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+          {searchQuery ? 'Search Results' : selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1).replace(/_/g, ' ')}
+        </div>
+        {filteredTechnologies.length > 0 ? (
+          filteredTechnologies.map((tech) => (
             <div
               key={tech.name}
-              className="flex items-center p-2 bg-white dark:bg-gray-800 rounded-md shadow-sm cursor-move hover:shadow-md transition-shadow"
+              className="bg-white dark:bg-gray-700 px-2 py-1.5 rounded cursor-move hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors group border border-gray-200 dark:border-gray-600"
               draggable
-              onDragStart={(event) => {
-                event.dataTransfer.setData('application/reactflow', 'techNode');
-                event.dataTransfer.setData('application/techname', tech.name);
-                event.dataTransfer.setData('application/techicon', tech.icon);
-                event.dataTransfer.setData('application/tech', JSON.stringify(tech));
+              onDragStart={(e) => {
+                e.dataTransfer.setData('application/reactflow', tech.type);
+                e.dataTransfer.setData('application/techname', tech.name);
+                e.dataTransfer.setData('application/techicon', tech.icon || '');
+                e.dataTransfer.setData('application/tech', JSON.stringify(tech));
               }}
             >
-              <img src={tech.icon} alt={tech.name} className="w-6 h-6 mr-2" />
-              <span className="text-sm text-gray-900 dark:text-gray-100">{tech.name}</span>
+              <div className="flex items-center">
+                {tech.icon && (
+                  <img
+                    src={tech.icon}
+                    alt={tech.name}
+                    className="w-5 h-5 mr-2"
+                  />
+                )}
+                <span className="group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors text-sm">{tech.name}</span>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+            No technologies found
+          </div>
+        )}
+      </div>
+
+      {/* Saved Stacks */}
+      <div className="flex-shrink-0 p-3">
+        <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Saved Stacks</div>
+        <div className="space-y-1.5">
+          {savedStacks.map((stack) => (
+            <div
+              key={stack.id}
+              className="bg-white dark:bg-gray-700 px-2 py-1.5 rounded flex items-center justify-between group border border-gray-200 dark:border-gray-600"
+            >
+              <button
+                onClick={() => onLoadStack(stack)}
+                className="text-sm text-gray-900 dark:text-white hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
+              >
+                {stack.name}
+              </button>
+              <button
+                onClick={() => onDeleteStack(stack.id)}
+                className="text-gray-400 hover:text-red-500 transition-colors"
+              >
+                ×
+              </button>
             </div>
           ))}
+          {savedStacks.length === 0 && (
+            <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">
+              No saved stacks
+            </div>
+          )}
         </div>
       </div>
     </div>

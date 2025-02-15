@@ -62,7 +62,12 @@ const FlowArea = ({
         id: `${type}-${nodes.length + 1}`,
         type: 'techNode',
         position,
-        data: { name, icon, type, tech: JSON.parse(tech) },
+        data: { 
+          name, 
+          icon, 
+          type, 
+          tech: tech ? JSON.parse(tech) : null 
+        },
       };
 
       onNodesChange([{ type: 'add', item: newNode }]);

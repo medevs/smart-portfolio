@@ -11,14 +11,14 @@ export class HistoryManager {
   private current: HistoryState;
   private maxHistory: number;
 
-  constructor(initialState: HistoryState, maxHistory: number = 50) {
+  constructor(initialState: HistoryState = { nodes: [], edges: [] }, maxHistory: number = 50) {
     this.current = initialState;
     this.maxHistory = maxHistory;
   }
 
   public pushState(state: HistoryState) {
     this.past.push({ ...this.current });
-    this.current = state;
+    this.current = { ...state };
     this.future = [];
 
     // Limit history size
@@ -45,6 +45,12 @@ export class HistoryManager {
     return nextState;
   }
 
+  public clear() {
+    this.past = [];
+    this.future = [];
+    this.current = { nodes: [], edges: [] };
+  }
+
   public canUndo(): boolean {
     return this.past.length > 0;
   }
@@ -54,6 +60,6 @@ export class HistoryManager {
   }
 
   public getCurrentState(): HistoryState {
-    return this.current;
+    return { ...this.current };
   }
 }

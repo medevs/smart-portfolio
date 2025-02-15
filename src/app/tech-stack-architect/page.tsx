@@ -24,13 +24,13 @@ const TechStackArchitectPage = () => {
         <div className="text-center space-y-4">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">Tech Stack Architect</h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Design, validate, and visualize your project&apos;s technology stack with our interactive tool.
+            Design, validate, and visualize your project&apos;s technology stack with this interactive tool.
             Drag and drop components to create your perfect architecture.
           </p>
         </div>
 
         {/* Main content area */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg">
           <StackBuilder />
         </div>
 
