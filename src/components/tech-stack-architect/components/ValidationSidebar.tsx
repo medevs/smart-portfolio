@@ -41,11 +41,11 @@ const ValidationSidebar: React.FC<ValidationSidebarProps> = ({ result, onShowDet
           </ul>
         </div>
 
-        {result.compatibility_issues.length > 0 && (
+        {result.compatibility_matrix.incompatible_pairs.length > 0 && (
           <div>
             <h4 className="font-medium text-orange-600 mb-1">Issues</h4>
             <ul className="text-sm list-disc pl-4">
-              {result.compatibility_issues.slice(0, 2).map((issue, i) => (
+              {result.compatibility_matrix.incompatible_pairs.slice(0, 2).map((issue, i) => (
                 <li key={i}>{issue}</li>
               ))}
             </ul>
