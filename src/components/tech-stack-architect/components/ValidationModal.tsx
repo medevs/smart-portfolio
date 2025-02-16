@@ -76,11 +76,11 @@ const ValidationModal: React.FC<ValidationModalProps> = ({ result, onClose }) =>
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-900 text-white rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto relative">
+    <div className="fixed inset-0 bg-black/60 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto relative shadow-lg border border-gray-200 dark:border-gray-800">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
         >
           <XCircle size={24} />
         </button>
@@ -89,58 +89,52 @@ const ValidationModal: React.FC<ValidationModalProps> = ({ result, onClose }) =>
         <div className="flex items-start mb-6">
           {result.isValid !== undefined ? (
             result.isValid ? (
-              <CheckCircle2 className="text-green-500 mr-3 mt-1" size={24} />
+              <CheckCircle2 className="text-green-600 dark:text-green-500 mr-3 mt-1" size={24} />
             ) : (
-              <AlertCircle className="text-yellow-500 mr-3 mt-1" size={24} />
+              <AlertCircle className="text-yellow-600 dark:text-yellow-500 mr-3 mt-1" size={24} />
             )
-          ) : (
-            <></>
-          )}
+          ) : null}
           <div>
-            <h2 className="text-2xl font-bold">{result.isValid !== undefined ? (result.isValid ? 'Valid Stack' : 'Stack Needs Review') : ''}</h2>
-            <p className="text-gray-400 mt-1">{result.message || ''}</p>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+              {result.isValid !== undefined ? (result.isValid ? 'Valid Stack' : 'Stack Needs Review') : ''}
+            </h2>
+            <p className="text-gray-700 dark:text-gray-200 mt-1 font-medium">{result.message || ''}</p>
           </div>
         </div>
 
         {/* Score Overview */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8 p-4 bg-gray-800 rounded-lg">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
           <ScoreGauge score={scores.overall} label="Overall" />
           <ScoreGauge score={scores.performance} label="Performance" />
           <ScoreGauge score={scores.scalability} label="Scalability" />
           <ScoreGauge score={scores.maintainability} label="Maintainability" />
           <ScoreGauge score={scores.security} label="Security" />
-          <ScoreGauge score={scores.cost_efficiency} label="Cost" />
+          <ScoreGauge score={scores.cost_efficiency} label="Cost Efficiency" />
         </div>
 
         {/* Analysis Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div className="space-y-6">
             {/* Strengths & Weaknesses */}
-            <div className="bg-gray-800/50 rounded-lg p-4">
-              <h3 className="text-lg font-semibold mb-3 flex items-center">
+            <div className="bg-gray-50 dark:bg-gray-800/90 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold mb-3 flex items-center text-gray-900 dark:text-white">
                 <Zap className="mr-2 text-green-500" size={20} />
                 Key Analysis
               </h3>
               <div className="space-y-4">
                 <div>
-                  <h4 className="text-green-500 font-medium mb-2">Strengths</h4>
-                  <ul className="space-y-1">
-                    {analysis.strengths.map((strength, i) => (
-                      <li key={i} className="flex items-start">
-                        <ChevronRight className="mr-1 mt-1 flex-shrink-0" size={16} />
-                        <span className="text-gray-300">{strength}</span>
-                      </li>
+                  <h4 className="font-medium text-green-600 dark:text-green-400 mb-2">Strengths</h4>
+                  <ul className="list-disc list-inside space-y-1">
+                    {analysis.strengths.map((strength, index) => (
+                      <li key={index} className="text-gray-700 dark:text-gray-200">{strength}</li>
                     ))}
                   </ul>
                 </div>
                 <div>
-                  <h4 className="text-yellow-500 font-medium mb-2">Areas for Improvement</h4>
-                  <ul className="space-y-1">
-                    {analysis.weaknesses.map((weakness, i) => (
-                      <li key={i} className="flex items-start">
-                        <ChevronRight className="mr-1 mt-1 flex-shrink-0" size={16} />
-                        <span className="text-gray-300">{weakness}</span>
-                      </li>
+                  <h4 className="font-medium text-red-600 dark:text-red-400 mb-2">Areas for Improvement</h4>
+                  <ul className="list-disc list-inside space-y-1">
+                    {analysis.weaknesses.map((weakness, index) => (
+                      <li key={index} className="text-gray-700 dark:text-gray-200">{weakness}</li>
                     ))}
                   </ul>
                 </div>
@@ -148,25 +142,25 @@ const ValidationModal: React.FC<ValidationModalProps> = ({ result, onClose }) =>
             </div>
 
             {/* Compatibility */}
-            <div className="bg-gray-800/50 rounded-lg p-4">
-              <h3 className="text-lg font-semibold mb-3 flex items-center">
+            <div className="bg-gray-50 dark:bg-gray-800/90 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold mb-3 flex items-center text-gray-900 dark:text-white">
                 <Shield className="mr-2 text-blue-500" size={20} />
                 Compatibility Analysis
               </h3>
               <div className="space-y-4">
                 <div>
-                  <h4 className="text-green-500 font-medium mb-2">Compatible Combinations</h4>
-                  <ul className="space-y-1">
-                    {compatibility.compatible_pairs.map((pair, i) => (
-                      <li key={i} className="text-gray-300">{pair}</li>
+                  <h4 className="font-medium text-blue-600 dark:text-blue-400 mb-2">Compatible Combinations</h4>
+                  <ul className="list-disc list-inside space-y-1">
+                    {compatibility.compatible_pairs.map((pair, index) => (
+                      <li key={index} className="text-gray-700 dark:text-gray-200">{pair}</li>
                     ))}
                   </ul>
                 </div>
                 <div>
-                  <h4 className="text-red-500 font-medium mb-2">Potential Issues</h4>
-                  <ul className="space-y-1">
-                    {compatibility.incompatible_pairs.map((pair, i) => (
-                      <li key={i} className="text-gray-300">{pair}</li>
+                  <h4 className="font-medium text-yellow-600 dark:text-yellow-400 mb-2">Potential Issues</h4>
+                  <ul className="list-disc list-inside space-y-1">
+                    {compatibility.incompatible_pairs.map((pair, index) => (
+                      <li key={index} className="text-gray-700 dark:text-gray-200">{pair}</li>
                     ))}
                   </ul>
                 </div>
@@ -176,45 +170,45 @@ const ValidationModal: React.FC<ValidationModalProps> = ({ result, onClose }) =>
 
           <div className="space-y-6">
             {/* Technical Assessment */}
-            <div className="bg-gray-800/50 rounded-lg p-4">
-              <h3 className="text-lg font-semibold mb-3 flex items-center">
+            <div className="bg-gray-50 dark:bg-gray-800/90 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold mb-3 flex items-center text-gray-900 dark:text-white">
                 <BarChart2 className="mr-2 text-purple-500" size={20} />
                 Technical Assessment
               </h3>
               <div className="space-y-4">
-                <div>
-                  <h4 className="text-blue-400 font-medium mb-1">Performance Impact</h4>
-                  <p className="text-gray-300 text-sm">{analysis.performance_impact}</p>
+                <div className="space-y-2">
+                  <h4 className="font-medium text-purple-600 dark:text-purple-400">Performance Impact</h4>
+                  <p className="text-gray-700 dark:text-gray-200">{analysis.performance_impact}</p>
                 </div>
-                <div>
-                  <h4 className="text-blue-400 font-medium mb-1">Scalability</h4>
-                  <p className="text-gray-300 text-sm">{analysis.scalability_assessment}</p>
+                <div className="space-y-2">
+                  <h4 className="font-medium text-purple-600 dark:text-purple-400">Scalability</h4>
+                  <p className="text-gray-700 dark:text-gray-200">{analysis.scalability_assessment}</p>
                 </div>
-                <div>
-                  <h4 className="text-blue-400 font-medium mb-1">Security</h4>
-                  <p className="text-gray-300 text-sm">{analysis.security_considerations}</p>
+                <div className="space-y-2">
+                  <h4 className="font-medium text-purple-600 dark:text-purple-400">Security</h4>
+                  <p className="text-gray-700 dark:text-gray-200">{analysis.security_considerations}</p>
                 </div>
               </div>
             </div>
 
             {/* Business Impact */}
-            <div className="bg-gray-800/50 rounded-lg p-4">
-              <h3 className="text-lg font-semibold mb-3 flex items-center">
+            <div className="bg-gray-50 dark:bg-gray-800/90 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold mb-3 flex items-center text-gray-900 dark:text-white">
                 <DollarSign className="mr-2 text-yellow-500" size={20} />
                 Business Impact
               </h3>
               <div className="space-y-4">
-                <div>
-                  <h4 className="text-yellow-400 font-medium mb-1">Cost Efficiency</h4>
-                  <p className="text-gray-300 text-sm">{analysis.cost_efficiency}</p>
+                <div className="space-y-2">
+                  <h4 className="font-medium text-yellow-600 dark:text-yellow-400">Cost Efficiency</h4>
+                  <p className="text-gray-700 dark:text-gray-200">{analysis.cost_efficiency}</p>
                 </div>
-                <div>
-                  <h4 className="text-yellow-400 font-medium mb-1">Learning Curve</h4>
-                  <p className="text-gray-300 text-sm">{analysis.learning_curve}</p>
+                <div className="space-y-2">
+                  <h4 className="font-medium text-yellow-600 dark:text-yellow-400">Learning Curve</h4>
+                  <p className="text-gray-700 dark:text-gray-200">{analysis.learning_curve}</p>
                 </div>
-                <div>
-                  <h4 className="text-yellow-400 font-medium mb-1">Community Support</h4>
-                  <p className="text-gray-300 text-sm">{analysis.community_support}</p>
+                <div className="space-y-2">
+                  <h4 className="font-medium text-yellow-600 dark:text-yellow-400">Community Support</h4>
+                  <p className="text-gray-700 dark:text-gray-200">{analysis.community_support}</p>
                 </div>
               </div>
             </div>
@@ -222,42 +216,33 @@ const ValidationModal: React.FC<ValidationModalProps> = ({ result, onClose }) =>
         </div>
 
         {/* Recommendations */}
-        <div className="bg-gray-800/50 rounded-lg p-4">
-          <h3 className="text-lg font-semibold mb-3 flex items-center">
+        <div className="bg-gray-50 dark:bg-gray-800/90 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold mb-3 flex items-center text-gray-900 dark:text-white">
             <BookOpen className="mr-2 text-indigo-500" size={20} />
             Recommendations
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-3 gap-4">
             <div>
-              <h4 className="text-indigo-400 font-medium mb-2">Immediate Actions</h4>
-              <ul className="space-y-1">
-                {recommendations.immediate_actions.map((action, i) => (
-                  <li key={i} className="flex items-start">
-                    <ChevronRight className="mr-1 mt-1 flex-shrink-0" size={16} />
-                    <span className="text-gray-300 text-sm">{action}</span>
-                  </li>
+              <h4 className="font-medium text-indigo-600 dark:text-indigo-400 mb-2">Immediate Actions</h4>
+              <ul className="list-disc list-inside space-y-1">
+                {recommendations.immediate_actions.map((action, index) => (
+                  <li key={index} className="text-gray-700 dark:text-gray-200">{action}</li>
                 ))}
               </ul>
             </div>
             <div>
-              <h4 className="text-indigo-400 font-medium mb-2">Future Considerations</h4>
-              <ul className="space-y-1">
-                {recommendations.future_considerations.map((consideration, i) => (
-                  <li key={i} className="flex items-start">
-                    <ChevronRight className="mr-1 mt-1 flex-shrink-0" size={16} />
-                    <span className="text-gray-300 text-sm">{consideration}</span>
-                  </li>
+              <h4 className="font-medium text-indigo-600 dark:text-indigo-400 mb-2">Future Considerations</h4>
+              <ul className="list-disc list-inside space-y-1">
+                {recommendations.future_considerations.map((consideration, index) => (
+                  <li key={index} className="text-gray-700 dark:text-gray-200">{consideration}</li>
                 ))}
               </ul>
             </div>
             <div>
-              <h4 className="text-indigo-400 font-medium mb-2">Alternative Technologies</h4>
-              <ul className="space-y-1">
-                {recommendations.alternative_technologies.map((tech, i) => (
-                  <li key={i} className="flex items-start">
-                    <ChevronRight className="mr-1 mt-1 flex-shrink-0" size={16} />
-                    <span className="text-gray-300 text-sm">{tech}</span>
-                  </li>
+              <h4 className="font-medium text-indigo-600 dark:text-indigo-400 mb-2">Alternative Technologies</h4>
+              <ul className="list-disc list-inside space-y-1">
+                {recommendations.alternative_technologies.map((tech, index) => (
+                  <li key={index} className="text-gray-700 dark:text-gray-200">{tech}</li>
                 ))}
               </ul>
             </div>

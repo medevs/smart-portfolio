@@ -209,7 +209,7 @@ const ProjectsGrid: React.FC = () => {
           placeholder="Search projects..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full px-4 py-2 rounded-lg bg-gray-800/50 border border-gray-700/50 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent"
+          className="w-full px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-950 text-gray-800 dark:text-gray-100 border border-gray-300 dark:border-gray-800 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 dark:focus:ring-primary/20 focus:border-primary dark:focus:border-primary transition-colors"
         />
       </div>
 
@@ -219,17 +219,18 @@ const ProjectsGrid: React.FC = () => {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as 'stars' | 'updated' | 'forks' | 'name')}
-            className="px-3 py-1.5 rounded-lg bg-gray-800/50 border border-gray-700/50 text-gray-100"
+            className="px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-950 text-gray-800 dark:text-gray-100 border border-gray-300 dark:border-gray-800 hover:border-primary/50 dark:hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20 dark:focus:ring-primary/20 focus:border-primary dark:focus:border-primary transition-colors"
+            style={{ WebkitAppearance: 'none', MozAppearance: 'none' }}
           >
-            <option value="updated">Last Updated</option>
-            <option value="stars">Stars</option>
-            <option value="forks">Forks</option>
-            <option value="name">Name</option>
+            <option value="updated" className="bg-gray-100 dark:bg-gray-950 text-gray-800 dark:text-gray-100">Last Updated</option>
+            <option value="stars" className="bg-gray-100 dark:bg-gray-950 text-gray-800 dark:text-gray-100">Stars</option>
+            <option value="forks" className="bg-gray-100 dark:bg-gray-950 text-gray-800 dark:text-gray-100">Forks</option>
+            <option value="name" className="bg-gray-100 dark:bg-gray-950 text-gray-800 dark:text-gray-100">Name</option>
           </select>
           
           <button
             onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-            className="p-1.5 rounded-lg bg-gray-800/50 border border-gray-700/50 text-gray-100 w-8 h-8 flex items-center justify-center"
+            className="p-2 rounded-lg bg-gray-100 dark:bg-gray-950 text-gray-800 dark:text-gray-100 border border-gray-300 dark:border-gray-800 hover:bg-gray-200 dark:hover:bg-gray-900 hover:border-primary/50 dark:hover:border-primary/50 w-9 h-9 flex items-center justify-center transition-colors"
           >
             {sortOrder === 'asc' ? '↑' : '↓'}
           </button>
@@ -238,11 +239,16 @@ const ProjectsGrid: React.FC = () => {
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="px-3 py-1.5 rounded-lg bg-gray-800/50 border border-gray-700/50 text-gray-100"
+          className="px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-950 text-gray-800 dark:text-gray-100 border border-gray-300 dark:border-gray-800 hover:border-primary/50 dark:hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20 dark:focus:ring-primary/20 focus:border-primary dark:focus:border-primary transition-colors"
+          style={{ WebkitAppearance: 'none', MozAppearance: 'none' }}
         >
-          <option value="All">All Technologies</option>
+          <option value="All" className="bg-gray-100 dark:bg-gray-950 text-gray-800 dark:text-gray-100">All Technologies</option>
           {technologies.filter(tech => tech !== 'All').map((tech) => (
-            <option key={tech} value={tech}>
+            <option 
+              key={tech} 
+              value={tech} 
+              className="bg-gray-100 dark:bg-gray-950 text-gray-800 dark:text-gray-100"
+            >
               {tech}
             </option>
           ))}
@@ -250,7 +256,7 @@ const ProjectsGrid: React.FC = () => {
 
         <button
           onClick={resetAllFilters}
-          className="px-3 py-1.5 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 border border-gray-700/50 text-gray-300 flex items-center gap-1.5 transition-colors"
+          className="px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-950 text-gray-800 dark:text-gray-100 border border-gray-300 dark:border-gray-800 hover:bg-gray-200 dark:hover:bg-gray-900 hover:border-primary/50 dark:hover:border-primary/50 flex items-center gap-1.5 transition-colors"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
