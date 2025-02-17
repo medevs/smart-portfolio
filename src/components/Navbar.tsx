@@ -11,7 +11,7 @@ const navLinks = [
   { name: "Home", href: "/", icon: Home },
   { name: "Projects", href: "/projects", icon: Briefcase },
   { name: "Blog", href: "/blog", icon: BookOpen },
-  { name: "Tech Stack", href: "/tech-stack-architect", icon: Box },
+  { name: "Stack Architect", href: "/tech-stack-architect", icon: Box },
 ];
 
 export default function Navbar() {
