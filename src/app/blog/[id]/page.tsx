@@ -93,15 +93,22 @@ export default async function BlogPost({ params }: BlogPostProps) {
             </span>
           ))}
         </div>
-        <h2 className="text-2xl font-bold mb-4">Related Posts</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {relatedPosts.map((post) => (
-            <div key={post.id} className="border p-4 rounded">
-              <h3 className="font-semibold">{post.title}</h3>
-              <p className="text-sm text-gray-600">{post.date}</p>
+        {relatedPosts.length > 0 && (
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold mb-4">Related Posts</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {relatedPosts.map((post) => (
+                <a 
+                className="block rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-gray-700 p-6"
+                key={post.id}
+                href={`/blog/${post.id}`}>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{post.title}</h3>
+                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{post.description}</p>
+                </a>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        )}
       </div>
       <div className="mt-16 pt-8 border-t border-gray-200 dark:border-gray-700">
         <h3 className="text-2xl font-semibold mb-6 text-gray-900 dark:text-white">About the Author</h3>
@@ -116,7 +123,7 @@ export default async function BlogPost({ params }: BlogPostProps) {
           <div>
             <h4 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">{postData.author}</h4>
             <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-              A passionate writer and technologist exploring the intersections of code and creativity.
+              A passionate Software Developer and technologist exploring the intersections of code and creativity.
             </p>
           </div>
         </div>

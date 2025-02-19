@@ -1,12 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ReactFlowInstance, Node, Edge, ReactFlowProvider } from 'reactflow';
+import { ReactFlowInstance, ReactFlowProvider } from 'reactflow';
 import 'reactflow/dist/style.css';
 
 // Data and Utils
 import { fetchTechData } from './techDataFetcher';
 import { saveStack, loadStacks, deleteStack, TechStack } from './stackUtils';
-import { validateStack } from './compatibilityUtils';
-import { stackTemplates, StackTemplate } from './stackTemplates';
+import { StackTemplate } from './stackTemplates';
 import { HistoryManager } from './historyManager';
 import { Technology } from './techDataFetcher';
 import { generateStackId } from './utils';
