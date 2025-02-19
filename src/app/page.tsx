@@ -3,7 +3,6 @@ import AboutMe from '@/components/AboutMe';
 import Technologies from '@/components/Technologies';
 import FeaturedProjects from '@/components/FeaturedProjects';
 import LatestPosts from '@/components/LatestPosts';
-import InteractiveCode from '@/components/InteractiveCode';
 import GitHubStats from '@/components/GitHubStats';
 import Timeline from '@/components/Timeline';
 import Languages from '@/components/Languages';
