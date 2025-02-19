@@ -1,8 +1,8 @@
 "use client"
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Monitor } from 'lucide-react';
 
 // Dynamically import the StackBuilder component to avoid SSR issues with ReactFlow
 const StackBuilder = dynamic(
@@ -18,6 +18,21 @@ const StackBuilder = dynamic(
 );
 
 const TechStackArchitectPage = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Check on mount
+    checkMobile();
+    
+    // Check on resize
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
     <main className="min-h-screen p-4 max-w-7xl mx-auto">
       <div className="container mx-auto px-4 py-6 space-y-6">
@@ -32,7 +47,29 @@ const TechStackArchitectPage = () => {
 
         {/* Main content area */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-          <StackBuilder />
+          {isMobile ? (
+            <div className="p-8 text-center">
+              <div className="flex justify-center mb-6">
+                <Monitor className="h-20 w-20 text-blue-500" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                Desktop View Required
+              </h2>
+              <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-md mx-auto">
+                The Tech Stack Architect tool is designed for larger screens to provide the best possible experience for building and visualizing technology stacks.
+              </p>
+              <div className="space-y-2">
+                <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  Please switch to a desktop or tablet device
+                </div>
+                <div className="text-xs text-gray-400 dark:text-gray-500">
+                  Recommended screen width: 768px or larger
+                </div>
+              </div>
+            </div>
+          ) : (
+            <StackBuilder />
+          )}
         </div>
 
         {/* Features section */}
