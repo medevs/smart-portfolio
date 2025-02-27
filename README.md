@@ -4,26 +4,40 @@ This project is a modern portfolio website built with Next.js 14, featuring AI-p
 
 ## Key Features
 
-- AI-powered chatbot for interactive portfolio exploration
-- Tech stack architecture visualization and validation
-- Dynamic GitHub statistics and contribution graphs
-- Fully responsive design with dark/light mode
-- Vector search capabilities using Supabase pgvector
-- Real-time data updates and caching with Upstash Redis
+- **AI-powered Chatbot**: Interactive portfolio exploration using LangChain and OpenAI, with vector search capabilities through Supabase pgvector
+- **Tech Stack Architecture Visualization**: Interactive drag-and-drop interface to design and validate technology stacks with AI feedback
+- **GitHub Integration**: Dynamic GitHub statistics, featured projects, and contribution graphs
+- **Responsive Design**: Fully responsive UI with dark/light mode support using Tailwind CSS and NextUI components
+- **Blog System**: Markdown-based blog with reading time estimation and syntax highlighting
+- **Performance Optimized**: Server components, static generation, and efficient caching strategies
 
 ## Tech Stack
 
 - **Framework**: Next.js 14 with App Router
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS, NextUI
-- **Database**: Supabase (with pgvector)
+- **Styling**: Tailwind CSS, NextUI components, Framer Motion
+- **Database**: Supabase with pgvector for vector embeddings
 - **AI/ML**: 
-  - Langchain
-  - OpenAI
-  - D3.js for visualizations
-- **Authentication**: NextAuth.js
-- **Caching**: Upstash Redis
-- **Deployment**: Vercel
+  - LangChain for chat functionality
+  - OpenAI for embeddings and completions
+  - ReactFlow for tech stack visualization
+- **GitHub API**: Octokit for repository and contribution data
+- **UI Components**: 
+  - React Icons
+  - Lucide React
+  - Recharts for data visualization
+- **Content**: 
+  - React Markdown
+  - Gray Matter for frontmatter parsing
+  - React Syntax Highlighter
+
+## Features Summary
+
+1. **Home Page**: Featuring about section, skills, timeline, and featured projects
+2. **Tech Stack Architect**: Interactive tool for designing and validating technology stacks with AI feedback
+3. **Blog System**: Markdown-based blog with filtering capabilities
+4. **AI Chatbot**: Conversational interface for exploring the portfolio
+5. **GitHub Integration**: Dynamic display of repositories and statistics
 
 ## Prerequisites
 
@@ -58,15 +72,13 @@ Before you begin, ensure you have:
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
    # GitHub
-   GITHUB_ACCESS_TOKEN=your_github_token
+   NEXT_PUBLIC_GITHUB_TOKEN=your_github_token
 
-   # Upstash Redis
-   UPSTASH_REDIS_REST_URL=your_upstash_redis_url
-   UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_token
+   # Optional: Add any other API keys needed for additional features
    ```
 
 4. **Database Setup**
-   Run the following SQL in your Supabase SQL editor:
+   Run the following SQL in your Supabase SQL editor to set up vector search:
    ```sql
    -- Enable the pgvector extension
    create extension if not exists vector;
@@ -127,26 +139,33 @@ Before you begin, ensure you have:
 ```
 /
 ├── src/
-│   ├── app/              # Next.js app router pages
+│   ├── app/              # Next.js app router pages and API routes
+│   │   ├── api/          # API endpoints for chat, GitHub, and tech stack validation
+│   │   ├── blog/         # Blog pages and post rendering
+│   │   ├── projects/     # Project showcase pages
+│   │   └── tech-stack-architect/ # Tech stack visualization tool
 │   ├── components/       # React components
-│   │   ├── tech-stack-architect/  # Tech stack visualization
-│   │   ├── github-stats/          # GitHub integration
-│   │   └── chat/                  # AI chatbot components
-│   ├── lib/             # Utility functions and API clients
-│   └── styles/          # Global styles and Tailwind
-├── public/              # Static assets
-├── scripts/             # Build and generation scripts
-├── posts/              # Blog posts and content
-└── utils/              # Helper functions
+│   │   ├── tech-stack-architect/  # Tech stack visualization components
+│   │   ├── ui/           # Reusable UI components
+│   │   └── AIChatBox.tsx # AI chatbot implementation
+│   ├── lib/              # Utility functions and API clients
+│   │   ├── github.ts     # GitHub API integration
+│   │   └── supabase.ts   # Supabase and vector store setup
+│   └── data/             # Static data and configuration
+├── public/               # Static assets
+├── scripts/              # Build and generation scripts
+├── posts/                # Blog posts in markdown format
+└── utils/                # Helper functions
 ```
 
 ## Available Scripts
 
 - `npm run dev` - Start development server
-- `npm run build` - Build for production
+- `npm run build` - Build for production (includes content generation)
 - `npm run generate` - Generate static content
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
+
 
 ## Contributing
 
