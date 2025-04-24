@@ -1,6 +1,6 @@
 # Smart Portfolio with AI Integration
 
-This project is a modern portfolio website built with Next.js 14, featuring AI-powered components including a chatbot, tech stack validation, and interactive visualizations.
+This project is a modern portfolio website built with Next.js 15, featuring AI-powered components including a chatbot, tech stack validation, and interactive visualizations.
 
 ## Key Features
 
@@ -13,7 +13,7 @@ This project is a modern portfolio website built with Next.js 14, featuring AI-p
 
 ## Tech Stack
 
-- **Framework**: Next.js 14 with App Router
+- **Framework**: Next.js 15 with App Router
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS, NextUI components, Framer Motion
 - **Database**: Supabase with pgvector for vector embeddings
@@ -41,7 +41,6 @@ This project is a modern portfolio website built with Next.js 14, featuring AI-p
 
 ## Prerequisites
 
-Before you begin, ensure you have:
 - Node.js 18.17 or later
 - npm or yarn package manager
 - Git
@@ -53,14 +52,12 @@ Before you begin, ensure you have:
    git clone https://github.com/medevs/smart-portfolio.git
    cd smart-portfolio
    ```
-
 2. **Install Dependencies**
    ```bash
    npm install
    # or
    yarn install
    ```
-
 3. **Environment Setup**
    Create a `.env.local` file in the root directory with the following variables:
    ```env
@@ -76,7 +73,6 @@ Before you begin, ensure you have:
 
    # Optional: Add any other API keys needed for additional features
    ```
-
 4. **Database Setup**
    Run the following SQL in your Supabase SQL editor to set up vector search:
    ```sql
@@ -118,7 +114,6 @@ Before you begin, ensure you have:
    end;
    $$;
    ```
-
 5. **Development Server**
    ```bash
    npm run dev
@@ -126,7 +121,6 @@ Before you begin, ensure you have:
    yarn dev
    ```
    The application will be available at `http://localhost:3000`
-
 6. **Build for Production**
    ```bash
    npm run build
@@ -136,44 +130,14 @@ Before you begin, ensure you have:
 
 ## Project Structure
 
-```
-/
-├── src/
-│   ├── app/              # Next.js app router pages and API routes
-│   │   ├── api/          # API endpoints for chat, GitHub, and tech stack validation
-│   │   ├── blog/         # Blog pages and post rendering
-│   │   ├── projects/     # Project showcase pages
-│   │   └── tech-stack-architect/ # Tech stack visualization tool
-│   ├── components/       # React components
-│   │   ├── tech-stack-architect/  # Tech stack visualization components
-│   │   ├── ui/           # Reusable UI components
-│   │   └── AIChatBox.tsx # AI chatbot implementation
-│   ├── lib/              # Utility functions and API clients
-│   │   ├── github.ts     # GitHub API integration
-│   │   └── supabase.ts   # Supabase and vector store setup
-│   └── data/             # Static data and configuration
-├── public/               # Static assets
-├── scripts/              # Build and generation scripts
-├── posts/                # Blog posts in markdown format
-└── utils/                # Helper functions
-```
+For a detailed breakdown of the project’s folders and files, see [Project-Structure.md](./Project-Structure.md).
 
 ## Available Scripts
 
 - `npm run dev` - Start development server
-- `npm run build` - Build for production (includes content generation)
-- `npm run generate` - Generate static content
+- `npm run build` - Build for production
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
-
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ## License
 
