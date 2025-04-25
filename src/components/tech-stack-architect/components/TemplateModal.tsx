@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react';
-import { XCircle } from 'lucide-react';
+import { X } from 'lucide-react';
 import { stackTemplates, StackTemplate } from '../stackTemplates';
 
 interface TemplateModalProps {
@@ -24,7 +24,7 @@ const TemplateModal: React.FC<TemplateModalProps> = ({
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
         >
-          <XCircle size={24} />
+          <X size={24} />
         </button>
 
         <h2 className="text-2xl font-bold mb-6 text-white">Load Template</h2>
