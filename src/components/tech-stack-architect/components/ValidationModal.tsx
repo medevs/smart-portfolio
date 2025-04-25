@@ -1,5 +1,5 @@
 import React from 'react';
-import { XCircle, CheckCircle2, AlertCircle, ChevronRight, Zap, Shield, BarChart2, DollarSign, BookOpen, Users } from 'lucide-react';
+import { X, CheckCircle, AlertCircle, ChevronRight, Zap, Shield, BarChart2, DollarSign, BookOpen, Users } from 'lucide-react';
 import { ValidationResult } from '../aiValidation';
 
 interface ValidationModalProps {
@@ -82,14 +82,14 @@ const ValidationModal: React.FC<ValidationModalProps> = ({ result, onClose }) =>
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
         >
-          <XCircle size={24} />
+          <X size={24} />
         </button>
 
         {/* Header */}
         <div className="flex items-start mb-6">
           {result.isValid !== undefined ? (
             result.isValid ? (
-              <CheckCircle2 className="text-green-600 dark:text-green-500 mr-3 mt-1" size={24} />
+              <CheckCircle className="text-green-600 dark:text-green-500 mr-3 mt-1" size={24} />
             ) : (
               <AlertCircle className="text-yellow-600 dark:text-yellow-500 mr-3 mt-1" size={24} />
             )
