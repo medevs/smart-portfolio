@@ -22,6 +22,10 @@
     "@radix-ui/react-slot": "^1.2.0",
     "@supabase/supabase-js": "^2.49.4",
     "@tailwindcss/typography": "^0.5.10",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/react-syntax-highlighter": "^15.5.10",
     "ai": "^4.3.9",
     "autoprefixer": "^10.4.16",
     "class-variance-authority": "^0.7.0",
@@ -52,10 +56,6 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "@types/react-syntax-highlighter": "^15.5.10",
     "depcheck": "^1.4.7",
     "eslint": "^8",
     "eslint-config-next": "15.3.1",
