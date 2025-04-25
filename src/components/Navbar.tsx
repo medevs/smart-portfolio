@@ -1,6 +1,5 @@
 "use client"
 
-
 import React, { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -18,26 +17,26 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md">
-      <nav className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
-            <Link href="/" className="text-3xl font-bold">
+            <Link href="/" className="text-3xl font-bold text-foreground">
               ⵣ
             </Link>
           </div>
           <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-4">
+            <div className="ml-10 flex items-center space-x-4">
               {navLinks.map((link) => (
                 <Link
                   key={link.name}
                   href={link.href}
-                  className="relative px-3 py-2 rounded-md text-sm font-medium   group flex items-center"
+                  className="group flex items-center rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:text-foreground"
                 >
-                  <link.icon className="w-5 h-5 mr-2" />
+                  <link.icon className="mr-2 h-5 w-5" />
                   {link.name}
                   <motion.span
-                    className="absolute bottom-0 left-0 w-full h-0.5  transform scale-x-0 group-hover:scale-x-100 "
+                    className="absolute bottom-0 left-0 h-0.5 w-full scale-x-0 transform bg-primary group-hover:scale-x-100"
                     layoutId="underline"
                   />
                 </Link>
@@ -46,14 +45,13 @@ export default function Navbar() {
           </div>
           <div className="hidden md:block">
             <div className="ml-4 flex items-center md:ml-6">
-
               <ThemeToggle />
             </div>
           </div>
-          <div className="flex -mr-2 md:hidden">
+          <div className="-mr-2 flex md:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-inset focus:ring-gray-500"
+              className="inline-flex items-center justify-center rounded-md p-2 text-foreground focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
             >
               <span className="sr-only">Open main menu</span>
               {!isOpen ? (
@@ -72,25 +70,26 @@ export default function Navbar() {
 
       {isOpen && (
         <motion.div
-          className="md:hidden backdrop-blur-md  bg-opacity-70"
+          className="md:hidden bg-background/95 backdrop-blur-md"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+          <div className="space-y-1 px-2 pb-3 pt-2 sm:px-3">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
-                className="px-3 py-2 rounded-md text-base font-medium flex items-center"
+                className="flex items-center rounded-md px-3 py-2 text-base font-medium text-foreground hover:bg-muted/50"
+                onClick={() => setIsOpen(false)}
               >
-                <link.icon className="w-5 h-5 mr-2" />
+                <link.icon className="mr-2 h-5 w-5" />
                 {link.name}
               </Link>
             ))}
           </div>
-          <div className="pt-4 pb-3 border-t border-gray-200">
-            <div className="flex items-center px-5">
+          <div className="border-t border-border pb-3 pt-4">
+            <div className="flex items-center justify-center px-5">
               <ThemeToggle />
             </div>
           </div>

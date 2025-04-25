@@ -8,19 +8,22 @@ import Link from "next/link";
 import { ArrowLeft, Calendar, Clock, Tag, User } from "lucide-react";
 import heroImage from "@/assets/Ahmed.jpeg";
 
-interface BlogPostProps {
-  params: { id: string };
-}
-
+// This matches the return type of getAllPostIds
 export async function generateStaticParams() {
   const paths = await getAllPostIds();
-  return paths.map((path) => ({
-    id: path.params.id,
-  }));
+  return paths;
 }
 
-export async function generateMetadata({ params }: BlogPostProps): Promise<Metadata> {
-  const postData = await getPostData(params.id);
+// Use the same params type for metadata generation
+export async function generateMetadata({ 
+  params 
+}: { 
+  params: { id: string } 
+}): Promise<Metadata> {
+  // In Next.js 15, we need to await params before accessing properties
+  const { id } = await params;
+  const postData = await getPostData(id);
+  
   if (!postData) {
     return {
       title: 'Post Not Found',
@@ -39,14 +42,23 @@ async function getRelatedPosts(currentPostId: string, category: string) {
     .slice(0, 3);
 }
 
-export default async function BlogPost({ params }: BlogPostProps) {
-  const postData = await getPostData(params.id);
+// Add searchParams parameter to match Next.js expectations
+export default async function BlogPost({ 
+  params,
+  searchParams
+}: { 
+  params: { id: string },
+  searchParams?: Record<string, string | string[]>
+}) {
+  // In Next.js 15, we need to await params before accessing properties
+  const { id } = await params;
+  const postData = await getPostData(id);
 
   if (!postData) {
     notFound();
   }
 
-  const relatedPosts = await getRelatedPosts(params.id, postData.category);
+  const relatedPosts = await getRelatedPosts(id, postData.category);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">

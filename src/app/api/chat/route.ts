@@ -1,5 +1,3 @@
-// File: src/lib/chatbot.ts
-
 import { getVectorStore } from "@/lib/supabase";
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
 import {
@@ -8,14 +6,17 @@ import {
   PromptTemplate,
 } from "@langchain/core/prompts";
 import { ChatOpenAI } from "@langchain/openai";
-import {
-  LangChainStream,
-  StreamingTextResponse,
-  Message as VercelChatMessage,
-} from "ai";
-import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
-import { createHistoryAwareRetriever } from "langchain/chains/history_aware_retriever";
-import { createRetrievalChain } from "langchain/chains/retrieval";
+import { Message as VercelChatMessage } from "ai";
+import { RunnableSequence } from "@langchain/core/runnables";
+import { StringOutputParser } from "@langchain/core/output_parsers";
+
+function sanitizeResponse(response: string): string {
+  if (!response) return "";
+  
+  return response
+    .replace(/<\/?[^>]+(>|$)/g, "")
+    .trim();
+}
 
 export async function POST(req: Request) {
   try {
@@ -32,97 +33,58 @@ export async function POST(req: Request) {
 
     const currentMessageContent = messages[messages.length - 1].content;
 
-    const { stream, handlers } = LangChainStream();
-
-    const retrievalModel = new ChatOpenAI({
-      modelName: "gpt-4-1106-preview",
-      streaming: false,
-    });
-
-    const streamingModel = new ChatOpenAI({
+    const model = new ChatOpenAI({
       modelName: "gpt-4-1106-preview",
       streaming: true,
-      callbacks: [handlers],
     });
 
-    const retriever = (await getVectorStore()).asRetriever({
-      k: 5
-    });
+    const vectorStore = await getVectorStore();
+    const retriever = vectorStore.asRetriever();
 
-    const rephrasePrompt = ChatPromptTemplate.fromMessages([
-      new MessagesPlaceholder("chat_history"),
-      ["user", "{input}"],
-      [
-        "user",
-        "Given the above conversation, generate a search query to look up information relevant to the current question. " +
-        "Focus on keywords related to skills, experiences, projects, or specific details about the portfolio owner. " +
-        "Only return the query and no other text.",
-      ],
-    ]);
+    // Step 1: Retrieve context
+    const getContext = async (input: { input: string; chat_history: any }) => {
+      const docs = await retriever.getRelevantDocuments(input.input);
+      return {
+        context: docs.map((doc: any) => doc.pageContent).join("\n\n"),
+        question: input.input,
+        chat_history: input.chat_history,
+      };
+    };
 
-    const historyAwareRetrieverChain = await createHistoryAwareRetriever({
-      llm: retrievalModel,
-      retriever,
-      rephrasePrompt,
-    });
+    // Step 2: Prompt template
+    const prompt = ChatPromptTemplate.fromTemplate(
+      `Given the following context and conversation, answer the user's question.\n\nContext:\n{context}\n\nConversation:\n{chat_history}\n\nQuestion:\n{question}\n\nAnswer:`
+    );
 
-    const prompt = ChatPromptTemplate.fromMessages([
-      [
-        "system",
-        `You are a chatbot representing me on my personal portfolio website. Your responses must be:
-        1. Personal - Always speak in first person ("I", "my", "me")
-        2. Detailed but concise - Provide meaningful information without being overwhelming
-        3. Based strictly on the provided context
-        4. Engaging and professional
+    // Compose the chain using .pipe()
+    const chain = getContext
+      // @ts-expect-error: .pipe is not typed for functions, but works at runtime
+      .pipe(prompt)
+      .pipe(model)
+      .pipe(new StringOutputParser());
 
-        Rules:
-        - Always respond as if you are me, the portfolio owner
-        - When information is not in the context, suggest relevant portfolio sections:
-          - For projects: "You can explore more of my projects on the [Projects](/projects) page"
-          - For skills: "Check out my [GitHub](https://github.com/medevs) for an overview of my technical skills"
-          - For experience: "Visit my [LinkedIn](https://www.linkedin.com/in/ahmed-oublihi/) for my complete professional history"
-        - Include 2-3 relevant details when discussing skills or experiences
-        - Use markdown links to reference portfolio sections or external profiles
-        - Keep responses informative but conversational
-        
-        Context:
-        {context}`,
-      ],
-      new MessagesPlaceholder("chat_history"),
-      ["user", "{input}"],
-    ]);
-
-    const combineDocsChain = await createStuffDocumentsChain({
-      llm: streamingModel,
-      prompt,
-      documentPrompt: PromptTemplate.fromTemplate(
-        "{page_content}",
-      ),
-      documentSeparator: "\n--------\n",
-    });
-
-    const retrievalChain = await createRetrievalChain({
-      combineDocsChain,
-      retriever: historyAwareRetrieverChain,
-    });
-
-    const resultPromise = retrievalChain.invoke({
+    // Stream the output
+    const stream = await chain.stream({
       input: currentMessageContent,
       chat_history: chatHistory,
     });
 
-    const response = new StreamingTextResponse(stream);
-
-    resultPromise.then((result) => {
-      if (!result.answer) {
-        handlers.handleLLMError(new Error("No response generated"), "no_response");
-        return;
-      }
-    }).catch((error) => {
-      handlers.handleLLMError(error, "chain_error");
+    const encoder = new TextEncoder();
+    const readable = new ReadableStream({
+      async start(controller) {
+        for await (const chunk of stream) {
+          controller.enqueue(encoder.encode(chunk));
+        }
+        controller.close();
+      },
     });
 
-    return response;
+    return new Response(readable, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Transfer-Encoding": "chunked",
+      },
+    });
   } catch (error: any) {
     console.error("Chat API error:", error);
     
@@ -136,12 +98,4 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
-}
-
-function sanitizeResponse(response: string): string {
-  if (!response) return "";
-  
-  return response
-    .replace(/<\/?[^>]+(>|$)/g, "")
-    .trim();
 }

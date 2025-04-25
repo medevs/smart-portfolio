@@ -1,10 +1,26 @@
 import dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 
-import { DocumentInterface } from "@langchain/core/documents";
-import { JSONLoader } from "langchain/document_loaders/fs/json";
+import { Document } from "langchain/document";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { getEmbeddingsCollection, getVectorStore } from "../src/lib/supabase";
+import fs from "fs";
+
+function loadResumeData(filePath: string, sections: string[]): Document[] {
+  const raw = fs.readFileSync(filePath, "utf-8");
+  const json = JSON.parse(raw);
+  const docs: Document[] = [];
+  for (const section of sections) {
+    const key = section.replace("/", "");
+    if (json[key]) {
+      docs.push(new Document({
+        pageContent: JSON.stringify(json[key]),
+        metadata: { source: section }
+      }));
+    }
+  }
+  return docs;
+}
 
 async function generateEmbeddings() {
   try {
@@ -21,15 +37,13 @@ async function generateEmbeddings() {
 
     // Load resume data
     console.log("Loading resume data...");
-    const loader = new JSONLoader(
+    const docs = loadResumeData(
       "src/data/resumeDtata.json",
       ["/personalInfo", "/experience", "/education", "/skills", "/projects", "/interests", "/languages"]
     );
-
-    const docs = await loader.load();
     console.log(`Loaded ${docs.length} documents`);
 
-    const processedDocs = docs.map((doc): DocumentInterface => {
+    const processedDocs = docs.map((doc: Document): Document => {
       const section = doc.metadata.source.replace('/', '');
       let content = doc.pageContent;
       
@@ -48,13 +62,13 @@ async function generateEmbeddings() {
         content = `Interests: ${content}`;
       }
 
-      return {
+      return new Document({
         pageContent: content,
         metadata: {
           source: "resume",
           section: section
         },
-      };
+      });
     });
 
     console.log("Splitting documents...");

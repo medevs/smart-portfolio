@@ -16,7 +16,7 @@ const client = createClient(
 // Function to get a vector store instance from an existing index
 export async function getVectorStore() {
   return new SupabaseVectorStore(
-    new OpenAIEmbeddings({ modelName: "text-embedding-3-small" }), 
+    new OpenAIEmbeddings({ modelName: "text-embedding-3-small" }),
     {
       client,
       tableName: 'documents',

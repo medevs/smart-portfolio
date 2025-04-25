@@ -13,23 +13,21 @@ export default function ThemeToggle() {
   }, []);
 
   if (!mounted) {
-    return null;
+    return <div className="h-6 w-6" aria-hidden="true" />;
   }
 
   return (
     <button 
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="relative h-6 w-6"
+      className="rounded-md p-2 inline-flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary"
+      aria-label="Toggle theme"
       suppressHydrationWarning
     >
-      <Sun
-        size={24}
-        className="absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
-      />
-      <Moon
-        size={24}
-        className="rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
-      />
+      {theme === 'dark' ? (
+        <Sun className="h-5 w-5 text-foreground" />
+      ) : (
+        <Moon className="h-5 w-5 text-foreground" />
+      )}
     </button>
   );
 }
