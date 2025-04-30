@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     const currentMessageContent = messages[messages.length - 1].content;
 
     const model = new ChatOpenAI({
-      modelName: "gpt-4-1106-preview",
+      modelName: "gpt-4.1-nano",
       streaming: true,
     });
 
@@ -53,15 +53,35 @@ export async function POST(req: Request) {
 
     // Step 2: Prompt template
     const prompt = ChatPromptTemplate.fromTemplate(
-      `Given the following context and conversation, answer the user's question.\n\nContext:\n{context}\n\nConversation:\n{chat_history}\n\nQuestion:\n{question}\n\nAnswer:`
+      `You are Ahmed Oublihi, a full-stack developer. Answer as if you're talking directly to a potential client or collaborator.
+
+      Guidelines:
+      - Speak in first person ("I", "me", "my"), like a real person.
+      - Be friendly, confident, and a bit informal—show personality!
+      - ALWAYS answer questions about my portfolio, skills, experience, contact info, or why hire me.
+      - Use info from my resume and portfolio for richer answers.
+      - Format your answers in clean Markdown (use bullet points, links, bold, etc. where helpful).
+      - If the question is not about my portfolio/skills/education/experience/contact info, politely say: "I'm here to talk about my work, skills, or experience—ask me anything about that!"
+
+      Context:
+      {context}
+
+      Conversation:
+      {chat_history}
+
+      Question:
+      {question}
+
+      Answer (Markdown, friendly, personal, and concise):`
     );
 
-    // Compose the chain using .pipe()
-    const chain = getContext
-      // @ts-expect-error: .pipe is not typed for functions, but works at runtime
-      .pipe(prompt)
-      .pipe(model)
-      .pipe(new StringOutputParser());
+    // Compose the chain using RunnableSequence
+    const chain = RunnableSequence.from([
+      getContext,
+      prompt,
+      model,
+      new StringOutputParser(),
+    ]);
 
     // Stream the output
     const stream = await chain.stream({
@@ -72,7 +92,50 @@ export async function POST(req: Request) {
     const encoder = new TextEncoder();
     const readable = new ReadableStream({
       async start(controller) {
-        for await (const chunk of stream) {
+        let lastChunkEndsWithSpace = false;
+        let insideCodeBlock = false;
+        let insideListItem = false;
+        
+        for await (let chunk of stream) {
+          if (typeof chunk !== 'string') {
+            chunk = String(chunk ?? '');
+          }
+          
+          // Check if we're entering or exiting a code block
+          if (chunk.includes('```')) {
+            insideCodeBlock = !insideCodeBlock;
+          }
+          
+          // Check if we're in a list item
+          if (chunk.match(/^\s*[-*+]\s/) || chunk.match(/^\s*\d+\.\s/)) {
+            insideListItem = true;
+          } else if (chunk.includes('\n')) {
+            insideListItem = false;
+          }
+          
+          // Only replace line breaks with spaces if not in a code block
+          if (!insideCodeBlock) {
+            chunk = chunk.replace(/[\r\n]+/g, ' ');
+          }
+          
+          // If the previous chunk didn't end with space and this chunk doesn't start with space or punctuation,
+          // add a space to preserve word boundaries (unless we're in a code block)
+          if (!insideCodeBlock && 
+              !lastChunkEndsWithSpace && 
+              chunk.length > 0 && 
+              !chunk.startsWith(' ') && 
+              !chunk.match(/^[.,!?;:)]/) && 
+              chunk.trim() !== '') {
+            chunk = ' ' + chunk;
+          }
+          
+          // Remember if this chunk ends with a space for the next iteration
+          lastChunkEndsWithSpace = chunk.endsWith(' ');
+          
+          // Skip empty chunks
+          if (!chunk.trim() && !chunk.includes(' ')) continue;
+          
+          // Send the chunk
           controller.enqueue(encoder.encode(chunk));
         }
         controller.close();
@@ -82,7 +145,8 @@ export async function POST(req: Request) {
     return new Response(readable, {
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
-        "Transfer-Encoding": "chunked",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
       },
     });
   } catch (error: any) {

@@ -5,6 +5,24 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 
+// --- Markdown Cleanup Helper ---
+export function cleanMarkdown(md: string): string {
+  return md
+    // Fix bold/italic with extra spaces: ** text ** -> **text**
+    .replace(/\*\*\s+([^\*]+?)\s+\*\*/g, '**$1**')
+    .replace(/\*\s+([^\*]+?)\s+\*/g, '*$1*')
+    .replace(/__\s+([^_]+?)\s+__/g, '__$1__')
+    .replace(/_\s+([^_]+?)\s+_/g, '_$1_')
+    // Fix list items with extra spaces: -   text -> - text
+    .replace(/^-\s{2,}/gm, '- ')
+    // Remove unwanted leading/trailing whitespace on each line
+    .replace(/^\s+|\s+$/gm, '')
+    // Remove double spaces before punctuation
+    .replace(/\s+([,.!?;:])/g, '$1')
+    // Optionally, collapse multiple blank lines
+    .replace(/\n{3,}/g, '\n\n');
+}
+
 interface AIChatBoxProps {
   open: boolean;
   onClose: () => void;
@@ -22,6 +40,7 @@ export default function AIChatBox({ open, onClose }: AIChatBoxProps) {
     error,
   } = useChat({
     api: '/api/chat',
+    streamProtocol: 'text', // Use plain text streaming
     onResponse: (response) => {
       if (!response.ok) {
         console.error('Response error:', response.statusText);
@@ -199,7 +218,7 @@ function ChatMessage({ message: { role, content } }: ChatMessageProps) {
                 className="mt-3 list-inside list-decimal first:mt-0"
               />
             ),
-            li: ({ node, ...props }) => <li {...props} className="mt-1" />,
+            li: ({ node, ...props }) => <li {...props} className="mt-1 ml-6" />,
             blockquote: ({ node, ...props }) => (
               <blockquote {...props} className="text-primary" />
             ),
@@ -253,9 +272,8 @@ function ChatMessage({ message: { role, content } }: ChatMessageProps) {
             ),
           }}
         >
-          {content}
+          {cleanMarkdown(content)}
         </ReactMarkdown>
-
       </div>
     </div>
   );
