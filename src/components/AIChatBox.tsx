@@ -5,23 +5,6 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 
-// --- Markdown Cleanup Helper ---
-export function cleanMarkdown(md: string): string {
-  return md
-    // Fix bold/italic with extra spaces: ** text ** -> **text**
-    .replace(/\*\*\s+([^\*]+?)\s+\*\*/g, '**$1**')
-    .replace(/\*\s+([^\*]+?)\s+\*/g, '*$1*')
-    .replace(/__\s+([^_]+?)\s+__/g, '__$1__')
-    .replace(/_\s+([^_]+?)\s+_/g, '_$1_')
-    // Fix list items with extra spaces: -   text -> - text
-    .replace(/^-\s{2,}/gm, '- ')
-    // Remove unwanted leading/trailing whitespace on each line
-    .replace(/^\s+|\s+$/gm, '')
-    // Remove double spaces before punctuation
-    .replace(/\s+([,.!?;:])/g, '$1')
-    // Optionally, collapse multiple blank lines
-    .replace(/\n{3,}/g, '\n\n');
-}
 
 interface AIChatBoxProps {
   open: boolean;
@@ -272,7 +255,7 @@ function ChatMessage({ message: { role, content } }: ChatMessageProps) {
             ),
           }}
         >
-          {cleanMarkdown(content)}
+          {content}
         </ReactMarkdown>
       </div>
     </div>
