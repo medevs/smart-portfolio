@@ -60,6 +60,7 @@ export interface Project {
   status: "active" | "building" | "planned";
   url?: string;
   tech: string[];
+  image?: string;
 }
 
 // Experience
