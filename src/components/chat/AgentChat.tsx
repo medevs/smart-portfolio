@@ -89,15 +89,15 @@ export default function AgentChat({ open, onClose }: AgentChatProps) {
         className={cn(
           "flex flex-col h-[500px] rounded-2xl overflow-hidden",
           // Glassmorphism
-          "bg-slate-900/70 backdrop-blur-2xl",
-          "border border-white/10",
+          "bg-surface-elevated/90 backdrop-blur-2xl",
+          "border border-card-theme-border",
           "shadow-chat-panel",
           // Glow effect
           "ring-1 ring-terminal-green/20"
         )}
       >
         {/* Header with animated gradient */}
-        <div className="relative px-4 py-3 bg-gradient-to-r from-slate-800/50 to-slate-900/50 flex-shrink-0">
+        <div className="relative px-4 py-3 bg-gradient-to-r from-surface-secondary/50 to-surface-elevated/50 flex-shrink-0">
           {/* Animated gradient border */}
           <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-terminal-green/50 to-transparent" />
 
@@ -109,10 +109,10 @@ export default function AgentChat({ open, onClose }: AgentChatProps) {
                   <Bot size={18} className="text-terminal-green" />
                 </div>
                 {/* Online indicator */}
-                <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-terminal-green animate-pulse ring-2 ring-slate-900/50" />
+                <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-terminal-green animate-pulse ring-2 ring-surface-primary/50" />
               </div>
               <div>
-                <h3 className="text-sm font-medium text-white">Ahmed&apos;s AI</h3>
+                <h3 className="text-sm font-medium text-foreground">Ahmed&apos;s AI</h3>
                 <p className="text-xs text-terminal-muted">Always online</p>
               </div>
             </div>
@@ -120,7 +120,7 @@ export default function AgentChat({ open, onClose }: AgentChatProps) {
             {/* Close button */}
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg hover:bg-white/10 text-terminal-muted hover:text-white transition-colors"
+              className="p-1.5 rounded-lg hover:bg-white/10 text-terminal-muted hover:text-foreground transition-colors"
             >
               <X size={18} />
             </button>
@@ -150,7 +150,7 @@ export default function AgentChat({ open, onClose }: AgentChatProps) {
               </div>
 
               <div className="space-y-2">
-                <p className="text-white font-medium text-sm">
+                <p className="text-foreground font-medium text-sm">
                   Hey! I&apos;m Ahmed&apos;s AI Agent
                 </p>
                 <p className="text-terminal-muted text-xs max-w-[280px]">
@@ -159,7 +159,7 @@ export default function AgentChat({ open, onClose }: AgentChatProps) {
               </div>
 
               {/* Easter egg hint */}
-              <div className="px-3 py-2 rounded-lg bg-white/5 border border-white/10">
+              <div className="px-3 py-2 rounded-lg bg-white/5 border border-card-theme-border">
                 <p className="text-xs text-terminal-muted">
                   <span className="text-terminal-cyan">Pro tip:</span>{" "}
                   Try typing{" "}
@@ -184,7 +184,7 @@ export default function AgentChat({ open, onClose }: AgentChatProps) {
                   <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-terminal-green/20 to-terminal-cyan/20 flex items-center justify-center border border-terminal-green/30">
                     <Bot size={16} className="text-terminal-green animate-pulse" />
                   </div>
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10">
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-card-theme-border">
                     <span className="inline-flex gap-1">
                       <span
                         className="w-1.5 h-1.5 rounded-full bg-terminal-green animate-bounce"

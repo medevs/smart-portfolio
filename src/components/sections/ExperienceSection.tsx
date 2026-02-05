@@ -30,7 +30,7 @@ export default function ExperienceSection() {
         <div className="w-6 h-6 rounded-lg bg-purple-500/10 border border-purple-500/30 flex items-center justify-center">
           <Briefcase size={12} className="text-purple-400" />
         </div>
-        <h2 className="text-sm font-semibold text-white">Experience</h2>
+        <h2 className="text-sm font-semibold text-foreground">Experience</h2>
       </motion.div>
 
       {/* Timeline - Scrollable */}
@@ -48,14 +48,14 @@ export default function ExperienceSection() {
               className="relative pl-4"
             >
               {/* Timeline dot */}
-              <div className="absolute left-0 top-2 w-2.5 h-2.5 rounded-full bg-slate-900 border-2 border-terminal-green" />
+              <div className="absolute left-0 top-2 w-2.5 h-2.5 rounded-full bg-surface-primary border-2 border-terminal-green" />
 
               {/* Content */}
-              <div className="group p-2 rounded-lg bg-white/5 border border-white/10 hover:border-terminal-green/30 transition-all">
+              <div className="group p-2 rounded-lg bg-white/5 border border-card-theme-border hover:border-terminal-green/30 transition-all">
                 {/* Header */}
                 <div className="flex items-start justify-between gap-1 mb-1">
                   <div className="min-w-0">
-                    <h3 className="text-[11px] font-semibold text-white group-hover:text-terminal-green transition-colors truncate">
+                    <h3 className="text-[11px] font-semibold text-foreground group-hover:text-terminal-green transition-colors truncate">
                       {exp.role}
                     </h3>
                     <p className="text-[9px] text-terminal-cyan truncate">
@@ -86,7 +86,7 @@ export default function ExperienceSection() {
                   {exp.tech.slice(0, 3).map((tech) => (
                     <span
                       key={tech}
-                      className="px-1 py-0.5 text-[7px] rounded bg-white/5 border border-white/10 text-terminal-muted"
+                      className="px-1 py-0.5 text-[7px] rounded bg-white/5 border border-card-theme-border text-terminal-muted"
                     >
                       {tech}
                     </span>

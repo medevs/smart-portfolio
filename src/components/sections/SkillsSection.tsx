@@ -28,7 +28,7 @@ export default function SkillsSection() {
         <div className="w-6 h-6 rounded-lg bg-terminal-green/10 border border-terminal-green/30 flex items-center justify-center">
           <Code2 size={12} className="text-terminal-green" />
         </div>
-        <h2 className="text-sm font-semibold text-white">Skills</h2>
+        <h2 className="text-sm font-semibold text-foreground">Skills</h2>
       </motion.div>
 
       {/* Category Tabs */}
@@ -46,7 +46,7 @@ export default function SkillsSection() {
                 ${
                   isActive
                     ? "bg-terminal-green/20 border-terminal-green/50 text-terminal-green"
-                    : "bg-white/5 border-white/10 text-terminal-muted hover:text-white"
+                    : "bg-white/5 border-card-theme-border text-terminal-muted hover:text-foreground"
                 }
                 border
               `}
@@ -80,14 +80,14 @@ export default function SkillsSection() {
                     transition={{ delay: index * 0.03 }}
                   >
                     <div className="flex items-center justify-between mb-0.5">
-                      <span className="text-[11px] text-white">
+                      <span className="text-[11px] text-foreground">
                         {skill.name}
                       </span>
                       <span className="text-[9px] text-terminal-muted">
                         {skill.level}%
                       </span>
                     </div>
-                    <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-1 bg-foreground/10 rounded-full overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${skill.level}%` }}
@@ -109,7 +109,7 @@ export default function SkillsSection() {
                   <span
                     key={skill.name}
                     className="px-2 py-1 rounded text-[10px] font-medium
-                               bg-white/5 border border-white/10 text-terminal-muted"
+                               bg-white/5 border border-card-theme-border text-terminal-muted"
                   >
                     {skill.name}
                   </span>

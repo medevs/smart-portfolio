@@ -24,7 +24,7 @@ export default function TerminalWindow({
         // Glassmorphism base
         "rounded-xl overflow-hidden",
         "bg-terminal-bg/60 backdrop-blur-xl",
-        "border border-white/10",
+        "border border-card-theme-border",
         "shadow-glass",
         // Hover glow effect
         "hover:border-terminal-green/30",

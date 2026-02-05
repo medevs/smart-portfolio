@@ -34,6 +34,23 @@
     --terminal-text: 222 84% 5%;
     --terminal-muted: 215 16% 47%;
     --terminal-glow: 142 71% 45%;
+
+    /* Surface colors - Light mode */
+    --surface-primary: 0 0% 100%;
+    --surface-secondary: 210 20% 98%;
+    --surface-elevated: 210 16% 95%;
+
+    /* Card colors - Light mode */
+    --card-bg: 0 0% 100%;
+    --card-border: 214 32% 91%;
+
+    /* Glass colors - Light mode */
+    --glass-bg: 210 20% 98% / 0.8;
+    --glass-border: 214 32% 91% / 0.5;
+
+    /* Products section - Light mode */
+    --products-bg: 210 16% 95%;
+    --products-overlay: 210 16% 95%;
   }
 
   .dark {
@@ -66,6 +83,23 @@
     --terminal-text: 213 31% 91%;
     --terminal-muted: 215 15% 55%;
     --terminal-glow: 142 71% 45%;
+
+    /* Surface colors - Dark mode */
+    --surface-primary: 222 47% 6%;
+    --surface-secondary: 222 47% 8%;
+    --surface-elevated: 222 47% 10%;
+
+    /* Card colors - Dark mode */
+    --card-bg: 222 47% 8%;
+    --card-border: 0 0% 100% / 0.1;
+
+    /* Glass colors - Dark mode */
+    --glass-bg: 222 47% 6% / 0.7;
+    --glass-border: 0 0% 100% / 0.1;
+
+    /* Products section - Dark mode */
+    --products-bg: 215 28% 5%;
+    --products-overlay: 215 28% 5%;
   }
 }
 
@@ -276,13 +310,13 @@
 
 /* Glassmorphism utilities */
 .glass {
-  background: rgba(15, 23, 42, 0.6);
+  background: hsl(var(--glass-bg));
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
 
 .glass-border {
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid hsl(var(--glass-border));
 }
 
 /* Gradient border glow */
@@ -553,8 +587,8 @@
 /* Bento card base */
 .bento-card {
   @apply rounded-xl overflow-hidden;
-  @apply bg-slate-800/50 backdrop-blur-xl;
-  @apply border border-white/10;
+  @apply bg-card-theme-bg backdrop-blur-xl;
+  @apply border border-card-theme-border;
   @apply hover:border-terminal-green/30;
   @apply transition-all duration-300;
   min-height: 0;
@@ -562,5 +596,5 @@
 
 .bento-card:hover {
   @apply shadow-lg;
-  box-shadow: 0 20px 40px -20px rgba(0, 255, 136, 0.15);
+  box-shadow: 0 20px 40px -20px hsl(var(--terminal-green) / 0.15);
 }

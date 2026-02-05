@@ -19,7 +19,7 @@ const commands = [
 
 export default function QuickActions({ onCommand, disabled }: QuickActionsProps) {
   return (
-    <div className="flex flex-wrap gap-2 px-4 py-3 border-b border-white/5 bg-slate-900/30">
+    <div className="flex flex-wrap gap-2 px-4 py-3 border-b border-white/5 bg-surface-elevated/30">
       {commands.map(({ command, label, icon: Icon }) => (
         <button
           key={command}
@@ -29,10 +29,10 @@ export default function QuickActions({ onCommand, disabled }: QuickActionsProps)
             "flex items-center gap-1.5 px-3 py-1.5",
             "rounded-full text-xs font-medium",
             "bg-white/5 hover:bg-white/10",
-            "border border-white/10 hover:border-terminal-green/30",
+            "border border-card-theme-border hover:border-terminal-green/30",
             "text-terminal-muted hover:text-terminal-green",
             "transition-all duration-200",
-            "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white/5 disabled:hover:border-white/10 disabled:hover:text-terminal-muted"
+            "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white/5 disabled:hover:border-card-theme-border disabled:hover:text-terminal-muted"
           )}
         >
           <Icon size={12} />

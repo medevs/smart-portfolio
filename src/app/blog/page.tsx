@@ -26,7 +26,7 @@ export default async function BlogPage() {
             <span>cd ~/portfolio</span>
           </Link>
 
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Blog
           </h1>
           <p className="text-terminal-muted max-w-2xl">
@@ -42,7 +42,7 @@ export default async function BlogPage() {
           {categories.map((category) => (
             <span
               key={category}
-              className="px-3 py-1.5 rounded-full text-sm font-medium bg-white/5 text-terminal-muted border border-white/10 hover:border-terminal-cyan/30 hover:text-terminal-cyan transition-colors cursor-pointer"
+              className="px-3 py-1.5 rounded-full text-sm font-medium bg-white/5 text-terminal-muted border border-card-theme-border hover:border-terminal-cyan/30 hover:text-terminal-cyan transition-colors cursor-pointer"
             >
               {category} ({posts.filter(p => p.category === category).length})
             </span>
@@ -55,18 +55,18 @@ export default async function BlogPage() {
             href={`/blog/${posts[0].id}`}
             className="block mb-8 group"
           >
-            <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-white/10 hover:border-terminal-green/30 transition-all duration-300">
+            <div className="relative rounded-2xl overflow-hidden bg-card-theme-bg border border-card-theme-border hover:border-terminal-green/30 transition-all duration-300">
               <div className="absolute inset-0 bg-gradient-to-br from-terminal-green/5 to-terminal-cyan/5 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative p-6 md:p-8">
                 <div className="flex items-center gap-2 mb-4">
                   <span className="px-2 py-1 rounded-full text-xs font-medium bg-terminal-green/20 text-terminal-green">
                     Featured
                   </span>
-                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-white/10 text-terminal-muted">
+                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-foreground/10 text-terminal-muted">
                     {posts[0].category}
                   </span>
                 </div>
-                <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 group-hover:text-terminal-green transition-colors">
+                <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3 group-hover:text-terminal-green transition-colors">
                   {posts[0].title}
                 </h2>
                 <p className="text-terminal-muted mb-4 line-clamp-2 max-w-3xl">
@@ -93,17 +93,17 @@ export default async function BlogPage() {
             <Link
               key={post.id}
               href={`/blog/${post.id}`}
-              className="group block rounded-xl overflow-hidden bg-slate-800/50 border border-white/10 hover:border-terminal-green/30 transition-all duration-300 hover:-translate-y-1"
+              className="group block rounded-xl overflow-hidden bg-card-theme-bg border border-card-theme-border hover:border-terminal-green/30 transition-all duration-300 hover:-translate-y-1"
               style={{ animationDelay: `${index * 50}ms` }}
             >
               <div className="p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <FileText size={16} className="text-terminal-cyan group-hover:text-terminal-green transition-colors" />
-                  <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-white/10 text-terminal-muted">
+                  <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-foreground/10 text-terminal-muted">
                     {post.category}
                   </span>
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-terminal-green transition-colors line-clamp-2">
+                <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-terminal-green transition-colors line-clamp-2">
                   {post.title}
                 </h3>
                 <p className="text-sm text-terminal-muted mb-4 line-clamp-2">
@@ -128,7 +128,7 @@ export default async function BlogPage() {
         {posts.length === 0 && (
           <div className="text-center py-16">
             <FileText size={48} className="mx-auto text-terminal-muted mb-4" />
-            <h3 className="text-lg font-semibold text-white mb-2">No posts yet</h3>
+            <h3 className="text-lg font-semibold text-foreground mb-2">No posts yet</h3>
             <p className="text-terminal-muted">Check back soon for new content!</p>
           </div>
         )}

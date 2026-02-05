@@ -33,7 +33,7 @@ export default function CTASection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="text-base font-bold text-white mb-1"
+          className="text-base font-bold text-foreground mb-1"
         >
           Let&apos;s Work Together
         </motion.h2>
@@ -49,7 +49,7 @@ export default function CTASection() {
             href={`mailto:${personalInfo.email}`}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg
                        bg-gradient-to-r from-terminal-green to-terminal-cyan
-                       text-slate-900 font-medium text-[11px]
+                       text-background dark:text-foreground font-medium text-[11px]
                        hover:shadow-lg hover:shadow-terminal-green/25
                        transition-all duration-300 btn-glow"
           >
@@ -63,8 +63,8 @@ export default function CTASection() {
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg
-                         bg-white/5 border border-white/10
-                         text-white font-medium text-[11px]
+                         bg-white/5 border border-card-theme-border
+                         text-foreground font-medium text-[11px]
                          hover:bg-white/10 hover:border-terminal-cyan/30
                          transition-all duration-300"
             >

@@ -30,8 +30,8 @@ export default function AgentInput({
   }, [autoFocus]);
 
   return (
-    <form onSubmit={onSubmit} className="p-3 border-t border-white/5 bg-slate-900/50">
-      <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10 focus-within:border-terminal-green/30 transition-colors">
+    <form onSubmit={onSubmit} className="p-3 border-t border-white/5 bg-surface-elevated/50">
+      <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-card-theme-border focus-within:border-terminal-green/30 transition-colors">
         {/* Prompt indicator */}
         <span className="text-terminal-green text-sm font-mono">$</span>
 

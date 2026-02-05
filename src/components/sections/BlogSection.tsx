@@ -32,7 +32,7 @@ export default function BlogSection({ posts }: BlogSectionProps) {
           <div className="w-6 h-6 rounded-lg bg-terminal-cyan/10 border border-terminal-cyan/30 flex items-center justify-center">
             <BookOpen size={12} className="text-terminal-cyan" />
           </div>
-          <h2 className="text-sm font-semibold text-white">Blog</h2>
+          <h2 className="text-sm font-semibold text-foreground">Blog</h2>
         </div>
         <Link
           href="/blog"
@@ -55,7 +55,7 @@ export default function BlogSection({ posts }: BlogSectionProps) {
           >
             <Link
               href={`/blog/${post.id}`}
-              className="group block h-full p-2 rounded-lg bg-white/5 border border-white/10 hover:border-terminal-green/30 transition-all"
+              className="group block h-full p-2 rounded-lg bg-white/5 border border-card-theme-border hover:border-terminal-green/30 transition-all"
             >
               <div className="flex items-center gap-1 mb-1">
                 {index === 0 && (
@@ -63,11 +63,11 @@ export default function BlogSection({ posts }: BlogSectionProps) {
                     Latest
                   </span>
                 )}
-                <span className="px-1.5 py-0.5 text-[8px] font-medium rounded-full bg-white/10 text-terminal-muted">
+                <span className="px-1.5 py-0.5 text-[8px] font-medium rounded-full bg-foreground/10 text-terminal-muted">
                   {post.category}
                 </span>
               </div>
-              <h3 className="text-[11px] font-medium text-white mb-1 group-hover:text-terminal-green transition-colors line-clamp-2">
+              <h3 className="text-[11px] font-medium text-foreground mb-1 group-hover:text-terminal-green transition-colors line-clamp-2">
                 {post.title}
               </h3>
               <div className="flex items-center gap-2 text-[9px] text-terminal-muted">

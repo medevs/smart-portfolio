@@ -23,7 +23,7 @@ export default function AgenticSection() {
         <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-terminal-green/20 to-terminal-cyan/20 border border-terminal-green/30 flex items-center justify-center">
           <Sparkles size={12} className="text-terminal-green" />
         </div>
-        <h2 className="text-sm font-semibold text-white">AI Capabilities</h2>
+        <h2 className="text-sm font-semibold text-foreground">AI Capabilities</h2>
       </motion.div>
 
       {/* Feature Cards Grid - Compact */}
@@ -36,14 +36,14 @@ export default function AgenticSection() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.05 + index * 0.05 }}
-              className="group p-2 rounded-lg bg-white/5 border border-white/10 hover:border-terminal-green/30 transition-all"
+              className="group p-2 rounded-lg bg-white/5 border border-card-theme-border hover:border-terminal-green/30 transition-all"
             >
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded flex-shrink-0 bg-white/5 border border-white/10 flex items-center justify-center">
+                <div className="w-6 h-6 rounded flex-shrink-0 bg-white/5 border border-card-theme-border flex items-center justify-center">
                   <Icon size={12} className={cap.iconColor} />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-[11px] font-semibold text-white group-hover:text-terminal-green transition-colors">
+                  <h3 className="text-[11px] font-semibold text-foreground group-hover:text-terminal-green transition-colors">
                     {cap.title}
                   </h3>
                   <p className="text-[9px] text-terminal-muted truncate">

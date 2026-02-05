@@ -66,6 +66,27 @@ const config: Config = {
           muted: "hsl(var(--terminal-muted))",
           glow: "hsl(var(--terminal-glow))",
         },
+        // Surface colors for themed backgrounds
+        surface: {
+          primary: "hsl(var(--surface-primary))",
+          secondary: "hsl(var(--surface-secondary))",
+          elevated: "hsl(var(--surface-elevated))",
+        },
+        // Card theme colors
+        "card-theme": {
+          bg: "hsl(var(--card-bg))",
+          border: "hsl(var(--card-border))",
+        },
+        // Glass effect colors
+        glass: {
+          bg: "hsl(var(--glass-bg))",
+          border: "hsl(var(--glass-border))",
+        },
+        // Products section colors
+        products: {
+          bg: "hsl(var(--products-bg))",
+          overlay: "hsl(var(--products-overlay))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -30,7 +30,7 @@ export default function AgentMessage({ role, content }: AgentMessageProps) {
         className={cn(
           "max-w-[85%] rounded-2xl px-4 py-3 text-sm",
           isAgent
-            ? "bg-white/5 border border-white/10 text-terminal-text rounded-tl-sm"
+            ? "bg-white/5 border border-card-theme-border text-terminal-text rounded-tl-sm"
             : "bg-gradient-to-br from-terminal-green/20 to-terminal-cyan/10 border border-terminal-green/30 text-terminal-text rounded-tr-sm"
         )}
       >
@@ -66,7 +66,7 @@ export default function AgentMessage({ role, content }: AgentMessageProps) {
                 return (
                   <code
                     {...props}
-                    className="px-1.5 py-0.5 rounded bg-slate-800/50 text-terminal-cyan text-xs font-mono"
+                    className="px-1.5 py-0.5 rounded bg-surface-elevated/50 text-terminal-cyan text-xs font-mono"
                   >
                     {children}
                   </code>
@@ -81,7 +81,7 @@ export default function AgentMessage({ role, content }: AgentMessageProps) {
             pre: ({ node, ...props }) => (
               <pre
                 {...props}
-                className="my-2 p-3 rounded-lg bg-slate-900/80 border border-white/10 overflow-x-auto text-xs font-mono"
+                className="my-2 p-3 rounded-lg bg-surface-elevated/80 border border-card-theme-border overflow-x-auto text-xs font-mono"
               />
             ),
             h1: ({ node, ...props }) => (
@@ -103,7 +103,7 @@ export default function AgentMessage({ role, content }: AgentMessageProps) {
               />
             ),
             hr: ({ node, ...props }) => (
-              <hr {...props} className="my-3 border-white/10" />
+              <hr {...props} className="my-3 border-card-theme-border" />
             ),
             blockquote: ({ node, ...props }) => (
               <blockquote

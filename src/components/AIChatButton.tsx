@@ -32,14 +32,14 @@ export default function AIChatButton() {
               "relative flex items-center justify-center w-14 h-14 rounded-full",
               "transition-all duration-300",
               chatBoxOpen
-                ? "bg-slate-800 border-2 border-red-500/50 hover:border-red-500"
+                ? "bg-surface-elevated border-2 border-red-500/50 hover:border-red-500"
                 : "bg-gradient-to-br from-terminal-green to-terminal-cyan shadow-chat-button hover:shadow-chat-button-hover hover:scale-110"
             )}
           >
             {chatBoxOpen ? (
               <X size={24} className="text-red-400" />
             ) : (
-              <Bot size={24} className="text-slate-900" />
+              <Bot size={24} className="text-foreground dark:text-background" />
             )}
           </div>
 

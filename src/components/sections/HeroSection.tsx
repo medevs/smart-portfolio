@@ -106,7 +106,7 @@ export default function HeroSection() {
           transition={{ delay: 0.3 }}
         >
           <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold">
-            <span className="text-white">{heroContent.greeting} </span>
+            <span className="text-foreground">{heroContent.greeting} </span>
             <span className="gradient-text">{personalInfo.firstName}</span>
           </h1>
         </motion.div>
@@ -120,7 +120,7 @@ export default function HeroSection() {
         >
           <p className="text-[11px] sm:text-xs md:text-sm lg:text-base text-terminal-muted font-mono">
             <span className="text-terminal-cyan">&gt;</span>{" "}
-            <span className="text-white">{displayText}</span>
+            <span className="text-foreground">{displayText}</span>
             <span className="inline-block w-0.5 h-3 sm:h-3.5 md:h-4 lg:h-5 ml-0.5 bg-terminal-green animate-cursor-blink align-middle" />
           </p>
         </motion.div>
@@ -182,7 +182,7 @@ export default function HeroSection() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-9 lg:h-9 rounded-md sm:rounded-lg
-                             bg-white/5 border border-white/10
+                             bg-white/5 border border-card-theme-border
                              hover:bg-terminal-green/10 hover:border-terminal-green/50
                              text-terminal-muted hover:text-terminal-green
                              transition-all duration-300 icon-glow"

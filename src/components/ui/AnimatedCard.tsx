@@ -32,8 +32,8 @@ export default function AnimatedCard({
       whileHover={hover ? { y: -4, transition: { duration: 0.2 } } : undefined}
       className={cn(
         "rounded-2xl overflow-hidden",
-        "bg-slate-800/50 backdrop-blur-xl",
-        "border border-white/10",
+        "bg-card-theme-bg backdrop-blur-xl",
+        "border border-card-theme-border",
         hover && "hover:border-terminal-green/30",
         hover && "hover:shadow-lg hover:shadow-terminal-green/5",
         glow && "relative",
