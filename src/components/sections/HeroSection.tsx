@@ -9,7 +9,6 @@ import {
   Twitter,
   MapPin,
   Mail,
-  Download,
   ExternalLink,
   LucideIcon,
 } from "lucide-react";
@@ -196,28 +195,6 @@ export default function HeroSection() {
           })}
         </div>
 
-        {/* Divider */}
-        <div className="h-5 sm:h-6 md:h-7 w-px bg-white/10 hidden sm:block" />
-
-        {/* Download CV Button */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 1.1 }}
-        >
-          <Link
-            href={personalInfo.resumeUrl}
-            target="_blank"
-            className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-md sm:rounded-lg
-                       bg-gradient-to-r from-terminal-green to-terminal-cyan
-                       text-slate-900 font-medium text-[10px] sm:text-xs md:text-sm
-                       hover:shadow-lg hover:shadow-terminal-green/25
-                       transition-all duration-300 btn-glow"
-          >
-            <Download className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" />
-            <span>{heroContent.ctaButtons.primary.text}</span>
-          </Link>
-        </motion.div>
       </motion.div>
     </div>
   );

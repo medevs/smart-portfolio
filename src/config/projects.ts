@@ -2,15 +2,25 @@ import type { Project } from "./types";
 
 export const projects: Project[] = [
   {
-    name: "Smart Portfolio",
-    description: "AI-powered portfolio with RAG chatbot",
+    name: "MentorClone",
+    description:
+      "Transform any YouTube channel into your personal AI mentor. Ask questions and get answers grounded in actual video content, complete with timestamps for verification.",
     status: "active",
-    url: "https://medevsmaker.vercel.app",
-    tech: ["Next.js", "LangChain", "OpenAI", "Supabase"],
+    url: "https://mentorclone.ai",
+    tech: ["React", "Supabase", "OpenAI", "YouTube API"],
+  },
+  {
+    name: "TalkTheDoc",
+    description:
+      "Voice-first AI document assistant. Have natural spoken conversations with PDFs, Word docs, and more — no typing required.",
+    status: "active",
+    url: "https://talkthedoc.com",
+    tech: ["Next.js", "TypeScript", "Convex", "AI SDK"],
+    image: "/images/projects/talkthedoc.png",
   },
   {
     name: "Blog Genius",
-    description: "AI tool for generating blog articles",
+    description: "AI-powered tool for generating SEO-optimized blog articles",
     status: "active",
     url: "https://blog-genius.vercel.app",
     tech: ["React", "Next.js", "OpenAI", "Node.js"],
