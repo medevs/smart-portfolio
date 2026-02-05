@@ -16,7 +16,6 @@ export const projects: Project[] = [
     status: "active",
     url: "https://talkthedoc.com",
     tech: ["Next.js", "TypeScript", "Convex", "AI SDK"],
-    image: "/images/projects/talkthedoc.png",
   },
   {
     name: "Blog Genius",
