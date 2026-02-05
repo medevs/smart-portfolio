@@ -1,9 +1,43 @@
+"use client";
+
 import AIChatButton from "./AIChatButton";
+import { Terminal, Heart } from "lucide-react";
 
 export default function Footer() {
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer className="fixed bottom-0 left-0 w-full bg-white">
+    <>
+      {/* Status bar footer */}
+      <footer className="fixed bottom-0 left-0 right-0 z-30 border-t border-terminal-border bg-terminal-bg/95 backdrop-blur">
+        <div className="container mx-auto px-4 h-8 flex items-center justify-between text-xs font-mono">
+          {/* Left side */}
+          <div className="flex items-center gap-4 text-terminal-muted">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-terminal-green animate-pulse" />
+              <span className="hidden sm:inline">READY</span>
+            </span>
+            <span className="hidden md:inline text-terminal-muted/70">
+              Next.js • TypeScript • AI
+            </span>
+          </div>
+
+          {/* Center */}
+          <div className="flex items-center gap-1 text-terminal-muted/70">
+            <span>Built with</span>
+            <Heart size={12} className="text-red-400" />
+            <span>by Ahmed</span>
+          </div>
+
+          {/* Right side */}
+          <div className="text-terminal-muted/70">
+            <span>{currentYear}</span>
+          </div>
+        </div>
+      </footer>
+
+      {/* Chat button */}
       <AIChatButton />
-    </footer>
+    </>
   );
 }

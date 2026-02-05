@@ -1,26 +1,33 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase";
 
-if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
-  throw new Error(
-    "Please set SUPABASE_URL and SUPABASE_ANON_KEY environment variables.",
-  );
-}
+let client: SupabaseClient | null = null;
 
-const client = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
+function getSupabaseClient(): SupabaseClient {
+  if (client) return client;
+
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error(
+      "Please set SUPABASE_URL and SUPABASE_ANON_KEY environment variables."
+    );
+  }
+
+  client = createClient(supabaseUrl, supabaseKey);
+  return client;
+}
 
 // Function to get a vector store instance from an existing index
 export async function getVectorStore() {
   return new SupabaseVectorStore(
     new OpenAIEmbeddings({ modelName: "text-embedding-3-small" }),
     {
-      client,
-      tableName: 'documents',
-      queryName: 'match_documents',
+      client: getSupabaseClient(),
+      tableName: "documents",
+      queryName: "match_documents",
       filter: {},
     }
   );
@@ -28,5 +35,5 @@ export async function getVectorStore() {
 
 // Function to get a reference to the embeddings collection
 export async function getEmbeddingsCollection() {
-  return client.from('documents');
+  return getSupabaseClient().from("documents");
 }

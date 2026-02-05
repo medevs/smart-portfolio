@@ -44,89 +44,97 @@ This project is a modern portfolio website built with Next.js 15, featuring AI-p
 - Node.js 18.17 or later
 - npm or yarn package manager
 - Git
+- [Supabase](https://supabase.com) account (free tier works)
+- [OpenAI](https://platform.openai.com) API key
 
-## Installation Guide
+## Quick Start
 
 1. **Clone the Repository**
    ```bash
    git clone https://github.com/medevs/smart-portfolio.git
    cd smart-portfolio
    ```
+
 2. **Install Dependencies**
    ```bash
    npm install
-   # or
-   yarn install
    ```
-3. **Environment Setup**
-   Create a `.env.local` file in the root directory with the following variables:
-   ```env
-   # OpenAI
-   OPENAI_API_KEY=your_openai_api_key
 
-   # Supabase
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-
-   # GitHub
-   NEXT_PUBLIC_GITHUB_TOKEN=your_github_token
-
-   # Optional: Add any other API keys needed for additional features
+3. **Set Up Environment Variables**
+   ```bash
+   cp .env.example .env.local
    ```
-4. **Database Setup**
-   Run the following SQL in your Supabase SQL editor to set up vector search:
-   ```sql
-   -- Enable the pgvector extension
-   create extension if not exists vector;
 
-   -- Create documents table for vector storage
-   create table if not exists documents (
-     id bigserial primary key,
-     content text,
-     metadata jsonb,
-     embedding vector(1536)
-   );
+   Then edit `.env.local` with your credentials:
 
-   -- Create the matching function
-   create or replace function match_documents(
-     query_embedding vector(1536),
-     filter jsonb default '{}'::jsonb,
-     match_count int default 10
-   ) returns table (
-     id bigint,
-     content text,
-     metadata jsonb,
-     similarity float
-   )
-   language plpgsql
-   as $$
-   begin
-     return query
-     select
-       id,
-       content,
-       metadata,
-       1 - (documents.embedding <=> query_embedding) as similarity
-     from documents
-     where metadata @> filter
-     order by documents.embedding <=> query_embedding
-     limit match_count;
-   end;
-   $$;
+   | Variable | Description | Where to Get |
+   |----------|-------------|--------------|
+   | `SUPABASE_URL` | Your Supabase project URL | [Supabase Dashboard](https://supabase.com/dashboard) → Settings → API |
+   | `SUPABASE_ANON_KEY` | Public anonymous key | [Supabase Dashboard](https://supabase.com/dashboard) → Settings → API |
+   | `OPENAI_API_KEY` | OpenAI API key | [OpenAI Platform](https://platform.openai.com/api-keys) |
+
+4. **Set Up Supabase Database**
+
+   **Option A: Using Supabase Dashboard (Recommended for beginners)**
+
+   1. Create a new project at [supabase.com](https://supabase.com)
+   2. Go to the SQL Editor in your project dashboard
+   3. Run each migration file in order from `supabase/migrations/`:
+      - `20240101000000_enable_pgvector.sql`
+      - `20240101000001_create_documents_table.sql`
+      - `20240101000002_create_match_function.sql`
+
+   **Option B: Using Supabase CLI**
+
+   ```bash
+   # Install Supabase CLI if you haven't
+   npm install -g supabase
+
+   # Link to your remote project
+   supabase link --project-ref your-project-ref
+
+   # Push migrations
+   supabase db push
    ```
-5. **Development Server**
+
+5. **Generate Embeddings**
+   ```bash
+   npm run generate
+   ```
+   This populates the database with document embeddings for the AI chat.
+
+6. **Start Development Server**
    ```bash
    npm run dev
-   # or
-   yarn dev
    ```
-   The application will be available at `http://localhost:3000`
-6. **Build for Production**
-   ```bash
-   npm run build
-   # or
-   yarn build
-   ```
+   Open [http://localhost:3000](http://localhost:3000) to view the site.
+
+## Database Schema
+
+The project uses Supabase with pgvector for AI-powered semantic search. The schema includes:
+
+- **`documents` table**: Stores content chunks with vector embeddings
+- **`match_documents` function**: Performs cosine similarity search
+
+Migration files are located in `supabase/migrations/` for version control and reproducibility.
+
+## Environment Variables Reference
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `SUPABASE_URL` | Yes | Your Supabase project URL |
+| `SUPABASE_ANON_KEY` | Yes | Supabase anonymous (public) key |
+| `OPENAI_API_KEY` | Yes | OpenAI API key for embeddings & chat |
+| `SUPABASE_SERVICE_ROLE_KEY` | No | Only for local CLI migrations |
+
+> **Note**: These are server-side variables. Do NOT prefix with `NEXT_PUBLIC_` as they contain sensitive keys.
+
+## Build for Production
+
+```bash
+npm run build
+npm run start
+```
 
 ## Project Structure
 

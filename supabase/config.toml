@@ -1,0 +1,36 @@
+# Supabase CLI Configuration
+# For local development and migrations
+# Docs: https://supabase.com/docs/guides/cli/config
+
+[api]
+# Port to use for the API URL
+port = 54321
+
+[db]
+# Port to use for the local database URL
+port = 54322
+
+[studio]
+# Port to use for Supabase Studio
+port = 54323
+
+[inbucket]
+# Port for email testing
+port = 54324
+
+[storage]
+# Storage service configuration
+
+[auth]
+# Auth service configuration
+
+[analytics]
+enabled = false
+
+# Database settings
+[db.pooler]
+enabled = false
+port = 54329
+pool_mode = "transaction"
+default_pool_size = 20
+max_client_conn = 100

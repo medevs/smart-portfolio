@@ -6,7 +6,7 @@
     "location": "Bremen, Germany",
     "github": "https://github.com/medevs",
     "linkedin": "https://www.linkedin.com/in/ahmed-oublihi/",
-    "website": "https://medevs.xyz",
+    "website": "https://medevsmaker.vercel.app",
     "summary": "Full Stack Developer specializing in JavaScript, PHP, and modern web technologies. Experienced in developing efficient web applications and optimizing enterprise software. Combining technical expertise with a passion for AI to create innovative solutions.",
     "image": "https://avatars.githubusercontent.com/u/40724828?v=4"
   },
@@ -113,7 +113,7 @@
       "name": "Smart Portfolio",
       "description": "Portfolio website with AI chatbot. Next.js, React.js, AI integration. Dynamic chatbot for answering questions. Modern web design for optimal UX.",
       "technologies": ["Next.js", "React", "AI", "OpenAI", "Langchain", "Tailwind CSS"],
-      "link": "https://medevs.xyz"
+      "link": "https://medevsmaker.vercel.app"
     },
     {
       "name": "Blog Genius",

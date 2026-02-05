@@ -26,10 +26,19 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
+.env
+.env.local
 .env*.local
+
+# Keep .env.example tracked (template for setup)
+!.env.example
 
 # vercel
 .vercel
+
+# Supabase
+.supabase
+supabase/.temp/
 
 # typescript
 *.tsbuildinfo

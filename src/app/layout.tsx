@@ -1,19 +1,75 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { NextUIProvider } from "@/components/NextUIProvider";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+});
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://medevsmaker.vercel.app"),
   title: {
     template: "%s | Ahmed Oublihi",
-    default: "Ahmed Oublihi",
+    default: "Ahmed Oublihi - Full Stack Developer & AI Engineer",
   },
-  description: "Check out my smart portfolio website with a custom AI chatbot.",
+  description: "Full Stack Developer & AI Engineer specializing in React, Next.js, TypeScript, and AI-powered applications. Building intelligent software with modern web technologies.",
+  keywords: [
+    "Full Stack Developer",
+    "AI Engineer",
+    "React",
+    "Next.js",
+    "TypeScript",
+    "LangChain",
+    "OpenAI",
+    "Web Development",
+    "Software Engineer",
+    "Ahmed Oublihi",
+  ],
+  authors: [{ name: "Ahmed Oublihi", url: "https://medevsmaker.vercel.app" }],
+  creator: "Ahmed Oublihi",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://medevsmaker.vercel.app",
+    siteName: "Ahmed Oublihi Portfolio",
+    title: "Ahmed Oublihi - Full Stack Developer & AI Engineer",
+    description: "Full Stack Developer & AI Engineer building intelligent software with modern web technologies.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Ahmed Oublihi - Full Stack Developer & AI Engineer",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Ahmed Oublihi - Full Stack Developer & AI Engineer",
+    description: "Full Stack Developer & AI Engineer building intelligent software with modern web technologies.",
+    images: ["/og-image.png"],
+    creator: "@medevs",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function RootLayout({
@@ -23,17 +79,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} antialiased`} suppressHydrationWarning>
+      <body
+        className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}
+        suppressHydrationWarning
+      >
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-          <NextUIProvider>
-            <div className="min-h-screen bg-background text-foreground">
-              <Navbar />
-              <main className="py-8 px-4 md:px-6 mx-auto max-w-7xl">
-                {children}
-              </main>
-              <Footer />
-            </div>
-          </NextUIProvider>
+          <div className="min-h-screen bg-background text-foreground">
+            <Navbar />
+            <main className="mx-auto max-w-7xl">
+              {children}
+            </main>
+            <Footer />
+          </div>
         </ThemeProvider>
       </body>
     </html>
