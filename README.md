@@ -1,43 +1,46 @@
 # Smart Portfolio with AI Integration
 
-This project is a modern portfolio website built with Next.js 15, featuring AI-powered components including a chatbot, tech stack validation, and interactive visualizations.
+A modern, terminal-inspired portfolio website built with Next.js 15, featuring an AI-powered chatbot with RAG (Retrieval-Augmented Generation) capabilities and a responsive bento grid layout.
 
 ## Key Features
 
-- **AI-powered Chatbot**: Interactive portfolio exploration using LangChain and OpenAI, with vector search capabilities through Supabase pgvector
-- **Tech Stack Architecture Visualization**: Interactive drag-and-drop interface to design and validate technology stacks with AI feedback
-- **GitHub Integration**: Dynamic GitHub statistics, featured projects, and contribution graphs
-- **Responsive Design**: Fully responsive UI with dark/light mode support using Tailwind CSS and NextUI components
-- **Blog System**: Markdown-based blog with reading time estimation and syntax highlighting
-- **Performance Optimized**: Server components, static generation, and efficient caching strategies
+- **AI-powered Chatbot**: Interactive portfolio exploration using LangChain and OpenAI, with vector search capabilities through Supabase pgvector for context-aware responses
+- **Bento Grid Layout**: Modern, responsive grid design that adapts seamlessly between desktop and mobile views
+- **Terminal Aesthetic**: Developer-focused design with terminal-inspired UI elements, typing animations, and command-style interactions
+- **Global Theming**: Centralized CSS variable system with full dark/light mode support across all components
+- **Blog System**: Markdown-based blog with reading time estimation, syntax highlighting, and table of contents
+- **Configurable Content**: All portfolio data (projects, skills, experience, education) managed through TypeScript config files
 
 ## Tech Stack
 
 - **Framework**: Next.js 15 with App Router
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS, NextUI components, Framer Motion
+- **Styling**: Tailwind CSS with CSS variables for theming
+- **Animations**: Framer Motion
 - **Database**: Supabase with pgvector for vector embeddings
-- **AI/ML**: 
-  - LangChain for chat functionality
+- **AI/ML**:
+  - LangChain for RAG-based chat functionality
   - OpenAI for embeddings and completions
-  - ReactFlow for tech stack visualization
-- **GitHub API**: Octokit for repository and contribution data
-- **UI Components**: 
-  - React Icons
-  - Lucide React
-  - Recharts for data visualization
-- **Content**: 
-  - React Markdown
+  - Vercel AI SDK for streaming responses
+- **UI Components**:
+  - Radix UI primitives (Dialog, Label, Slot)
+  - Lucide React icons
+  - Custom terminal-style components
+- **Content**:
+  - React Markdown with GFM support
   - Gray Matter for frontmatter parsing
-  - React Syntax Highlighter
+  - React Syntax Highlighter for code blocks
 
-## Features Summary
+## Portfolio Sections
 
-1. **Home Page**: Featuring about section, skills, timeline, and featured projects
-2. **Tech Stack Architect**: Interactive tool for designing and validating technology stacks with AI feedback
-3. **Blog System**: Markdown-based blog with filtering capabilities
-4. **AI Chatbot**: Conversational interface for exploring the portfolio
-5. **GitHub Integration**: Dynamic display of repositories and statistics
+1. **Hero**: Personal introduction with animated role typing, availability status, and social links
+2. **Products/Projects**: Showcase of featured projects with images, tech stack, and status badges
+3. **Skills**: Categorized skill display with progress indicators (Frontend, Backend, Database, AI/ML)
+4. **AI Capabilities**: Highlights of AI/ML expertise and interests
+5. **Experience**: Professional timeline with role details and technologies
+6. **Blog**: Latest blog posts with category filtering
+7. **CTA**: Contact section with email and LinkedIn links
+8. **AI Chat Widget**: Floating chatbot for interactive portfolio exploration
 
 ## Prerequisites
 
@@ -109,14 +112,27 @@ This project is a modern portfolio website built with Next.js 15, featuring AI-p
    ```
    Open [http://localhost:3000](http://localhost:3000) to view the site.
 
+## Configuration
+
+All portfolio content is managed through TypeScript config files in `src/config/`:
+
+- `personal.ts` - Name, email, location, availability status
+- `projects.ts` - Featured projects with descriptions and tech stack
+- `experience.ts` - Work history and timeline
+- `education.ts` - Educational background
+- `skills.ts` - Skill categories and proficiency levels
+- `social.ts` - Social media links
+- `ai.ts` - AI capabilities display
+- `seo.ts` - SEO metadata
+
 ## Database Schema
 
-The project uses Supabase with pgvector for AI-powered semantic search. The schema includes:
+The project uses Supabase with pgvector for AI-powered semantic search:
 
 - **`documents` table**: Stores content chunks with vector embeddings
-- **`match_documents` function**: Performs cosine similarity search
+- **`match_documents` function**: Performs cosine similarity search for RAG
 
-Migration files are located in `supabase/migrations/` for version control and reproducibility.
+Migration files are located in `supabase/migrations/` for version control.
 
 ## Environment Variables Reference
 
@@ -136,16 +152,30 @@ npm run build
 npm run start
 ```
 
-## Project Structure
-
-For a detailed breakdown of the project’s folders and files, see [Project-Structure.md](./Project-Structure.md).
-
 ## Available Scripts
 
 - `npm run dev` - Start development server
-- `npm run build` - Build for production
+- `npm run build` - Generate embeddings and build for production
+- `npm run generate` - Generate vector embeddings for RAG
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
+
+## Project Structure
+
+```
+src/
+├── app/                    # Next.js App Router pages
+│   ├── api/chat/          # AI chat API endpoint
+│   ├── blog/              # Blog pages
+│   └── page.tsx           # Home page with bento grid
+├── components/
+│   ├── chat/              # AI chatbot components
+│   ├── sections/          # Page sections (Hero, Skills, etc.)
+│   ├── terminal/          # Terminal-style UI components
+│   └── ui/                # Reusable UI primitives
+├── config/                # Portfolio configuration files
+└── lib/                   # Utility functions
+```
 
 ## License
 
