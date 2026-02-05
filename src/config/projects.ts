@@ -1,12 +1,6 @@
-export interface Product {
-  name: string;
-  description: string;
-  status: "active" | "building" | "planned";
-  url?: string;
-  tech: string[];
-}
+import type { Project } from "./types";
 
-export const products: Product[] = [
+export const projects: Project[] = [
   {
     name: "Smart Portfolio",
     description: "AI-powered portfolio with RAG chatbot",
@@ -27,23 +21,5 @@ export const products: Product[] = [
     status: "active",
     url: "http://yourdailyway.com",
     tech: ["Astro", "React", "TypeScript", "Markdown"],
-  },
-];
-
-export const socialLinks = [
-  {
-    name: "GitHub",
-    url: "https://github.com/medevs",
-    username: "@medevs",
-  },
-  {
-    name: "LinkedIn",
-    url: "https://linkedin.com/in/ahmed-oublihi",
-    username: "ahmed-oublihi",
-  },
-  {
-    name: "Twitter",
-    url: "https://twitter.com/AhmedOublihi",
-    username: "@AhmedOublihi",
   },
 ];

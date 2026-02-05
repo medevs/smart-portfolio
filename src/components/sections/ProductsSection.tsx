@@ -1,10 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { products } from "@/data/products";
-import { ExternalLink, Github, ArrowUpRight } from "lucide-react";
+import { projects } from "@/config";
+import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 
 const statusColors = {
   active: "bg-green-500/20 text-green-400 border-green-500/30",
@@ -19,8 +18,8 @@ const statusLabels = {
 };
 
 export default function ProductsSection() {
-  const featuredProject = products[0];
-  const otherProjects = products.slice(1);
+  const featuredProject = projects[0];
+  const otherProjects = projects.slice(1);
 
   return (
     <div className="h-full flex flex-col gap-2">
@@ -45,17 +44,24 @@ export default function ProductsSection() {
             <div className="relative flex items-start justify-between gap-3 mb-2">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className={`px-2 py-0.5 text-[9px] font-medium rounded-full border ${statusColors[featuredProject.status]}`}>
+                  <span
+                    className={`px-2 py-0.5 text-[9px] font-medium rounded-full border ${statusColors[featuredProject.status]}`}
+                  >
                     {statusLabels[featuredProject.status]}
                   </span>
-                  <span className="text-[9px] text-terminal-muted">Featured Project</span>
+                  <span className="text-[9px] text-terminal-muted">
+                    Featured Project
+                  </span>
                 </div>
                 <h3 className="text-lg font-bold text-white group-hover:text-terminal-green transition-colors">
                   {featuredProject.name}
                 </h3>
               </div>
               <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-terminal-green/10 border border-terminal-green/30 flex items-center justify-center group-hover:bg-terminal-green/20 transition-colors">
-                <ArrowUpRight size={16} className="text-terminal-green group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                <ArrowUpRight
+                  size={16}
+                  className="text-terminal-green group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+                />
               </div>
             </div>
 
@@ -102,7 +108,9 @@ export default function ProductsSection() {
                     <h4 className="text-xs lg:text-sm font-semibold text-white group-hover:text-terminal-green transition-colors truncate">
                       {project.name}
                     </h4>
-                    <span className={`flex-shrink-0 px-1.5 py-0.5 text-[8px] font-medium rounded border ${statusColors[project.status]}`}>
+                    <span
+                      className={`flex-shrink-0 px-1.5 py-0.5 text-[8px] font-medium rounded border ${statusColors[project.status]}`}
+                    >
                       {statusLabels[project.status]}
                     </span>
                   </div>

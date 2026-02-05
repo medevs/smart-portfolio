@@ -2,6 +2,7 @@
 
 import AIChatButton from "./AIChatButton";
 import { Heart } from "lucide-react";
+import { personalInfo } from "@/config";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -26,7 +27,7 @@ export default function Footer() {
           <div className="flex items-center gap-1 text-terminal-muted/70">
             <span>Built with</span>
             <Heart size={12} className="text-red-400" />
-            <span>by Ahmed</span>
+            <span>by {personalInfo.firstName}</span>
           </div>
 
           {/* Right side */}

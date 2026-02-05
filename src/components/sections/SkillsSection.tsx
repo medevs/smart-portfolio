@@ -2,52 +2,20 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Code2, Server, Database, Brain } from "lucide-react";
+import { Code2, Server, Database, Brain, LucideIcon } from "lucide-react";
+import { skillCategories } from "@/config";
 
-const skillCategories = [
-  {
-    name: "Frontend",
-    icon: Code2,
-    skills: [
-      { name: "React", level: 95 },
-      { name: "Next.js", level: 90 },
-      { name: "TypeScript", level: 88 },
-      { name: "Tailwind", level: 92 },
-    ],
-  },
-  {
-    name: "Backend",
-    icon: Server,
-    skills: [
-      { name: "Node.js", level: 85 },
-      { name: "Express", level: 82 },
-      { name: "PHP", level: 78 },
-      { name: "Python", level: 70 },
-    ],
-  },
-  {
-    name: "Database",
-    icon: Database,
-    skills: [
-      { name: "MySQL", level: 85 },
-      { name: "MongoDB", level: 80 },
-      { name: "Prisma", level: 82 },
-      { name: "Supabase", level: 85 },
-    ],
-  },
-  {
-    name: "AI/ML",
-    icon: Brain,
-    skills: [
-      { name: "LangChain", level: 80 },
-      { name: "OpenAI", level: 85 },
-      { name: "RAG", level: 82 },
-    ],
-  },
-];
+const iconMap: Record<string, LucideIcon> = {
+  Code2,
+  Server,
+  Database,
+  Brain,
+};
 
 export default function SkillsSection() {
-  const [activeCategory, setActiveCategory] = useState<string | null>("Frontend");
+  const [activeCategory, setActiveCategory] = useState<string | null>(
+    "Frontend"
+  );
 
   return (
     <div className="h-full bento-card p-2 lg:p-3 flex flex-col overflow-hidden">
@@ -65,8 +33,8 @@ export default function SkillsSection() {
 
       {/* Category Tabs */}
       <div className="flex flex-wrap gap-1 mb-2">
-        {skillCategories.map((category, index) => {
-          const Icon = category.icon;
+        {skillCategories.map((category) => {
+          const Icon = iconMap[category.icon] || Code2;
           const isActive = activeCategory === category.name;
           return (
             <button
@@ -75,9 +43,10 @@ export default function SkillsSection() {
               className={`
                 flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium
                 transition-all duration-200
-                ${isActive
-                  ? "bg-terminal-green/20 border-terminal-green/50 text-terminal-green"
-                  : "bg-white/5 border-white/10 text-terminal-muted hover:text-white"
+                ${
+                  isActive
+                    ? "bg-terminal-green/20 border-terminal-green/50 text-terminal-green"
+                    : "bg-white/5 border-white/10 text-terminal-muted hover:text-white"
                 }
                 border
               `}
@@ -111,8 +80,12 @@ export default function SkillsSection() {
                     transition={{ delay: index * 0.03 }}
                   >
                     <div className="flex items-center justify-between mb-0.5">
-                      <span className="text-[11px] text-white">{skill.name}</span>
-                      <span className="text-[9px] text-terminal-muted">{skill.level}%</span>
+                      <span className="text-[11px] text-white">
+                        {skill.name}
+                      </span>
+                      <span className="text-[9px] text-terminal-muted">
+                        {skill.level}%
+                      </span>
                     </div>
                     <div className="h-1 bg-white/10 rounded-full overflow-hidden">
                       <motion.div

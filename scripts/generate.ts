@@ -10,91 +10,14 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 
-/**
- * Creates a formatted text representation of resume data with improved context
- */
-function formatResumeSection(sectionName: string, data: any): string {
-  const formatSectionName = (name: string): string => {
-    return name
-      .replace(/([A-Z])/g, " $1")
-      .replace(/^./, (str) => str.toUpperCase())
-      .trim();
-  };
-
-  const formattedSectionName = formatSectionName(sectionName);
-  let content = `# ${formattedSectionName}\n\n`;
-
-  if (sectionName === "personalInfo") {
-    const info = data;
-    content += `## About Ahmed Oublihi\n`;
-    content += `Name: ${info.name}\n`;
-    content += `Title: ${info.title}\n`;
-    content += `Email: ${info.email}\n`;
-    content += `Location: ${info.location}\n`;
-    content += `GitHub: ${info.github}\n`;
-    content += `LinkedIn: ${info.linkedin}\n`;
-    content += `Website: ${info.website}\n\n`;
-    content += `## Professional Summary\n${info.summary}\n`;
-  } else if (sectionName === "experience") {
-    content += `## Work Experience\n\n`;
-    data.forEach((exp: any, i: number) => {
-      content += `### ${exp.position} at ${exp.company}\n`;
-      content += `Duration: ${exp.startDate} - ${exp.endDate}\n`;
-      if (exp.location) content += `Location: ${exp.location}\n`;
-      content += `\nResponsibilities and achievements:\n${exp.description}\n`;
-      if (exp.companyUrl) content += `Company website: ${exp.companyUrl}\n`;
-      content += "\n";
-    });
-  } else if (sectionName === "education") {
-    content += `## Educational Background\n\n`;
-    data.forEach((edu: any, i: number) => {
-      content += `### ${edu.degree}\n`;
-      content += `Institution: ${edu.institution}\n`;
-      content += `Duration: ${edu.startDate} - ${edu.endDate}\n`;
-      content += `Description: ${edu.description}\n`;
-      if (edu.institutionUrl)
-        content += `Institution website: ${edu.institutionUrl}\n`;
-      content += "\n";
-    });
-  } else if (sectionName === "skills") {
-    content += `## Technical Skills\n\n`;
-    content += `Ahmed is proficient in the following technologies:\n`;
-    content += data.map((skill: string) => `- ${skill}`).join("\n");
-    content += "\n";
-  } else if (sectionName === "projects") {
-    content += `## Projects and Products\n\n`;
-    data.forEach((proj: any, i: number) => {
-      content += `### ${proj.name}\n`;
-      content += `Description: ${proj.description}\n`;
-      content += `Technologies used: ${proj.technologies.join(", ")}\n`;
-      content += `Link: ${proj.link}\n\n`;
-    });
-  } else if (sectionName === "languages") {
-    content += `## Language Proficiency\n\n`;
-    data.forEach((lang: any) => {
-      content += `- ${lang.language}: ${lang.proficiency}\n`;
-    });
-  } else if (sectionName === "interests") {
-    content += `## Professional Interests\n\n`;
-    content += data.map((interest: string) => `- ${interest}`).join("\n");
-    content += "\n";
-  } else if (sectionName === "softSkills") {
-    content += `## Soft Skills\n\n`;
-    content += data.map((skill: string) => `- ${skill}`).join("\n");
-    content += "\n";
-  } else if (sectionName === "certifications") {
-    content += `## Certifications\n\n`;
-    data.forEach((cert: any) => {
-      content += `### ${cert.name}\n`;
-      content += `Date: ${cert.date}\n`;
-      content += `Description: ${cert.description}\n\n`;
-    });
-  } else {
-    content += JSON.stringify(data, null, 2);
-  }
-
-  return content;
-}
+// Import config data
+import { personalInfo } from "../src/config/personal";
+import { experiences } from "../src/config/experience";
+import { education, certifications } from "../src/config/education";
+import { skillCategories, skillsList } from "../src/config/skills";
+import { projects } from "../src/config/projects";
+import { socialLinks } from "../src/config/social";
+import { aboutConfig } from "../src/config/about";
 
 /**
  * Load and parse blog posts from markdown files
@@ -123,7 +46,7 @@ function loadBlogPosts(): Document[] {
     const formattedContent = `
 # Blog Post: ${frontmatter.title || "Untitled"}
 
-Author: ${frontmatter.author || "Ahmed Oublihi"}
+Author: ${frontmatter.author || personalInfo.fullName}
 Date: ${frontmatter.date || "Unknown"}
 Category: ${frontmatter.category || "General"}
 Tags: ${(frontmatter.tags || []).join(", ")}
@@ -143,7 +66,7 @@ ${content}
           type: "blog_post",
           postId: postId,
           title: frontmatter.title || "Untitled",
-          author: frontmatter.author || "Ahmed Oublihi",
+          author: frontmatter.author || personalInfo.fullName,
           date: frontmatter.date || "",
           category: frontmatter.category || "General",
           tags: frontmatter.tags || [],
@@ -176,82 +99,257 @@ async function generateEmbeddings() {
 
     const allDocuments: Document[] = [];
 
-    // Load resume data
-    console.log("\n📄 Loading resume data...");
-    const resumeDataPath = "src/data/resumeData.json";
-    const rawData = fs.readFileSync(resumeDataPath, "utf-8");
-    const resumeData = JSON.parse(rawData);
+    // === PERSONAL INFO DOCUMENT ===
+    console.log("\n📄 Creating personal info document...");
+    const githubLink = socialLinks.find((l) => l.name === "GitHub");
+    const linkedinLink = socialLinks.find((l) => l.name === "LinkedIn");
 
-    // Create documents for each resume section
-    const sections = [
-      "personalInfo",
-      "experience",
-      "education",
-      "skills",
-      "projects",
-      "languages",
-      "interests",
-      "certifications",
-      "softSkills",
-    ];
+    const personalInfoContent = `
+# About ${personalInfo.fullName}
 
-    for (const section of sections) {
-      if (!resumeData[section]) continue;
+## Personal Information
+Name: ${personalInfo.fullName}
+Title: ${personalInfo.title}
+Email: ${personalInfo.email}
+Location: ${personalInfo.location.display}
+GitHub: ${githubLink?.url || "N/A"}
+LinkedIn: ${linkedinLink?.url || "N/A"}
+Website: ${personalInfo.website}
 
-      const content = formatResumeSection(section, resumeData[section]);
+## Professional Summary
+${personalInfo.summary}
+
+## Languages
+${aboutConfig.languages.map((l) => `- ${l.language}: ${l.proficiency}`).join("\n")}
+
+## Soft Skills
+${aboutConfig.softSkills.map((s) => `- ${s}`).join("\n")}
+
+## Professional Interests
+${aboutConfig.interests.map((i) => `- ${i}`).join("\n")}
+`;
+
+    allDocuments.push(
+      new Document({
+        pageContent: personalInfoContent,
+        metadata: {
+          source: "resume",
+          type: "personal_info",
+          section: "personalInfo",
+          importance: "high",
+        },
+      })
+    );
+
+    // === WORK EXPERIENCE DOCUMENTS ===
+    console.log("📄 Creating work experience documents...");
+    for (const exp of experiences) {
+      const expContent = `
+# Work Experience: ${exp.role} at ${exp.company}
+
+## Position Details
+Role: ${exp.role}
+Company: ${exp.company}
+Period: ${exp.period} (${exp.startDate} - ${exp.endDate})
+Location: ${exp.location}
+Type: ${exp.type}
+
+## Description
+${exp.description}
+
+## Key Achievements
+${exp.achievements.map((a) => `- ${a}`).join("\n")}
+
+## Technologies Used
+${exp.tech.join(", ")}
+`;
 
       allDocuments.push(
         new Document({
-          pageContent: content,
+          pageContent: expContent,
           metadata: {
             source: "resume",
-            type: "resume_section",
-            section: section,
-            importance:
-              section === "personalInfo" || section === "experience"
-                ? "high"
-                : "medium",
+            type: "work_experience",
+            section: "experience",
+            company: exp.company,
+            role: exp.role,
+            importance: "high",
           },
         })
       );
     }
 
-    console.log(`  Created ${allDocuments.length} resume section documents`);
+    // === SKILLS DOCUMENTS ===
+    console.log("📄 Creating skills documents...");
+    for (const category of skillCategories) {
+      const skillsContent = `
+# Skills: ${category.name}
 
-    // Load blog posts
-    console.log("\n📝 Loading blog posts...");
-    const blogDocuments = loadBlogPosts();
-    allDocuments.push(...blogDocuments);
-    console.log(`  Loaded ${blogDocuments.length} blog posts`);
+## ${category.name} Technologies
+${personalInfo.firstName} is proficient in the following ${category.name.toLowerCase()} technologies:
 
-    // Create recruiter-focused summary document
+${category.skills.map((s) => `- ${s.name}: ${s.level}% proficiency`).join("\n")}
+`;
+
+      allDocuments.push(
+        new Document({
+          pageContent: skillsContent,
+          metadata: {
+            source: "resume",
+            type: `skills_${category.name.toLowerCase()}`,
+            section: "skills",
+            category: category.name,
+            importance: "medium",
+          },
+        })
+      );
+    }
+
+    // Overall skills summary
+    const allSkillsContent = `
+# Technical Skills Summary
+
+## All Technologies
+${personalInfo.firstName} is proficient in the following technologies:
+${skillsList.map((skill) => `- ${skill}`).join("\n")}
+
+## Skill Categories
+${skillCategories.map((c) => `- ${c.name}: ${c.skills.map((s) => s.name).join(", ")}`).join("\n")}
+`;
+
+    allDocuments.push(
+      new Document({
+        pageContent: allSkillsContent,
+        metadata: {
+          source: "resume",
+          type: "skills_summary",
+          section: "skills",
+          importance: "high",
+        },
+      })
+    );
+
+    // === PROJECT DOCUMENTS ===
+    console.log("📄 Creating project documents...");
+    for (const project of projects) {
+      const projectContent = `
+# Project: ${project.name}
+
+## Project Details
+Name: ${project.name}
+Status: ${project.status}
+URL: ${project.url || "N/A"}
+
+## Description
+${project.description}
+
+## Technologies Used
+${project.tech.join(", ")}
+`;
+
+      allDocuments.push(
+        new Document({
+          pageContent: projectContent,
+          metadata: {
+            source: "resume",
+            type: "project",
+            section: "projects",
+            projectName: project.name,
+            importance: "medium",
+          },
+        })
+      );
+    }
+
+    // === EDUCATION DOCUMENTS ===
+    console.log("📄 Creating education documents...");
+    for (const edu of education) {
+      const eduContent = `
+# Education: ${edu.degree}
+
+## Education Details
+Degree: ${edu.degree}
+Institution: ${edu.institution}
+Period: ${edu.startDate} - ${edu.endDate}
+${edu.institutionUrl ? `Institution Website: ${edu.institutionUrl}` : ""}
+
+## Description
+${edu.description}
+`;
+
+      allDocuments.push(
+        new Document({
+          pageContent: eduContent,
+          metadata: {
+            source: "resume",
+            type: "education",
+            section: "education",
+            institution: edu.institution,
+            importance: "medium",
+          },
+        })
+      );
+    }
+
+    // === CERTIFICATIONS DOCUMENT ===
+    if (certifications.length > 0) {
+      console.log("📄 Creating certifications document...");
+      const certContent = `
+# Certifications
+
+${certifications
+  .map(
+    (cert) => `
+## ${cert.name}
+Issuer: ${cert.issuer || "N/A"}
+Date: ${cert.date}
+Description: ${cert.description}
+`
+  )
+  .join("\n")}
+`;
+
+      allDocuments.push(
+        new Document({
+          pageContent: certContent,
+          metadata: {
+            source: "resume",
+            type: "certifications",
+            section: "certifications",
+            importance: "medium",
+          },
+        })
+      );
+    }
+
+    // === RECRUITER SUMMARY DOCUMENT ===
+    console.log("📄 Creating recruiter summary document...");
     const recruiterSummary = `
 # Quick Summary for Recruiters
 
-## Ahmed Oublihi - Full Stack Developer & AI Engineer
+## ${personalInfo.fullName} - ${personalInfo.title}
 
 ### Current Status
-- Available for: Full-time positions, contract work
-- Location: Bremen, Germany
+- Availability: ${personalInfo.availability.message}
+- Location: ${personalInfo.location.display}
 - Remote: Open to remote work
 
 ### Key Highlights
-- 3+ years professional experience in Full Stack Development
-- Currently working at ePhilos AG (Aug 2021 - Present)
+- ${experiences.length > 0 ? `Currently: ${experiences[0].role} at ${experiences[0].company}` : "Experienced developer"}
 - Specializes in React, Next.js, TypeScript, PHP, and AI/ML technologies
 - Experience with LangChain, OpenAI, and RAG systems
 
 ### Contact
-- Email: oublihi.a@gmail.com
-- GitHub: https://github.com/medevs
-- LinkedIn: https://www.linkedin.com/in/ahmed-oublihi/
-- Website: https://medevsmaker.vercel.app
+- Email: ${personalInfo.email}
+- GitHub: ${githubLink?.url || "N/A"}
+- LinkedIn: ${linkedinLink?.url || "N/A"}
+- Website: ${personalInfo.website}
 
-### Why Hire Ahmed?
+### Why Hire ${personalInfo.firstName}?
 1. Proven track record in enterprise software development
 2. Strong AI/ML integration skills
 3. Experience building production RAG systems
-4. Excellent communication in German (C1), English (B2)
+4. Excellent communication in ${aboutConfig.languages.slice(0, 2).map((l) => `${l.language} (${l.proficiency})`).join(", ")}
 5. Continuous learner with passion for emerging technologies
 `;
 
@@ -266,6 +364,48 @@ async function generateEmbeddings() {
         },
       })
     );
+
+    // === CONTACT/HIRING DOCUMENT ===
+    console.log("📄 Creating contact/hiring document...");
+    const contactContent = `
+# How to Contact and Hire ${personalInfo.firstName}
+
+## Contact Information
+- Email: ${personalInfo.email}
+- GitHub: ${githubLink?.url || "N/A"}
+- LinkedIn: ${linkedinLink?.url || "N/A"}
+- Website: ${personalInfo.website}
+- Location: ${personalInfo.location.display}
+
+## Availability
+${personalInfo.availability.message}
+
+## Preferred Contact Method
+Email is the best way to reach ${personalInfo.firstName}: ${personalInfo.email}
+
+## Download Resume
+${personalInfo.firstName}'s CV/Resume can be downloaded from: ${personalInfo.resumeUrl}
+`;
+
+    allDocuments.push(
+      new Document({
+        pageContent: contactContent,
+        metadata: {
+          source: "resume",
+          type: "contact_hiring",
+          section: "contact",
+          importance: "high",
+        },
+      })
+    );
+
+    console.log(`  Created ${allDocuments.length} resume documents`);
+
+    // Load blog posts
+    console.log("\n📝 Loading blog posts...");
+    const blogDocuments = loadBlogPosts();
+    allDocuments.push(...blogDocuments);
+    console.log(`  Loaded ${blogDocuments.length} blog posts`);
 
     console.log(`\n📊 Total documents before splitting: ${allDocuments.length}`);
 
@@ -285,8 +425,14 @@ async function generateEmbeddings() {
     await vectorStore.addDocuments(splitDocs);
 
     console.log("\n✅ Embeddings generated successfully!");
-    console.log(`   - Resume sections: ${sections.length}`);
+    console.log(`   - Personal info: 1`);
+    console.log(`   - Work experience: ${experiences.length}`);
+    console.log(`   - Skill categories: ${skillCategories.length + 1}`);
+    console.log(`   - Projects: ${projects.length}`);
+    console.log(`   - Education: ${education.length}`);
+    console.log(`   - Certifications: ${certifications.length > 0 ? 1 : 0}`);
     console.log(`   - Blog posts: ${blogDocuments.length}`);
+    console.log(`   - Summary docs: 2`);
     console.log(`   - Total chunks: ${splitDocs.length}`);
   } catch (error) {
     console.error("Error generating embeddings:", error);

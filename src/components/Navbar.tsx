@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
-import { Terminal, Github, Linkedin, Twitter } from "lucide-react";
+import { Terminal, Github, Linkedin, Twitter, LucideIcon } from "lucide-react";
+import { personalInfo, socialLinks } from "@/config";
 
-const socialLinks = [
-  { name: "GitHub", href: "https://github.com/medevs", icon: Github },
-  { name: "LinkedIn", href: "https://linkedin.com/in/ahmed-oublihi", icon: Linkedin },
-  { name: "Twitter", href: "https://twitter.com/AhmedOublihi", icon: Twitter },
-];
+const iconMap: Record<string, LucideIcon> = {
+  GitHub: Github,
+  LinkedIn: Linkedin,
+  Twitter: Twitter,
+};
 
 export default function Navbar() {
   return (
@@ -23,12 +24,14 @@ export default function Navbar() {
             <Terminal size={20} className="text-terminal-green" />
             <span className="font-mono text-sm hidden sm:inline">
               <span className="text-terminal-muted">~/</span>
-              <span className="text-terminal-green">ahmed</span>
+              <span className="text-terminal-green">
+                {personalInfo.firstName.toLowerCase()}
+              </span>
               <span className="text-terminal-muted">/</span>
               <span className="text-terminal-cyan">portfolio</span>
             </span>
             <span className="font-mono text-sm sm:hidden text-terminal-green">
-              ahmed
+              {personalInfo.firstName.toLowerCase()}
             </span>
           </Link>
 
@@ -36,18 +39,21 @@ export default function Navbar() {
           <div className="flex items-center gap-2 sm:gap-4">
             {/* Social links */}
             <div className="hidden sm:flex items-center gap-1">
-              {socialLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2 rounded-md text-terminal-muted hover:text-terminal-green hover:bg-terminal-bg-alt transition-colors"
-                  aria-label={link.name}
-                >
-                  <link.icon size={18} />
-                </a>
-              ))}
+              {socialLinks.map((link) => {
+                const Icon = iconMap[link.name] || Github;
+                return (
+                  <a
+                    key={link.name}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-md text-terminal-muted hover:text-terminal-green hover:bg-terminal-bg-alt transition-colors"
+                    aria-label={link.name}
+                  >
+                    <Icon size={18} />
+                  </a>
+                );
+              })}
             </div>
 
             {/* Divider */}

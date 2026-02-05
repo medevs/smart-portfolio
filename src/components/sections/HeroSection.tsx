@@ -1,9 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { socialLinks } from "@/data/products";
-import { Github, Linkedin, Twitter, MapPin, Mail, Download, ExternalLink, LucideIcon, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
+import { personalInfo, socialLinks, heroContent } from "@/config";
+import {
+  Github,
+  Linkedin,
+  Twitter,
+  MapPin,
+  Mail,
+  Download,
+  ExternalLink,
+  LucideIcon,
+} from "lucide-react";
 import Link from "next/link";
 
 const iconMap: Record<string, LucideIcon> = {
@@ -12,17 +21,12 @@ const iconMap: Record<string, LucideIcon> = {
   Twitter: Twitter,
 };
 
-const roles = [
-  "Full Stack Developer",
-  "AI Engineer",
-  "Problem Solver",
-  "Tech Enthusiast",
-];
-
 export default function HeroSection() {
   const [roleIndex, setRoleIndex] = useState(0);
   const [displayText, setDisplayText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
+
+  const roles = heroContent.roles;
 
   useEffect(() => {
     const currentRole = roles[roleIndex];
@@ -50,27 +54,29 @@ export default function HeroSection() {
         setIsTyping(true);
       }
     }
-  }, [displayText, isTyping, roleIndex]);
+  }, [displayText, isTyping, roleIndex, roles]);
 
   return (
-    <div className="h-full bento-card p-4 lg:p-5 flex flex-col justify-between relative overflow-hidden">
+    <div className="h-full bento-card p-2.5 sm:p-3 md:p-4 lg:p-5 flex flex-col justify-between relative overflow-hidden">
       {/* Background gradient effects */}
       <div className="absolute inset-0 bg-gradient-to-br from-terminal-green/5 via-transparent to-terminal-cyan/5" />
       <div className="absolute top-0 right-0 w-64 h-64 bg-terminal-green/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
 
-      <div className="relative z-10 space-y-2 lg:space-y-3">
+      <div className="relative z-10 space-y-0.5 sm:space-y-1 md:space-y-1.5 lg:space-y-2">
         {/* Availability Badge */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-terminal-green/10 border border-terminal-green/30">
-            <span className="relative flex h-2 w-2">
+          <span className="inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-terminal-green/10 border border-terminal-green/30">
+            <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-terminal-green opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-terminal-green" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-terminal-green" />
             </span>
-            <span className="text-xs font-medium text-terminal-green">Available for work</span>
+            <span className="text-[9px] sm:text-[10px] md:text-xs font-medium text-terminal-green">
+              {personalInfo.availability.message}
+            </span>
           </span>
         </motion.div>
 
@@ -80,9 +86,9 @@ export default function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <h1 className="text-2xl lg:text-3xl font-bold">
-            <span className="text-white">Hi, I&apos;m </span>
-            <span className="gradient-text">Ahmed Oublihi</span>
+          <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold">
+            <span className="text-white">{heroContent.greeting} </span>
+            <span className="gradient-text">{personalInfo.firstName}</span>
           </h1>
         </motion.div>
 
@@ -91,12 +97,12 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="h-6"
+          className="min-h-4 sm:min-h-5 md:min-h-6 lg:min-h-7"
         >
-          <p className="text-base lg:text-lg text-terminal-muted font-mono">
+          <p className="text-[11px] sm:text-xs md:text-sm lg:text-base text-terminal-muted font-mono">
             <span className="text-terminal-cyan">&gt;</span>{" "}
             <span className="text-white">{displayText}</span>
-            <span className="inline-block w-0.5 h-5 ml-1 bg-terminal-green animate-cursor-blink align-middle" />
+            <span className="inline-block w-0.5 h-3 sm:h-3.5 md:h-4 lg:h-5 ml-0.5 bg-terminal-green animate-cursor-blink align-middle" />
           </p>
         </motion.div>
 
@@ -105,27 +111,27 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="flex flex-wrap items-center gap-4 text-sm text-terminal-muted"
+          className="flex flex-wrap items-center gap-x-2 gap-y-0.5 sm:gap-x-3 md:gap-x-4 text-[10px] sm:text-[11px] md:text-xs lg:text-sm text-terminal-muted"
         >
-          <span className="flex items-center gap-1.5">
-            <MapPin size={14} className="text-terminal-green" />
-            Bremen, Germany
+          <span className="flex items-center gap-1">
+            <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-terminal-green flex-shrink-0" />
+            <span>{personalInfo.location.display}</span>
           </span>
           <a
-            href="mailto:oublihi.a@gmail.com"
-            className="flex items-center gap-1.5 hover:text-terminal-cyan transition-colors"
+            href={`mailto:${personalInfo.email}`}
+            className="flex items-center gap-1 hover:text-terminal-cyan transition-colors"
           >
-            <Mail size={14} className="text-terminal-cyan" />
-            oublihi.a@gmail.com
+            <Mail className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-terminal-cyan flex-shrink-0" />
+            <span className="break-all">{personalInfo.email}</span>
           </a>
         </motion.div>
 
-        {/* Brief Description */}
+        {/* Brief Description - Hidden on small screens to save space */}
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="text-terminal-text/80 text-sm leading-relaxed max-w-md"
+          className="hidden md:block text-terminal-text/80 text-[11px] md:text-xs lg:text-sm leading-relaxed max-w-md"
         >
           Building intelligent software with modern web technologies.
           Specializing in <span className="text-terminal-cyan">React</span>,{" "}
@@ -139,10 +145,10 @@ export default function HeroSection() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.7 }}
-        className="relative z-10 flex flex-wrap items-center gap-2 pt-2"
+        className="relative z-10 flex flex-wrap items-center gap-1.5 sm:gap-2 pt-1 sm:pt-2"
       >
         {/* Social Links */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2">
           {socialLinks.map((link, index) => {
             const Icon = iconMap[link.name] || ExternalLink;
             return (
@@ -156,14 +162,14 @@ export default function HeroSection() {
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center w-10 h-10 rounded-lg
+                  className="flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-9 lg:h-9 rounded-md sm:rounded-lg
                              bg-white/5 border border-white/10
                              hover:bg-terminal-green/10 hover:border-terminal-green/50
                              text-terminal-muted hover:text-terminal-green
                              transition-all duration-300 icon-glow"
                   aria-label={link.name}
                 >
-                  <Icon size={18} />
+                  <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-[18px] md:h-[18px]" />
                 </Link>
               </motion.div>
             );
@@ -171,7 +177,7 @@ export default function HeroSection() {
         </div>
 
         {/* Divider */}
-        <div className="h-8 w-px bg-white/10 hidden sm:block" />
+        <div className="h-5 sm:h-6 md:h-7 w-px bg-white/10 hidden sm:block" />
 
         {/* Download CV Button */}
         <motion.div
@@ -180,16 +186,16 @@ export default function HeroSection() {
           transition={{ delay: 1.1 }}
         >
           <Link
-            href="/Ahmed_Oublihi_CV.pdf"
+            href={personalInfo.resumeUrl}
             target="_blank"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg
+            className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-md sm:rounded-lg
                        bg-gradient-to-r from-terminal-green to-terminal-cyan
-                       text-slate-900 font-medium text-sm
+                       text-slate-900 font-medium text-[10px] sm:text-xs md:text-sm
                        hover:shadow-lg hover:shadow-terminal-green/25
                        transition-all duration-300 btn-glow"
           >
-            <Download size={16} />
-            <span>Download CV</span>
+            <Download className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" />
+            <span>{heroContent.ctaButtons.primary.text}</span>
           </Link>
         </motion.div>
       </motion.div>

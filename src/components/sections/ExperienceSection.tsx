@@ -2,18 +2,20 @@
 
 import { motion } from "framer-motion";
 import { Briefcase, MapPin, Calendar } from "lucide-react";
-import { experiences } from "@/data/experience";
+import { experiences } from "@/config";
 
 const typeColors = {
   fulltime: "bg-terminal-green/20 text-terminal-green border-terminal-green/30",
   freelance: "bg-terminal-cyan/20 text-terminal-cyan border-terminal-cyan/30",
   contract: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+  internship: "bg-purple-500/20 text-purple-400 border-purple-500/30",
 };
 
 const typeLabels = {
   fulltime: "Full",
   freelance: "Free",
   contract: "Contract",
+  internship: "Intern",
 };
 
 export default function ExperienceSection() {
@@ -56,9 +58,13 @@ export default function ExperienceSection() {
                     <h3 className="text-[11px] font-semibold text-white group-hover:text-terminal-green transition-colors truncate">
                       {exp.role}
                     </h3>
-                    <p className="text-[9px] text-terminal-cyan truncate">{exp.company}</p>
+                    <p className="text-[9px] text-terminal-cyan truncate">
+                      {exp.company}
+                    </p>
                   </div>
-                  <span className={`flex-shrink-0 px-1 py-0.5 text-[7px] font-medium rounded border ${typeColors[exp.type]}`}>
+                  <span
+                    className={`flex-shrink-0 px-1 py-0.5 text-[7px] font-medium rounded border ${typeColors[exp.type]}`}
+                  >
                     {typeLabels[exp.type]}
                   </span>
                 </div>

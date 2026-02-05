@@ -1,6 +1,7 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { seoConfig, personalInfo } from "@/config";
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
@@ -16,48 +17,30 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://medevsmaker.vercel.app"),
+  metadataBase: new URL(seoConfig.siteUrl),
   title: {
-    template: "%s | Ahmed Oublihi",
-    default: "Ahmed Oublihi - Full Stack Developer & AI Engineer",
+    template: `%s | ${personalInfo.fullName}`,
+    default: `${personalInfo.fullName} - ${personalInfo.title}`,
   },
-  description: "Full Stack Developer & AI Engineer specializing in React, Next.js, TypeScript, and AI-powered applications. Building intelligent software with modern web technologies.",
-  keywords: [
-    "Full Stack Developer",
-    "AI Engineer",
-    "React",
-    "Next.js",
-    "TypeScript",
-    "LangChain",
-    "OpenAI",
-    "Web Development",
-    "Software Engineer",
-    "Ahmed Oublihi",
-  ],
-  authors: [{ name: "Ahmed Oublihi", url: "https://medevsmaker.vercel.app" }],
-  creator: "Ahmed Oublihi",
+  description: seoConfig.description,
+  keywords: seoConfig.keywords,
+  authors: [{ name: seoConfig.author.name, url: seoConfig.author.url }],
+  creator: personalInfo.fullName,
   openGraph: {
     type: "website",
-    locale: "en_US",
-    url: "https://medevsmaker.vercel.app",
-    siteName: "Ahmed Oublihi Portfolio",
-    title: "Ahmed Oublihi - Full Stack Developer & AI Engineer",
-    description: "Full Stack Developer & AI Engineer building intelligent software with modern web technologies.",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Ahmed Oublihi - Full Stack Developer & AI Engineer",
-      },
-    ],
+    locale: seoConfig.openGraph.locale,
+    url: seoConfig.siteUrl,
+    siteName: seoConfig.siteName,
+    title: seoConfig.openGraph.title,
+    description: seoConfig.openGraph.description,
+    images: seoConfig.openGraph.images,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ahmed Oublihi - Full Stack Developer & AI Engineer",
-    description: "Full Stack Developer & AI Engineer building intelligent software with modern web technologies.",
-    images: ["/og-image.png"],
-    creator: "@medevs",
+    title: seoConfig.twitter.title,
+    description: seoConfig.twitter.description,
+    images: seoConfig.twitter.images,
+    creator: seoConfig.twitter.creator,
   },
   robots: {
     index: true,

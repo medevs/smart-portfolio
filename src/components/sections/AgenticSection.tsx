@@ -1,34 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Bot, Database, Zap, Brain, Sparkles } from "lucide-react";
+import { Bot, Database, Zap, Brain, Sparkles, LucideIcon } from "lucide-react";
+import { aiConfig } from "@/config";
 
-const capabilities = [
-  {
-    icon: Brain,
-    title: "RAG",
-    description: "Vector search & retrieval",
-    iconColor: "text-purple-400",
-  },
-  {
-    icon: Bot,
-    title: "Agents",
-    description: "LangChain & tools",
-    iconColor: "text-terminal-green",
-  },
-  {
-    icon: Database,
-    title: "Vector DBs",
-    description: "pgvector & embeddings",
-    iconColor: "text-terminal-cyan",
-  },
-  {
-    icon: Zap,
-    title: "LLMs",
-    description: "OpenAI & streaming",
-    iconColor: "text-amber-400",
-  },
-];
+const iconMap: Record<string, LucideIcon> = {
+  Brain,
+  Bot,
+  Database,
+  Zap,
+};
 
 export default function AgenticSection() {
   return (
@@ -47,8 +28,8 @@ export default function AgenticSection() {
 
       {/* Feature Cards Grid - Compact */}
       <div className="grid grid-cols-2 gap-1.5 flex-1 min-h-0">
-        {capabilities.map((cap, index) => {
-          const Icon = cap.icon;
+        {aiConfig.capabilities.map((cap, index) => {
+          const Icon = iconMap[cap.icon] || Sparkles;
           return (
             <motion.div
               key={cap.title}

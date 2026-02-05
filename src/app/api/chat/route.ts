@@ -6,70 +6,11 @@ import { getVectorStore } from "@/lib/supabase";
 import { ChatOpenAI } from "@langchain/openai";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { PromptTemplate } from "@langchain/core/prompts";
+import { aiConfig, personalInfo } from "@/config";
 
-// Slash command definitions
-const SLASH_COMMANDS: Record<string, { description: string; query: string }> = {
-  "/skills": {
-    description: "Show technical skills",
-    query: "What are Ahmed's technical skills and technologies he works with?",
-  },
-  "/projects": {
-    description: "Show projects",
-    query: "What projects has Ahmed built? Include links and technologies used.",
-  },
-  "/experience": {
-    description: "Show work history",
-    query: "What is Ahmed's work experience? List companies, positions, and responsibilities.",
-  },
-  "/hire": {
-    description: "Contact and availability",
-    query: "How can I hire Ahmed? What's his availability, contact info, and preferred roles?",
-  },
-  "/blog": {
-    description: "Show blog articles",
-    query: "What blog posts has Ahmed written? What topics does he cover?",
-  },
-  "/education": {
-    description: "Show education",
-    query: "What is Ahmed's educational background and certifications?",
-  },
-};
-
-// Easter egg responses - fun and memorable
-const EASTER_EGGS: Record<string, string> = {
-  "sudo hire ahmed": `
-\`\`\`bash
-$ sudo hire ahmed
-[sudo] verifying recruiter credentials... ✓
-[████████████████████████████] 100%
-
-✅ HIRE REQUEST APPROVED
-
-Ready to build something awesome together!
-
-📧 oublihi.a@gmail.com
-💼 linkedin.com/in/ahmed-oublihi
-🐙 github.com/medevs
-\`\`\`
-
-*Pro tip: He comes with free AI integration skills!*
-`,
-  "hello world": `
-\`\`\`javascript
-console.log("Hey there! 👋");
-\`\`\`
-
-The classic. I see you're a person of culture! How can I help?
-`,
-  "coffee": `Ahmed runs on mass, code compiles on hope. ☕
-
-But seriously - what can I help you with?`,
-  "matrix": `*You take the green pill...* 🟢
-
-Welcome to Ahmed's portfolio. The rabbit hole goes deep - try \`/skills\` or \`/projects\`.`,
-  "404": `Skills not found? Impossible. Try \`/skills\` to see the full stack.`,
-  "ping": `pong! 🏓 Latency: 0ms (Ahmed's always ready)`,
-};
+// Get slash commands and easter eggs from config
+const SLASH_COMMANDS = aiConfig.slashCommands;
+const EASTER_EGGS = aiConfig.easterEggs;
 
 /**
  * Re-rank documents by relevance and importance
@@ -100,12 +41,14 @@ function reRankDocuments(docs: any[], query: string): any[] {
         queryLower.includes("available")
       ) {
         if (metadata.type === "recruiter_summary") score += 5;
+        if (metadata.type === "contact_hiring") score += 5;
         if (metadata.section === "personalInfo") score += 3;
       }
 
       // Boost skill-related queries
       if (queryLower.includes("skill") || queryLower.includes("tech")) {
         if (metadata.section === "skills") score += 4;
+        if (metadata.type === "skills_summary") score += 5;
       }
 
       // Boost experience-related queries
@@ -115,6 +58,13 @@ function reRankDocuments(docs: any[], query: string): any[] {
         queryLower.includes("job")
       ) {
         if (metadata.section === "experience") score += 4;
+        if (metadata.type === "work_experience") score += 5;
+      }
+
+      // Boost project-related queries
+      if (queryLower.includes("project") || queryLower.includes("built")) {
+        if (metadata.section === "projects") score += 4;
+        if (metadata.type === "project") score += 5;
       }
 
       // Boost blog-related queries
@@ -124,6 +74,15 @@ function reRankDocuments(docs: any[], query: string): any[] {
         queryLower.includes("post")
       ) {
         if (metadata.source === "blog") score += 4;
+      }
+
+      // Boost education-related queries
+      if (
+        queryLower.includes("education") ||
+        queryLower.includes("degree") ||
+        queryLower.includes("study")
+      ) {
+        if (metadata.section === "education") score += 4;
       }
 
       return { ...doc, relevanceScore: score };
@@ -228,18 +187,9 @@ export async function POST(req: Request) {
       console.error("Error retrieving documents:", error);
     }
 
-    // Fallback context
+    // Fallback context from config
     if (!resumeContext.trim()) {
-      resumeContext = `
-Ahmed Oublihi - Full Stack Developer & AI Engineer
-Location: Bremen, Germany
-Email: oublihi.a@gmail.com
-GitHub: github.com/medevs
-LinkedIn: linkedin.com/in/ahmed-oublihi
-
-Currently working at ePhilos AG as a Full Stack Developer.
-Skills: React, Next.js, TypeScript, PHP, Node.js, LangChain, OpenAI
-      `;
+      resumeContext = aiConfig.fallbackContext;
     }
 
     // Generate contextual follow-up
@@ -247,13 +197,13 @@ Skills: React, Next.js, TypeScript, PHP, Node.js, LangChain, OpenAI
 
     // Create the enhanced prompt - shorter, wittier responses
     const promptTemplate = PromptTemplate.fromTemplate(`
-You are Ahmed's AI Agent - sharp, witty, and technically impressive.
+You are ${personalInfo.firstName}'s AI Agent - sharp, witty, and technically impressive.
 
 ## Personality
 - Confident but not arrogant
 - Sprinkle in developer humor (don't force it)
 - Be direct - recruiters are busy people
-- Speak as Ahmed's AI representative, not AS Ahmed
+- Speak as ${personalInfo.firstName}'s AI representative, not AS ${personalInfo.firstName}
 
 ## CRITICAL: Response Length Rules
 - **Simple questions**: MAX 100 words, 1-2 short paragraphs
@@ -269,11 +219,11 @@ You are Ahmed's AI Agent - sharp, witty, and technically impressive.
 - Keep paragraphs to 2-3 sentences max
 
 ## Tone Examples
-INSTEAD OF: "Ahmed has extensive experience with React and has worked on numerous projects..."
-SAY: "Ahmed ships production \`React\` apps daily at ePhilos AG."
+INSTEAD OF: "${personalInfo.firstName} has extensive experience with React and has worked on numerous projects..."
+SAY: "${personalInfo.firstName} ships production \`React\` apps daily at ePhilos AG."
 
 INSTEAD OF: "Feel free to reach out if you have any questions..."
-SAY: "Questions? Drop a line: oublihi.a@gmail.com"
+SAY: "Questions? Drop a line: ${personalInfo.email}"
 
 ## What NOT to do
 - Don't be generic or corporate-sounding
@@ -282,7 +232,7 @@ SAY: "Questions? Drop a line: oublihi.a@gmail.com"
 - Don't list every single skill - highlight relevant ones
 - Don't end with multiple follow-up questions
 
-## Context from Ahmed's Portfolio
+## Context from ${personalInfo.firstName}'s Portfolio
 {resumeContext}
 
 ## Conversation History

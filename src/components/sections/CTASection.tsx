@@ -1,10 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Mail, Linkedin, ArrowRight, Sparkles } from "lucide-react";
+import { Mail, Linkedin, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { personalInfo, socialLinks } from "@/config";
 
 export default function CTASection() {
+  const linkedinLink = socialLinks.find((l) => l.name === "LinkedIn");
+
   return (
     <div className="h-full bento-card relative overflow-hidden">
       {/* Background Effects */}
@@ -43,7 +46,7 @@ export default function CTASection() {
           className="flex flex-wrap justify-center gap-2 mt-2"
         >
           <a
-            href="mailto:oublihi.a@gmail.com"
+            href={`mailto:${personalInfo.email}`}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg
                        bg-gradient-to-r from-terminal-green to-terminal-cyan
                        text-slate-900 font-medium text-[11px]
@@ -54,19 +57,21 @@ export default function CTASection() {
             <span>Email</span>
           </a>
 
-          <Link
-            href="https://linkedin.com/in/ahmed-oublihi"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg
-                       bg-white/5 border border-white/10
-                       text-white font-medium text-[11px]
-                       hover:bg-white/10 hover:border-terminal-cyan/30
-                       transition-all duration-300"
-          >
-            <Linkedin size={12} />
-            <span>LinkedIn</span>
-          </Link>
+          {linkedinLink && (
+            <Link
+              href={linkedinLink.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg
+                         bg-white/5 border border-white/10
+                         text-white font-medium text-[11px]
+                         hover:bg-white/10 hover:border-terminal-cyan/30
+                         transition-all duration-300"
+            >
+              <Linkedin size={12} />
+              <span>LinkedIn</span>
+            </Link>
+          )}
         </motion.div>
 
         {/* Status */}
@@ -81,7 +86,7 @@ export default function CTASection() {
             <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-terminal-green" />
           </span>
           <span className="text-[10px] text-terminal-green">
-            Available for work
+            {personalInfo.availability.message}
           </span>
         </motion.div>
       </div>
