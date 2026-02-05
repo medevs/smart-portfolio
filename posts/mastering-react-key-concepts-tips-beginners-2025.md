@@ -1,7 +1,7 @@
 ---
 title: "Mastering React: Key Concepts and Essential Tips for Beginners (2025)"
 date: "2024-10-19"
-author: "Ahmed Oublihi"
+author: "Ahmed"
 tags: ["React", "Web Development"]
 category: "Web Development"
 description: "Dive into React's core concepts in 2025! Learn about components, JSX, hooks, and more. Perfect for beginners looking to build modern web apps. Start your React journey today!"

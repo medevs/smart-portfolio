@@ -1,7 +1,7 @@
 ---
 title: "The Complete Guide to OpenAI API: A Practical Developer's Handbook"
 date: "2025-04-03"
-author: "Ahmed Oublihi"
+author: "Ahmed"
 tags: ["AI", "OpenAI", "API", "Web Development", "AI Agents", "AI Tools"]
 category: "Artificial Intelligence"
 description: "Explore a complete guide to the OpenAI API, covering everything from setup and core functionality to advanced features, performance optimization, error handling, and practical use cases. Perfect for developers looking to integrate and leverage OpenAI models effectively."

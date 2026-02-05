@@ -1,7 +1,7 @@
 ---  
 title: "Python Playground: A Fun, Project-Based Guide to Learning Python for Generative AI"  
 date: "2025-04-10"  
-author: "Ahmed Oublihi"  
+author: "Ahmed"  
 tags: ["Python", "Generative AI", "AI Development", "Machine Learning", "Coding Projects"]  
 category: "Python Development"  
 description: "Learn Python through hands-on projects! This beginner-friendly guide walks you through building an AI-powered text adventure game while mastering Python fundamentals in a fun and engaging way."  

@@ -1,7 +1,7 @@
 ---
 title: "Building a Family Task Manager: A Comprehensive Laravel and React Tutorial"
 date: "2023-07-18"
-author: "Ahmed Oublihi"
+author: "Ahmed"
 tags: ["Php", "Laravel", "Reactjs", "Javascript", "Web Development"]
 category: "Web Development"
 description: "Learn how to build a full-stack Family Task Manager application using Laravel and React. This comprehensive tutorial covers everything from setup to deployment, including advanced features like real-time updates and performance optimization."

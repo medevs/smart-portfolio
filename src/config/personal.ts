@@ -2,8 +2,8 @@ import type { PersonalInfo } from "./types";
 
 export const personalInfo: PersonalInfo = {
   firstName: "Ahmed",
-  lastName: "Oublihi",
-  fullName: "Ahmed Oublihi",
+  lastName: "",
+  fullName: "Ahmed",
   email: "oublihi.a@gmail.com",
   location: {
     city: "Bremen",
@@ -15,7 +15,7 @@ export const personalInfo: PersonalInfo = {
     status: "available",
     message: "Available for work",
   },
-  resumeUrl: "/Ahmed_Oublihi_CV.pdf",
+  resumeUrl: "/Ahmed_CV.pdf",
   profileImage: "/images/profile.jpeg",
   website: "https://medevsmaker.vercel.app",
   summary:

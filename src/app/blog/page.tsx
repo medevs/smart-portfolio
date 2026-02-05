@@ -5,7 +5,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Blog",
-  description: "Articles about web development, AI, and software engineering by Ahmed Oublihi.",
+  description: "Articles about web development, AI, and software engineering by Ahmed.",
 };
 
 export default async function BlogPage() {
