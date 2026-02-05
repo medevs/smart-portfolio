@@ -26,6 +26,18 @@ export const metadata: Metadata = {
   keywords: seoConfig.keywords,
   authors: [{ name: seoConfig.author.name, url: seoConfig.author.url }],
   creator: personalInfo.fullName,
+  icons: {
+    icon: [
+      { url: "/icons/favicon-16x16.svg", sizes: "16x16", type: "image/svg+xml" },
+      { url: "/icons/favicon-32x32.svg", sizes: "32x32", type: "image/svg+xml" },
+    ],
+    apple: [
+      { url: "/icons/apple-touch-icon.svg", sizes: "180x180", type: "image/svg+xml" },
+    ],
+    other: [
+      { rel: "icon", url: "/icons/android-chrome-192x192.svg", sizes: "192x192", type: "image/svg+xml" },
+    ],
+  },
   openGraph: {
     type: "website",
     locale: seoConfig.openGraph.locale,

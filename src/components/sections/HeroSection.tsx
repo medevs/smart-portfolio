@@ -14,6 +14,7 @@ import {
   LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 const iconMap: Record<string, LucideIcon> = {
   GitHub: Github,
@@ -62,7 +63,26 @@ export default function HeroSection() {
       <div className="absolute inset-0 bg-gradient-to-br from-terminal-green/5 via-transparent to-terminal-cyan/5" />
       <div className="absolute top-0 right-0 w-64 h-64 bg-terminal-green/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
 
-      <div className="relative z-10 space-y-0.5 sm:space-y-1 md:space-y-1.5 lg:space-y-2">
+      {/* Profile Image - Positioned top right */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.1 }}
+        className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 md:top-4 md:right-4 z-20"
+      >
+        <div className="relative w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 rounded-full overflow-hidden border-2 border-terminal-green/50 shadow-lg shadow-terminal-green/20">
+          <Image
+            src={personalInfo.profileImage}
+            alt={personalInfo.fullName}
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 rounded-full ring-2 ring-terminal-green/30 ring-offset-2 ring-offset-terminal-bg" />
+        </div>
+      </motion.div>
+
+      <div className="relative z-10 space-y-0.5 sm:space-y-1 md:space-y-1.5 lg:space-y-2 pr-14 sm:pr-16 md:pr-20 lg:pr-24">
         {/* Availability Badge */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
