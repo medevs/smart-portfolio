@@ -16,22 +16,22 @@ export default function AgentMessage({ role, content }: AgentMessageProps) {
   return (
     <div
       className={cn(
-        "flex gap-3 animate-fade-in",
+        "flex gap-3 animate-slide-up-fade",
         isAgent ? "justify-start" : "justify-end"
       )}
     >
       {isAgent && (
-        <div className="flex-shrink-0 w-8 h-8 rounded-md bg-terminal-green/10 border border-terminal-green/30 flex items-center justify-center">
+        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-terminal-green/20 to-terminal-cyan/20 flex items-center justify-center border border-terminal-green/30">
           <Bot size={16} className="text-terminal-green" />
         </div>
       )}
 
       <div
         className={cn(
-          "max-w-[85%] rounded-lg px-4 py-3 font-mono text-sm",
+          "max-w-[85%] rounded-2xl px-4 py-3 text-sm",
           isAgent
-            ? "bg-terminal-bg-alt border border-terminal-border text-terminal-text"
-            : "bg-terminal-green/10 border border-terminal-green/30 text-terminal-text"
+            ? "bg-white/5 border border-white/10 text-terminal-text rounded-tl-sm"
+            : "bg-gradient-to-br from-terminal-green/20 to-terminal-cyan/10 border border-terminal-green/30 text-terminal-text rounded-tr-sm"
         )}
       >
         <ReactMarkdown
@@ -66,14 +66,14 @@ export default function AgentMessage({ role, content }: AgentMessageProps) {
                 return (
                   <code
                     {...props}
-                    className="px-1.5 py-0.5 rounded bg-terminal-bg text-terminal-cyan text-xs"
+                    className="px-1.5 py-0.5 rounded bg-slate-800/50 text-terminal-cyan text-xs font-mono"
                   >
                     {children}
                   </code>
                 );
               }
               return (
-                <code {...props} className={className}>
+                <code {...props} className={cn(className, "font-mono")}>
                   {children}
                 </code>
               );
@@ -81,34 +81,34 @@ export default function AgentMessage({ role, content }: AgentMessageProps) {
             pre: ({ node, ...props }) => (
               <pre
                 {...props}
-                className="my-2 p-3 rounded-md bg-terminal-bg border border-terminal-border overflow-x-auto text-xs"
+                className="my-2 p-3 rounded-lg bg-slate-900/80 border border-white/10 overflow-x-auto text-xs font-mono"
               />
             ),
             h1: ({ node, ...props }) => (
               <h1
                 {...props}
-                className="text-lg font-bold text-terminal-green mb-2 mt-3 first:mt-0"
+                className="text-base font-bold text-terminal-green mb-2 mt-3 first:mt-0"
               />
             ),
             h2: ({ node, ...props }) => (
               <h2
                 {...props}
-                className="text-base font-bold text-terminal-green mb-2 mt-3 first:mt-0"
+                className="text-sm font-bold text-terminal-green mb-2 mt-3 first:mt-0"
               />
             ),
             h3: ({ node, ...props }) => (
               <h3
                 {...props}
-                className="text-sm font-bold text-terminal-cyan mb-1 mt-2 first:mt-0"
+                className="text-sm font-semibold text-terminal-cyan mb-1 mt-2 first:mt-0"
               />
             ),
             hr: ({ node, ...props }) => (
-              <hr {...props} className="my-3 border-terminal-border" />
+              <hr {...props} className="my-3 border-white/10" />
             ),
             blockquote: ({ node, ...props }) => (
               <blockquote
                 {...props}
-                className="border-l-2 border-terminal-cyan pl-3 my-2 text-terminal-muted italic"
+                className="border-l-2 border-terminal-cyan/50 pl-3 my-2 text-terminal-muted italic"
               />
             ),
           }}
@@ -118,7 +118,7 @@ export default function AgentMessage({ role, content }: AgentMessageProps) {
       </div>
 
       {!isAgent && (
-        <div className="flex-shrink-0 w-8 h-8 rounded-md bg-terminal-cyan/10 border border-terminal-cyan/30 flex items-center justify-center">
+        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-terminal-cyan/20 to-terminal-green/10 flex items-center justify-center border border-terminal-cyan/30">
           <User size={16} className="text-terminal-cyan" />
         </div>
       )}

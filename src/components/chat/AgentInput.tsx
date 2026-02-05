@@ -2,6 +2,7 @@
 
 import { SendHorizontal, Trash2 } from "lucide-react";
 import { useRef, useEffect } from "react";
+import { cn } from "@/lib/utils";
 
 interface AgentInputProps {
   value: string;
@@ -29,14 +30,10 @@ export default function AgentInput({
   }, [autoFocus]);
 
   return (
-    <form onSubmit={onSubmit} className="p-3 border-t border-terminal-border bg-terminal-bg-alt">
-      <div className="flex items-center gap-2">
-        <div className="flex-shrink-0 text-terminal-green font-mono text-sm">
-          <span className="hidden sm:inline">guest@portfolio</span>
-          <span className="text-terminal-muted">:</span>
-          <span className="text-terminal-cyan">~</span>
-          <span className="text-terminal-muted">$</span>
-        </div>
+    <form onSubmit={onSubmit} className="p-3 border-t border-white/5 bg-slate-900/50">
+      <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10 focus-within:border-terminal-green/30 transition-colors">
+        {/* Prompt indicator */}
+        <span className="text-terminal-green text-sm font-mono">$</span>
 
         <input
           ref={inputRef}
@@ -45,7 +42,7 @@ export default function AgentInput({
           onChange={onChange}
           placeholder="Ask me anything..."
           disabled={isLoading}
-          className="flex-1 bg-transparent border-none outline-none font-mono text-sm
+          className="flex-1 bg-transparent border-none outline-none text-sm
                      text-terminal-text placeholder:text-terminal-muted/50
                      disabled:opacity-50"
         />
@@ -55,8 +52,11 @@ export default function AgentInput({
             type="button"
             onClick={onClear}
             disabled={isLoading}
-            className="p-2 rounded-md text-terminal-muted hover:text-red-400
-                       hover:bg-red-400/10 transition-colors disabled:opacity-50"
+            className={cn(
+              "p-1.5 rounded-lg transition-colors",
+              "text-terminal-muted hover:text-red-400 hover:bg-red-400/10",
+              "disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-terminal-muted"
+            )}
             title="Clear chat"
           >
             <Trash2 size={16} />
@@ -65,9 +65,12 @@ export default function AgentInput({
           <button
             type="submit"
             disabled={!value.trim() || isLoading}
-            className="p-2 rounded-md text-terminal-muted hover:text-terminal-green
-                       hover:bg-terminal-green/10 transition-colors
-                       disabled:opacity-50 disabled:cursor-not-allowed"
+            className={cn(
+              "p-1.5 rounded-lg transition-all",
+              "text-terminal-muted",
+              "disabled:opacity-50 disabled:cursor-not-allowed",
+              value.trim() && !isLoading && "text-terminal-green hover:bg-terminal-green/10"
+            )}
             title="Send message"
           >
             <SendHorizontal size={16} />
@@ -76,9 +79,9 @@ export default function AgentInput({
       </div>
 
       {isLoading && (
-        <div className="flex items-center gap-2 mt-2 text-xs font-mono text-terminal-muted">
-          <span className="inline-block w-2 h-2 rounded-full bg-terminal-green animate-pulse" />
-          <span>Processing query...</span>
+        <div className="flex items-center gap-2 mt-2 px-3 text-xs text-terminal-muted">
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-terminal-green animate-pulse" />
+          <span>Processing...</span>
         </div>
       )}
     </form>

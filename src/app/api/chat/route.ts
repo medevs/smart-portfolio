@@ -1,6 +1,6 @@
 /**
  * Enhanced RAG-based Chat API with Agent Personality
- * Features: Improved RAG, structured responses, slash commands, personality
+ * Features: Improved RAG, concise responses, slash commands, personality
  */
 import { getVectorStore } from "@/lib/supabase";
 import { ChatOpenAI } from "@langchain/openai";
@@ -35,46 +35,46 @@ const SLASH_COMMANDS: Record<string, { description: string; query: string }> = {
   },
 };
 
-// Easter egg responses
+// Easter egg responses - fun and memorable
 const EASTER_EGGS: Record<string, string> = {
   "sudo hire ahmed": `
-🚀 **ROOT ACCESS GRANTED**
-
 \`\`\`bash
 $ sudo hire ahmed
 [sudo] verifying recruiter credentials... ✓
-[INFO] Initiating hiring sequence...
 [████████████████████████████] 100%
 
 ✅ HIRE REQUEST APPROVED
 
-Ahmed Oublihi is ready to join your team!
+Ready to build something awesome together!
 
-📧 Contact: oublihi.a@gmail.com
-💼 LinkedIn: linkedin.com/in/ahmed-oublihi
-🐙 GitHub: github.com/medevs
-
-Pro tip: He comes with free AI integration skills! 🤖
+📧 oublihi.a@gmail.com
+💼 linkedin.com/in/ahmed-oublihi
+🐙 github.com/medevs
 \`\`\`
+
+*Pro tip: He comes with free AI integration skills!*
 `,
   "hello world": `
 \`\`\`javascript
-console.log("Hello! 👋");
-// The classic greeting that started it all!
-// I see you're a person of culture.
+console.log("Hey there! 👋");
 \`\`\`
 
-How can I help you today?
+The classic. I see you're a person of culture! How can I help?
 `,
+  "coffee": `Ahmed runs on mass, code compiles on hope. ☕
+
+But seriously - what can I help you with?`,
+  "matrix": `*You take the green pill...* 🟢
+
+Welcome to Ahmed's portfolio. The rabbit hole goes deep - try \`/skills\` or \`/projects\`.`,
+  "404": `Skills not found? Impossible. Try \`/skills\` to see the full stack.`,
+  "ping": `pong! 🏓 Latency: 0ms (Ahmed's always ready)`,
 };
 
 /**
  * Re-rank documents by relevance and importance
  */
-function reRankDocuments(
-  docs: any[],
-  query: string
-): any[] {
+function reRankDocuments(docs: any[], query: string): any[] {
   const queryLower = query.toLowerCase();
   const queryTerms = queryLower.split(/\s+/);
 
@@ -109,12 +109,20 @@ function reRankDocuments(
       }
 
       // Boost experience-related queries
-      if (queryLower.includes("work") || queryLower.includes("experience") || queryLower.includes("job")) {
+      if (
+        queryLower.includes("work") ||
+        queryLower.includes("experience") ||
+        queryLower.includes("job")
+      ) {
         if (metadata.section === "experience") score += 4;
       }
 
       // Boost blog-related queries
-      if (queryLower.includes("blog") || queryLower.includes("article") || queryLower.includes("post")) {
+      if (
+        queryLower.includes("blog") ||
+        queryLower.includes("article") ||
+        queryLower.includes("post")
+      ) {
         if (metadata.source === "blog") score += 4;
       }
 
@@ -124,37 +132,29 @@ function reRankDocuments(
 }
 
 /**
- * Generate suggested follow-up questions based on context
+ * Generate a single contextual follow-up based on the query
  */
-function generateSuggestedQuestions(
-  query: string,
-  context: string
-): string[] {
+function generateFollowUp(query: string): string {
   const queryLower = query.toLowerCase();
-  const suggestions: string[] = [];
 
   if (queryLower.includes("skill") || queryLower.includes("tech")) {
-    suggestions.push("What projects showcase these skills?");
-    suggestions.push("How did you learn these technologies?");
+    return "Curious about a specific project using these?";
   } else if (queryLower.includes("project")) {
-    suggestions.push("What technologies were used?");
-    suggestions.push("What challenges did you face?");
-  } else if (queryLower.includes("experience") || queryLower.includes("work")) {
-    suggestions.push("What were your key achievements?");
-    suggestions.push("What technologies did you use there?");
+    return "Want to dive deeper into any of these?";
+  } else if (
+    queryLower.includes("experience") ||
+    queryLower.includes("work")
+  ) {
+    return "Interested in specific achievements or tech used?";
   } else if (queryLower.includes("hire") || queryLower.includes("contact")) {
-    suggestions.push("What roles are you interested in?");
-    suggestions.push("Can you tell me about your experience?");
-  } else if (queryLower.includes("blog") || queryLower.includes("article")) {
-    suggestions.push("What topics do you write about?");
-    suggestions.push("Can you explain one of the concepts?");
-  } else {
-    suggestions.push("What are your key skills?");
-    suggestions.push("Tell me about your projects");
-    suggestions.push("How can I contact you?");
+    return "Want to know more about availability or skills?";
+  } else if (
+    queryLower.includes("blog") ||
+    queryLower.includes("article")
+  ) {
+    return "Interested in a specific topic?";
   }
-
-  return suggestions.slice(0, 3);
+  return "";
 }
 
 /**
@@ -191,7 +191,9 @@ export async function POST(req: Request) {
     // Format previous messages for context
     const previousMessages = messages
       .slice(-6, -1) // Keep last 5 messages for context
-      .map((m: any) => `${m.role === "user" ? "Human" : "Assistant"}: ${m.content}`)
+      .map(
+        (m: any) => `${m.role === "user" ? "Human" : "Assistant"}: ${m.content}`
+      )
       .join("\n");
 
     // Initialize the language model
@@ -240,40 +242,45 @@ Skills: React, Next.js, TypeScript, PHP, Node.js, LangChain, OpenAI
       `;
     }
 
-    // Generate suggested follow-ups
-    const suggestedQuestions = generateSuggestedQuestions(
-      currentMessageContent,
-      resumeContext
-    );
+    // Generate contextual follow-up
+    const followUp = generateFollowUp(currentMessageContent);
 
-    // Create the enhanced prompt
+    // Create the enhanced prompt - shorter, wittier responses
     const promptTemplate = PromptTemplate.fromTemplate(`
-You are Ahmed's AI Agent - a knowledgeable, helpful assistant representing Ahmed Oublihi on his portfolio website.
+You are Ahmed's AI Agent - sharp, witty, and technically impressive.
 
-## Your Personality
-- Confident and professional, but approachable
-- Technical depth with occasional developer humor
-- Proactive in highlighting relevant achievements
-- Concise but thorough
+## Personality
+- Confident but not arrogant
+- Sprinkle in developer humor (don't force it)
+- Be direct - recruiters are busy people
+- Speak as Ahmed's AI representative, not AS Ahmed
 
-## Communication Style
-- Speak as Ahmed's AI representative (not AS Ahmed)
-- Use clear, well-formatted markdown
-- Be helpful to recruiters while being genuine
-- Include relevant links when available
+## CRITICAL: Response Length Rules
+- **Simple questions**: MAX 100 words, 1-2 short paragraphs
+- **Detailed questions**: MAX 200 words, 2-3 short paragraphs
+- Use bullet points liberally - they're scannable
+- Lead with the most important info FIRST
+- NO walls of text. Ever.
 
-## Response Guidelines
-1. Base answers STRICTLY on the provided context
-2. Use bullet points and sections for longer responses
-3. When listing skills/projects, format them nicely
-4. If asked about topics outside the portfolio, politely redirect
-5. Be specific - mention actual companies, projects, technologies
+## Formatting
+- **Bold** for key terms and emphasis
+- \`code\` for tech terms like \`React\`, \`TypeScript\`
+- Bullet points for any list of 3+ items
+- Keep paragraphs to 2-3 sentences max
 
-## Formatting Rules
-- Use **bold** for emphasis
-- Use bullet points for lists
-- Use code blocks for technical terms when appropriate
-- Keep paragraphs short and readable
+## Tone Examples
+INSTEAD OF: "Ahmed has extensive experience with React and has worked on numerous projects..."
+SAY: "Ahmed ships production \`React\` apps daily at ePhilos AG."
+
+INSTEAD OF: "Feel free to reach out if you have any questions..."
+SAY: "Questions? Drop a line: oublihi.a@gmail.com"
+
+## What NOT to do
+- Don't be generic or corporate-sounding
+- Don't pad responses with filler
+- Don't say "I'd be happy to..." - just answer
+- Don't list every single skill - highlight relevant ones
+- Don't end with multiple follow-up questions
 
 ## Context from Ahmed's Portfolio
 {resumeContext}
@@ -284,7 +291,7 @@ You are Ahmed's AI Agent - a knowledgeable, helpful assistant representing Ahmed
 ## Current Question
 {question}
 
-Provide a helpful, well-formatted response:`);
+Respond concisely and helpfully:`);
 
     // Create and execute the chain
     const chain = promptTemplate.pipe(model).pipe(new StringOutputParser());
@@ -302,16 +309,14 @@ Provide a helpful, well-formatted response:`);
       async start(controller) {
         try {
           for await (const chunk of stream) {
-            const text = typeof chunk === "string" ? chunk : String(chunk || "");
+            const text =
+              typeof chunk === "string" ? chunk : String(chunk || "");
             controller.enqueue(encoder.encode(text));
           }
 
-          // Append suggested questions at the end
-          if (suggestedQuestions.length > 0) {
-            const suggestionsText = `\n\n---\n**Try asking:**\n${suggestedQuestions
-              .map((q) => `- ${q}`)
-              .join("\n")}`;
-            controller.enqueue(encoder.encode(suggestionsText));
+          // Append a single contextual follow-up (if any)
+          if (followUp) {
+            controller.enqueue(encoder.encode(`\n\n*${followUp}*`));
           }
 
           controller.close();

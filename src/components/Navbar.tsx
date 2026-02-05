@@ -12,9 +12,9 @@ const socialLinks = [
 
 export default function Navbar() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-terminal-border bg-terminal-bg/95 backdrop-blur supports-[backdrop-filter]:bg-terminal-bg/80">
+    <header className="flex-shrink-0 z-50 w-full border-b border-terminal-border bg-terminal-bg/95 backdrop-blur supports-[backdrop-filter]:bg-terminal-bg/80">
       <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-14 items-center justify-between">
+        <div className="flex h-11 items-center justify-between">
           {/* Logo / Home link */}
           <Link
             href="/"

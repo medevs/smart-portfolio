@@ -1,7 +1,7 @@
 "use client";
 
 import AIChatButton from "./AIChatButton";
-import { Terminal, Heart } from "lucide-react";
+import { Heart } from "lucide-react";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -9,8 +9,8 @@ export default function Footer() {
   return (
     <>
       {/* Status bar footer */}
-      <footer className="fixed bottom-0 left-0 right-0 z-30 border-t border-terminal-border bg-terminal-bg/95 backdrop-blur">
-        <div className="container mx-auto px-4 h-8 flex items-center justify-between text-xs font-mono">
+      <footer className="flex-shrink-0 border-t border-terminal-border bg-terminal-bg/95 backdrop-blur">
+        <div className="container mx-auto px-4 h-7 flex items-center justify-between text-[11px] font-mono">
           {/* Left side */}
           <div className="flex items-center gap-4 text-terminal-muted">
             <span className="flex items-center gap-1.5">

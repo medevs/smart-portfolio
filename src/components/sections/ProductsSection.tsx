@@ -1,141 +1,138 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import TerminalWindow from "@/components/terminal/TerminalWindow";
-import CommandPrompt from "@/components/terminal/CommandPrompt";
+import { motion } from "framer-motion";
 import { products } from "@/data/products";
-import { ExternalLink, Folder, FolderOpen } from "lucide-react";
+import { ExternalLink, Github, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
+
+const statusColors = {
+  active: "bg-green-500/20 text-green-400 border-green-500/30",
+  building: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+  planned: "bg-slate-500/20 text-slate-400 border-slate-500/30",
+};
+
+const statusLabels = {
+  active: "Live",
+  building: "In Progress",
+  planned: "Coming Soon",
+};
 
 export default function ProductsSection() {
-  const [showContent, setShowContent] = useState(false);
-  const [typedText, setTypedText] = useState("");
-  const fullText = "ls ./products";
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          let index = 0;
-          const typingInterval = setInterval(() => {
-            if (index <= fullText.length) {
-              setTypedText(fullText.slice(0, index));
-              index++;
-            } else {
-              clearInterval(typingInterval);
-              setTimeout(() => setShowContent(true), 300);
-            }
-          }, 80);
-        }
-      },
-      { threshold: 0.5 }
-    );
-
-    const element = document.getElementById("products-section");
-    if (element) observer.observe(element);
-
-    return () => observer.disconnect();
-  }, []);
-
-  const statusColors = {
-    active: "text-green-400",
-    building: "text-yellow-400",
-    planned: "text-terminal-muted",
-  };
-
-  const statusLabels = {
-    active: "LIVE",
-    building: "WIP",
-    planned: "SOON",
-  };
+  const featuredProject = products[0];
+  const otherProjects = products.slice(1);
 
   return (
-    <section id="products-section" className="py-8 px-4">
-      <TerminalWindow title="products" className="max-w-4xl mx-auto">
-        <div className="space-y-4">
-          {/* Command */}
-          <CommandPrompt>
-            <span>{typedText}</span>
-            {!showContent && typedText.length > 0 && typedText.length < fullText.length && (
-              <span className="inline-block w-2 h-4 ml-0.5 bg-terminal-green animate-cursor-blink" />
-            )}
-          </CommandPrompt>
+    <div className="h-full flex flex-col gap-2">
+      {/* Featured Project */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="flex-1 min-h-0"
+      >
+        <Link
+          href={featuredProject.url || "#"}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group block h-full bento-card overflow-hidden card-shine"
+        >
+          <div className="relative h-full p-3 lg:p-4 flex flex-col">
+            {/* Background gradient */}
+            <div className="absolute inset-0 bg-gradient-to-br from-terminal-green/5 via-transparent to-terminal-cyan/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
-          {/* Output */}
-          {showContent && (
-            <div className="space-y-1 animate-fade-in">
-              {/* Header */}
-              <div className="text-terminal-muted text-xs mb-3">
-                total {products.length}
-              </div>
-
-              {/* Products list */}
-              {products.map((product, index) => (
-                <div
-                  key={product.name}
-                  className="group flex items-start gap-3 py-2 px-3 rounded-md
-                             hover:bg-terminal-bg-alt/50 transition-colors"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  {/* Icon */}
-                  <div className="flex-shrink-0 mt-0.5">
-                    <FolderOpen
-                      size={18}
-                      className="text-terminal-cyan group-hover:text-terminal-green transition-colors"
-                    />
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {/* Name */}
-                      {product.url ? (
-                        <Link
-                          href={product.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-terminal-green hover:underline flex items-center gap-1"
-                        >
-                          {product.name}
-                          <ExternalLink size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </Link>
-                      ) : (
-                        <span className="text-terminal-green">{product.name}</span>
-                      )}
-
-                      {/* Status badge */}
-                      <span
-                        className={`text-[10px] px-1.5 py-0.5 rounded uppercase font-semibold
-                                    ${statusColors[product.status]} bg-current/10`}
-                      >
-                        {statusLabels[product.status]}
-                      </span>
-                    </div>
-
-                    {/* Description */}
-                    <p className="text-terminal-muted text-sm mt-0.5">
-                      {product.description}
-                    </p>
-
-                    {/* Tech stack */}
-                    <div className="flex flex-wrap gap-1.5 mt-2">
-                      {product.tech.map((tech) => (
-                        <span
-                          key={tech}
-                          className="text-[10px] px-1.5 py-0.5 rounded
-                                     bg-terminal-bg border border-terminal-border text-terminal-cyan"
-                        >
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+            {/* Header */}
+            <div className="relative flex items-start justify-between gap-3 mb-2">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={`px-2 py-0.5 text-[9px] font-medium rounded-full border ${statusColors[featuredProject.status]}`}>
+                    {statusLabels[featuredProject.status]}
+                  </span>
+                  <span className="text-[9px] text-terminal-muted">Featured Project</span>
                 </div>
+                <h3 className="text-lg font-bold text-white group-hover:text-terminal-green transition-colors">
+                  {featuredProject.name}
+                </h3>
+              </div>
+              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-terminal-green/10 border border-terminal-green/30 flex items-center justify-center group-hover:bg-terminal-green/20 transition-colors">
+                <ArrowUpRight size={16} className="text-terminal-green group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              </div>
+            </div>
+
+            {/* Description */}
+            <p className="relative text-xs text-terminal-muted mb-2 line-clamp-1">
+              {featuredProject.description}
+            </p>
+
+            {/* Tech Stack */}
+            <div className="relative flex flex-wrap gap-1 mt-auto">
+              {featuredProject.tech.map((tech) => (
+                <span
+                  key={tech}
+                  className="px-1.5 py-0.5 text-[9px] font-medium rounded
+                             bg-white/5 border border-white/10 text-terminal-cyan
+                             group-hover:border-terminal-cyan/30 transition-colors"
+                >
+                  {tech}
+                </span>
               ))}
             </div>
-          )}
-        </div>
-      </TerminalWindow>
-    </section>
+          </div>
+        </Link>
+      </motion.div>
+
+      {/* Other Projects Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        {otherProjects.map((project, index) => (
+          <motion.div
+            key={project.name}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 + index * 0.1 }}
+          >
+            <Link
+              href={project.url || "#"}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group block bento-card p-2.5 lg:p-3 card-shine h-full"
+            >
+              <div className="flex items-start justify-between gap-2 mb-1">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <h4 className="text-xs lg:text-sm font-semibold text-white group-hover:text-terminal-green transition-colors truncate">
+                      {project.name}
+                    </h4>
+                    <span className={`flex-shrink-0 px-1.5 py-0.5 text-[8px] font-medium rounded border ${statusColors[project.status]}`}>
+                      {statusLabels[project.status]}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-terminal-muted line-clamp-1">
+                    {project.description}
+                  </p>
+                </div>
+              </div>
+
+              {/* Tech tags */}
+              <div className="flex flex-wrap gap-1">
+                {project.tech.slice(0, 3).map((tech) => (
+                  <span
+                    key={tech}
+                    className="px-1.5 py-0.5 text-[8px] rounded
+                               bg-white/5 border border-white/10 text-terminal-muted"
+                  >
+                    {tech}
+                  </span>
+                ))}
+                {project.tech.length > 3 && (
+                  <span className="px-1.5 py-0.5 text-[8px] text-terminal-muted">
+                    +{project.tech.length - 3}
+                  </span>
+                )}
+              </div>
+            </Link>
+          </motion.div>
+        ))}
+      </div>
+    </div>
   );
 }

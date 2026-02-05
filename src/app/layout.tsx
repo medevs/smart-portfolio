@@ -84,9 +84,9 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-          <div className="min-h-screen bg-background text-foreground">
+          <div className="h-screen flex flex-col overflow-hidden bg-background text-foreground">
             <Navbar />
-            <main className="mx-auto max-w-7xl">
+            <main className="flex-1 overflow-hidden">
               {children}
             </main>
             <Footer />
