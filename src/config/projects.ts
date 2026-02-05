@@ -8,6 +8,7 @@ export const projects: Project[] = [
     status: "active",
     url: "https://mentorclone.ai",
     tech: ["React", "Supabase", "OpenAI", "YouTube API"],
+    image: "/images/projects/mentorclone.png",
   },
   {
     name: "TalkTheDoc",
@@ -19,17 +20,11 @@ export const projects: Project[] = [
     image: "/images/projects/talkthedoc.png",
   },
   {
-    name: "Blog Genius",
-    description: "AI-powered tool for generating SEO-optimized blog articles",
-    status: "active",
-    url: "https://blog-genius.vercel.app",
-    tech: ["React", "Next.js", "OpenAI", "Node.js"],
-  },
-  {
     name: "Your Daily Way",
-    description: "High-performance blog with Astro & React",
+    description: "High-performance blog platform built with modern web technologies for optimal speed and SEO.",
     status: "active",
     url: "http://yourdailyway.com",
     tech: ["Astro", "React", "TypeScript", "Markdown"],
+    image: "/images/projects/yourdailyway.png",
   },
 ];
