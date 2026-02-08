@@ -5,9 +5,9 @@ export const heroContent: HeroContent = {
   greeting: "Hi, I'm",
   roles: [
     "Full Stack Developer",
+    "Agentic Coder",
     "AI Engineer",
     "Problem Solver",
-    "Tech Enthusiast",
   ],
   description: `Building intelligent software with modern web technologies. Specializing in React, Next.js, and AI/ML integration.`,
   ctaButtons: {

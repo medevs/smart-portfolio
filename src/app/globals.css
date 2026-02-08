@@ -28,11 +28,11 @@
     /* Terminal color palette - Light mode */
     --terminal-bg: 210 20% 98%;
     --terminal-bg-alt: 210 16% 93%;
-    --terminal-border: 214 32% 91%;
-    --terminal-green: 142 71% 45%;
-    --terminal-cyan: 199 89% 48%;
+    --terminal-border: 214 32% 88%;
+    --terminal-green: 152 69% 35%;
+    --terminal-cyan: 199 80% 40%;
     --terminal-text: 222 84% 5%;
-    --terminal-muted: 215 16% 47%;
+    --terminal-muted: 215 16% 40%;
     --terminal-glow: 142 71% 45%;
 
     /* Surface colors - Light mode */
@@ -43,6 +43,10 @@
     /* Card colors - Light mode */
     --card-bg: 0 0% 100%;
     --card-border: 214 32% 91%;
+
+    /* Inner card / sub-surface - Light mode */
+    --inner-card-bg: 220 14% 96%;
+    --inner-card-border: 214 25% 88%;
 
     /* Glass colors - Light mode */
     --glass-bg: 210 20% 98% / 0.8;
@@ -92,6 +96,10 @@
     /* Card colors - Dark mode */
     --card-bg: 222 47% 8%;
     --card-border: 0 0% 100% / 0.1;
+
+    /* Inner card / sub-surface - Dark mode */
+    --inner-card-bg: 220 30% 12%;
+    --inner-card-border: 220 20% 18%;
 
     /* Glass colors - Dark mode */
     --glass-bg: 222 47% 6% / 0.7;
@@ -422,6 +430,15 @@
 }
 
 .gradient-text {
+  background: linear-gradient(90deg, #00c96b, #00a8d6, #00c96b);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 3s ease infinite;
+}
+
+:is(.dark) .gradient-text {
   background: linear-gradient(90deg, #00ff88, #00d4ff, #00ff88);
   background-size: 200% auto;
   -webkit-background-clip: text;
@@ -584,17 +601,26 @@
   background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 212, 255, 0.1));
 }
 
-/* Bento card base */
+/* Bento card base - Apple-inspired */
 .bento-card {
-  @apply rounded-xl overflow-hidden;
-  @apply bg-card-theme-bg backdrop-blur-xl;
+  @apply rounded-2xl overflow-hidden;
+  @apply bg-card-theme-bg;
   @apply border border-card-theme-border;
-  @apply hover:border-terminal-green/30;
-  @apply transition-all duration-300;
+  @apply transition-all duration-500 ease-out;
   min-height: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
 }
 
 .bento-card:hover {
-  @apply shadow-lg;
-  box-shadow: 0 20px 40px -20px hsl(var(--terminal-green) / 0.15);
+  border-color: hsl(var(--terminal-green) / 0.25);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
+  transform: translateY(-1px);
+}
+
+:is(.dark) .bento-card {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+}
+
+:is(.dark) .bento-card:hover {
+  box-shadow: 0 8px 30px rgba(0,0,0,0.4), 0 0 20px hsl(var(--terminal-green) / 0.06);
 }

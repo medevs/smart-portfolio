@@ -77,6 +77,11 @@ const config: Config = {
           bg: "hsl(var(--card-bg))",
           border: "hsl(var(--card-border))",
         },
+        // Inner card colors (sub-surfaces inside bento cards)
+        "inner-card": {
+          bg: "hsl(var(--inner-card-bg))",
+          border: "hsl(var(--inner-card-border))",
+        },
         // Glass effect colors
         glass: {
           bg: "hsl(var(--glass-bg))",

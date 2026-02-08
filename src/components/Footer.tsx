@@ -11,7 +11,7 @@ export default function Footer() {
     <>
       {/* Status bar footer */}
       <footer className="flex-shrink-0 border-t border-terminal-border bg-terminal-bg/95 backdrop-blur">
-        <div className="container mx-auto px-4 h-7 flex items-center justify-between text-[11px] font-mono">
+        <div className="max-w-[1440px] mx-auto px-3 md:px-4 lg:px-6 h-7 flex items-center justify-between text-[11px] font-mono">
           {/* Left side */}
           <div className="flex items-center gap-4 text-terminal-muted">
             <span className="flex items-center gap-1.5">

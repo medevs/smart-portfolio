@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Code2, Server, Database, Brain, LucideIcon } from "lucide-react";
 import { skillCategories } from "@/config";
 
@@ -13,111 +12,72 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 export default function SkillsSection() {
-  const [activeCategory, setActiveCategory] = useState<string | null>(
-    "Frontend"
-  );
-
   return (
-    <div className="h-full bento-card p-2 lg:p-3 flex flex-col overflow-hidden">
+    <div className="h-full bento-card p-2.5 lg:p-3 flex flex-col overflow-hidden">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-1.5 mb-2"
+        className="flex items-center gap-1.5 mb-1.5 flex-shrink-0"
       >
-        <div className="w-6 h-6 rounded-lg bg-terminal-green/10 border border-terminal-green/30 flex items-center justify-center">
-          <Code2 size={12} className="text-terminal-green" />
+        <div className="w-5 h-5 rounded-lg bg-terminal-green/10 flex items-center justify-center">
+          <Code2 size={11} className="text-terminal-green" />
         </div>
-        <h2 className="text-sm font-semibold text-foreground">Skills</h2>
+        <h2 className="text-xs font-semibold text-foreground">Skills</h2>
       </motion.div>
 
-      {/* Category Tabs */}
-      <div className="flex flex-wrap gap-1 mb-2">
-        {skillCategories.map((category) => {
+      {/* All Categories Grid */}
+      <div className="flex-1 grid grid-cols-2 gap-2 min-h-0 overflow-y-auto scrollbar-hide">
+        {skillCategories.map((category, catIndex) => {
           const Icon = iconMap[category.icon] || Code2;
-          const isActive = activeCategory === category.name;
           return (
-            <button
-              key={category.name}
-              onClick={() => setActiveCategory(isActive ? null : category.name)}
-              className={`
-                flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium
-                transition-all duration-200
-                ${
-                  isActive
-                    ? "bg-terminal-green/20 border-terminal-green/50 text-terminal-green"
-                    : "bg-white/5 border-card-theme-border text-terminal-muted hover:text-foreground"
-                }
-                border
-              `}
-            >
-              <Icon size={10} />
-              {category.name}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Skills Display */}
-      <div className="flex-1 overflow-y-auto scrollbar-hide min-h-0">
-        <AnimatePresence mode="wait">
-          {activeCategory ? (
             <motion.div
-              key={activeCategory}
-              initial={{ opacity: 0, y: 5 }}
+              key={category.name}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -5 }}
-              transition={{ duration: 0.15 }}
-              className="space-y-1.5"
+              transition={{ delay: 0.05 + catIndex * 0.05 }}
+              className="flex flex-col gap-1"
             >
-              {skillCategories
-                .find((c) => c.name === activeCategory)
-                ?.skills.map((skill, index) => (
-                  <motion.div
-                    key={skill.name}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.03 }}
-                  >
+              {/* Category Label */}
+              <div className="flex items-center gap-1">
+                <Icon
+                  size={9}
+                  className="text-terminal-green flex-shrink-0"
+                />
+                <span className="text-[8px] lg:text-[9px] font-semibold text-foreground truncate">
+                  {category.name}
+                </span>
+              </div>
+
+              {/* Skills */}
+              <div className="space-y-1">
+                {category.skills.map((skill, index) => (
+                  <div key={skill.name}>
                     <div className="flex items-center justify-between mb-0.5">
-                      <span className="text-[11px] text-foreground">
+                      <span className="text-[8px] lg:text-[9px] text-foreground/80">
                         {skill.name}
                       </span>
-                      <span className="text-[9px] text-terminal-muted">
+                      <span className="text-[7px] lg:text-[8px] text-terminal-muted tabular-nums">
                         {skill.level}%
                       </span>
                     </div>
-                    <div className="h-1 bg-foreground/10 rounded-full overflow-hidden">
+                    <div className="h-1 bg-inner-card-bg border border-inner-card-border rounded-full overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${skill.level}%` }}
-                        transition={{ duration: 0.5, delay: index * 0.03 }}
+                        transition={{
+                          duration: 0.5,
+                          delay: 0.1 + catIndex * 0.08 + index * 0.03,
+                        }}
                         className="h-full bg-gradient-to-r from-terminal-green to-terminal-cyan rounded-full"
                       />
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
+              </div>
             </motion.div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex flex-wrap gap-1"
-            >
-              {skillCategories.flatMap((category) =>
-                category.skills.map((skill) => (
-                  <span
-                    key={skill.name}
-                    className="px-2 py-1 rounded text-[10px] font-medium
-                               bg-white/5 border border-card-theme-border text-terminal-muted"
-                  >
-                    {skill.name}
-                  </span>
-                ))
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+          );
+        })}
       </div>
     </div>
   );

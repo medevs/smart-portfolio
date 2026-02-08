@@ -14,7 +14,7 @@ const iconMap: Record<string, LucideIcon> = {
 export default function Navbar() {
   return (
     <header className="flex-shrink-0 z-50 w-full border-b border-terminal-border bg-terminal-bg/95 backdrop-blur supports-[backdrop-filter]:bg-terminal-bg/80">
-      <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <nav className="max-w-[1440px] mx-auto px-3 md:px-4 lg:px-6">
         <div className="flex h-11 items-center justify-between">
           {/* Logo / Home link */}
           <Link

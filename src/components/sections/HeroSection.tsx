@@ -26,7 +26,12 @@ export default function HeroSection() {
   const [displayText, setDisplayText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
 
-  const roles = heroContent.roles;
+  const roles = [
+    "Full Stack Developer",
+    "Agentic Coder",
+    "AI Engineer",
+    "Problem Solver",
+  ];
 
   useEffect(() => {
     const currentRole = roles[roleIndex];
@@ -57,7 +62,7 @@ export default function HeroSection() {
   }, [displayText, isTyping, roleIndex, roles]);
 
   return (
-    <div className="h-full bento-card p-2.5 sm:p-3 md:p-4 lg:p-5 flex flex-col justify-between relative overflow-hidden">
+    <div className="h-full bento-card p-3 md:p-3.5 lg:p-4 xl:p-5 flex flex-col relative overflow-hidden">
       {/* Background gradient effects */}
       <div className="absolute inset-0 bg-gradient-to-br from-terminal-green/5 via-transparent to-terminal-cyan/5" />
       <div className="absolute top-0 right-0 w-64 h-64 bg-terminal-green/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
@@ -67,9 +72,9 @@ export default function HeroSection() {
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.1 }}
-        className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 md:top-4 md:right-4 z-20"
+        className="absolute top-3 right-3 md:top-3.5 md:right-3.5 lg:top-4 lg:right-4 z-20"
       >
-        <div className="relative w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 rounded-full overflow-hidden border-2 border-terminal-green/50 shadow-lg shadow-terminal-green/20">
+        <div className="relative w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 xl:w-20 xl:h-20 rounded-full overflow-hidden border-2 border-terminal-green/50 shadow-lg shadow-terminal-green/20">
           <Image
             src={personalInfo.profileImage}
             alt={personalInfo.fullName}
@@ -81,19 +86,21 @@ export default function HeroSection() {
         </div>
       </motion.div>
 
-      <div className="relative z-10 space-y-0.5 sm:space-y-1 md:space-y-1.5 lg:space-y-2 pr-14 sm:pr-16 md:pr-20 lg:pr-24">
+      {/* Main content - flex-1 to take available space, with auto overflow */}
+      <div className="relative z-10 flex-1 min-h-0 flex flex-col gap-0.5 md:gap-1 lg:gap-1.5 pr-12 sm:pr-14 md:pr-16 lg:pr-20 xl:pr-24">
         {/* Availability Badge */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
+          className="flex-shrink-0"
         >
-          <span className="inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-terminal-green/10 border border-terminal-green/30">
-            <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-terminal-green/10 border border-terminal-green/30">
+            <span className="relative flex h-1.5 w-1.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-terminal-green opacity-75" />
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-terminal-green" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-terminal-green" />
             </span>
-            <span className="text-[9px] sm:text-[10px] md:text-xs font-medium text-terminal-green">
+            <span className="text-[8px] md:text-[9px] lg:text-[10px] font-medium text-terminal-green">
               {personalInfo.availability.message}
             </span>
           </span>
@@ -104,8 +111,9 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
+          className="flex-shrink-0"
         >
-          <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold">
+          <h1 className="text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold leading-tight">
             <span className="text-foreground">{heroContent.greeting} </span>
             <span className="gradient-text">{personalInfo.firstName}</span>
           </h1>
@@ -116,12 +124,12 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="min-h-4 sm:min-h-5 md:min-h-6 lg:min-h-7"
+          className="flex-shrink-0"
         >
-          <p className="text-[11px] sm:text-xs md:text-sm lg:text-base text-terminal-muted font-mono">
+          <p className="text-[11px] md:text-xs lg:text-sm text-terminal-muted font-mono">
             <span className="text-terminal-cyan">&gt;</span>{" "}
             <span className="text-foreground">{displayText}</span>
-            <span className="inline-block w-0.5 h-3 sm:h-3.5 md:h-4 lg:h-5 ml-0.5 bg-terminal-green animate-cursor-blink align-middle" />
+            <span className="inline-block w-0.5 h-3 md:h-3.5 lg:h-4 ml-0.5 bg-terminal-green animate-cursor-blink align-middle" />
           </p>
         </motion.div>
 
@@ -130,71 +138,68 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="flex flex-wrap items-center gap-x-2 gap-y-0.5 sm:gap-x-3 md:gap-x-4 text-[10px] sm:text-[11px] md:text-xs lg:text-sm text-terminal-muted"
+          className="flex-shrink-0 flex flex-col gap-0.5 text-[10px] md:text-[11px] lg:text-xs text-terminal-muted"
         >
           <span className="flex items-center gap-1">
-            <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-terminal-green flex-shrink-0" />
+            <MapPin className="w-3 h-3 text-terminal-green flex-shrink-0" />
             <span>{personalInfo.location.display}</span>
           </span>
           <a
             href={`mailto:${personalInfo.email}`}
-            className="flex items-center gap-1 hover:text-terminal-cyan transition-colors"
+            className="flex items-center gap-1 hover:text-terminal-cyan transition-colors min-w-0"
           >
-            <Mail className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-terminal-cyan flex-shrink-0" />
-            <span className="break-all">{personalInfo.email}</span>
+            <Mail className="w-3 h-3 text-terminal-cyan flex-shrink-0" />
+            <span className="truncate">{personalInfo.email}</span>
           </a>
         </motion.div>
 
-        {/* Brief Description - Hidden on small screens to save space */}
+        {/* Brief Description - Always visible, responsive sizing */}
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="hidden md:block text-terminal-text/80 text-[11px] md:text-xs lg:text-sm leading-relaxed max-w-md"
+          className="text-terminal-muted text-[8px] sm:text-[9px] md:text-[10px] lg:text-[11px] xl:text-xs leading-relaxed flex-shrink-0"
         >
-          Building intelligent software with modern web technologies.
-          Specializing in <span className="text-terminal-cyan">React</span>,{" "}
-          <span className="text-terminal-cyan">Next.js</span>, and{" "}
-          <span className="text-terminal-cyan">AI/ML</span> integration.
+          Building software at the speed of thought with{" "}
+          <span className="text-terminal-cyan">AI-native</span> tools.
+          Shipping production code with{" "}
+          <span className="text-terminal-cyan">Claude Code</span> &{" "}
+          <span className="text-terminal-cyan">agentic workflows</span>.
         </motion.p>
       </div>
 
-      {/* Bottom: Social Links & CTA */}
+      {/* Bottom: Social Links - always pinned to bottom */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.7 }}
-        className="relative z-10 flex flex-wrap items-center gap-1.5 sm:gap-2 pt-1 sm:pt-2"
+        className="relative z-10 flex-shrink-0 flex items-center gap-1 md:gap-1.5 pt-1.5"
       >
-        {/* Social Links */}
-        <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2">
-          {socialLinks.map((link, index) => {
-            const Icon = iconMap[link.name] || ExternalLink;
-            return (
-              <motion.div
-                key={link.name}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.8 + index * 0.1 }}
+        {socialLinks.map((link, index) => {
+          const Icon = iconMap[link.name] || ExternalLink;
+          return (
+            <motion.div
+              key={link.name}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.8 + index * 0.1 }}
+            >
+              <Link
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center w-7 h-7 md:w-8 md:h-8 lg:w-9 lg:h-9 rounded-lg
+                           bg-inner-card-bg border border-inner-card-border
+                           hover:bg-terminal-green/10 hover:border-terminal-green/50
+                           text-terminal-muted hover:text-terminal-green
+                           transition-all duration-300 icon-glow"
+                aria-label={link.name}
               >
-                <Link
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-9 lg:h-9 rounded-md sm:rounded-lg
-                             bg-white/5 border border-card-theme-border
-                             hover:bg-terminal-green/10 hover:border-terminal-green/50
-                             text-terminal-muted hover:text-terminal-green
-                             transition-all duration-300 icon-glow"
-                  aria-label={link.name}
-                >
-                  <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-[18px] md:h-[18px]" />
-                </Link>
-              </motion.div>
-            );
-          })}
-        </div>
-
+                <Icon className="w-3.5 h-3.5 md:w-4 md:h-4" />
+              </Link>
+            </motion.div>
+          );
+        })}
       </motion.div>
     </div>
   );

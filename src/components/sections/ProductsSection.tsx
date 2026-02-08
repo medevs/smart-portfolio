@@ -7,9 +7,9 @@ import Link from "next/link";
 import Image from "next/image";
 
 const statusColors = {
-  active: "bg-green-500/20 text-green-400 border-green-500/30",
-  building: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-  planned: "bg-slate-500/20 text-slate-400 border-slate-500/30",
+  active: "bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 border-green-300 dark:border-green-500/30",
+  building: "bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-300 dark:border-yellow-500/30",
+  planned: "bg-slate-100 dark:bg-slate-500/20 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-500/30",
 };
 
 const statusLabels = {
@@ -20,7 +20,7 @@ const statusLabels = {
 
 export default function ProductsSection() {
   return (
-    <div className="h-full flex flex-col md:flex-row gap-3 overflow-y-auto md:overflow-visible">
+    <div className="h-full flex flex-col md:flex-row gap-2.5 overflow-y-auto md:overflow-visible">
       {projects.map((project, index) => (
         <motion.div
           key={project.name}
@@ -33,7 +33,7 @@ export default function ProductsSection() {
             href={project.url || "#"}
             target="_blank"
             rel="noopener noreferrer"
-            className="group block h-full rounded-xl border border-card-theme-border bg-products-bg overflow-hidden hover:border-terminal-green/40 transition-all duration-300 relative"
+            className="group block h-full rounded-2xl border border-card-theme-border bg-products-bg overflow-hidden hover:border-terminal-green/30 transition-all duration-500 relative"
           >
             {/* Full Image Background */}
             <div className="absolute inset-0 flex items-center justify-center p-3 pb-28">
@@ -62,14 +62,14 @@ export default function ProductsSection() {
                 {statusLabels[project.status]}
               </span>
               {index === 0 && (
-                <span className="px-2 py-0.5 text-[8px] lg:text-[9px] text-foreground/80 bg-surface-elevated/50 backdrop-blur-sm rounded-full border border-card-theme-border">
+                <span className="px-2 py-0.5 text-[8px] lg:text-[9px] text-gray-700 dark:text-foreground/80 bg-white/70 dark:bg-white/10 backdrop-blur-sm rounded-full border border-black/10 dark:border-white/10">
                   Featured
                 </span>
               )}
             </div>
 
             {/* Arrow indicator - Top Right */}
-            <div className="absolute top-3 right-3 w-7 h-7 rounded-lg bg-surface-elevated/50 backdrop-blur-sm border border-card-theme-border flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
+            <div className="absolute top-3 right-3 w-7 h-7 rounded-lg bg-white/70 dark:bg-white/10 backdrop-blur-sm border border-black/10 dark:border-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
               <ArrowUpRight
                 size={14}
                 className="text-foreground group-hover:text-terminal-green transition-colors"
@@ -91,14 +91,14 @@ export default function ProductsSection() {
                   <span
                     key={tech}
                     className="px-1.5 py-0.5 text-[7px] lg:text-[8px] font-medium rounded
-                               bg-surface-elevated/40 border border-card-theme-border text-terminal-cyan
-                               backdrop-blur-sm"
+                               bg-white/80 dark:bg-white/10 border border-black/10 dark:border-white/10
+                               text-gray-700 dark:text-terminal-cyan backdrop-blur-sm"
                   >
                     {tech}
                   </span>
                 ))}
                 {project.tech.length > 3 && (
-                  <span className="px-1 py-0.5 text-[7px] lg:text-[8px] text-foreground/50">
+                  <span className="px-1 py-0.5 text-[7px] lg:text-[8px] text-foreground/70 dark:text-foreground/50">
                     +{project.tech.length - 3}
                   </span>
                 )}
