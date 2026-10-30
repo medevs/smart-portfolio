@@ -1,4 +1,4 @@
-import { sprites } from "./sprites";
+import { isSpriteId } from "./spriteIds";
 import { items } from "./items";
 import { plots } from "./plots";
 import { FARM_WORLD, GROUND_GRID, plotAnchor } from "./grid";
@@ -57,7 +57,7 @@ export function assertFarm(data: FarmData) {
   for (const item of data.items) {
     if (ids.has(item.id)) throw new Error(`Duplicate item id "${item.id}"`);
     ids.add(item.id);
-    if (!(item.sprite in sprites)) {
+    if (!isSpriteId(item.sprite)) {
       throw new Error(`Item "${item.id}" uses missing sprite "${item.sprite}"`);
     }
     if (item.id === "reelstyles" && (item.forSale || item.sku || item.landmark)) {

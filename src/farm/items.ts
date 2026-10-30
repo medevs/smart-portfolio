@@ -213,6 +213,7 @@ export const items: FarmItem[] = [
   { id: "chicken", name: "Chicken", label: "Chicken", sprite: "chicken", visual: { w: 70, h: 70 } },
   { id: "hen", name: "Hen", label: "Hen", sprite: "hen", visual: { w: 70, h: 70 } },
   { id: "cow", name: "Cow", label: "Cow", sprite: "cow", visual: { w: 140, h: 110 } },
+  { id: "sheep", name: "Sheep", label: "Sheep", sprite: "sheep", visual: { w: 90, h: 70 } },
   { id: "cat", name: "Cat", label: "Cat", sprite: "cat", visual: { w: 80, h: 70 } },
   { id: "tractor", name: "Tractor", label: "Tractor", sprite: "tractor", visual: { w: 160, h: 110 } },
   { id: "fence", name: "Fence", label: "Fence", sprite: "fence", visual: { w: 120, h: 50 } },

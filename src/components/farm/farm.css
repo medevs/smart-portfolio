@@ -14,14 +14,101 @@ html[data-farm-phase="color"] .farm-root {
   background: #241448;
 }
 
-.farm-scroll {
+.farm-stage {
   position: absolute;
   inset: 0 0 28px;
-  overflow: auto;
-  cursor: grab;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(80, 50, 40, 0.35) transparent;
+  background: #1a1428;
+}
+
+.farm-stage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.farm-loader {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(255, 176, 122, 0.18), transparent 42%),
+    #161222;
+  color: #fffaf3;
+  transition: opacity 0.7s ease;
+}
+
+.farm-loader.is-done {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loader-kicker {
+  margin: 0;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: #ffd7b0;
+}
+
+.loader-title {
+  margin: 0;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+}
+
+.loader-track {
+  width: min(280px, 70vw);
+  height: 4px;
+  margin-top: 12px;
+  border-radius: 99px;
+  background: rgba(255, 250, 244, 0.16);
+  overflow: hidden;
+}
+
+.loader-bar {
+  height: 100%;
+  width: 40%;
+  border-radius: inherit;
+  background: #ffb06a;
+  animation: load 1.1s ease-in-out infinite;
+}
+
+@keyframes load {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(320%); }
+}
+
+.float-label,
+.float-name,
+.float-note {
+  background: rgba(255, 250, 244, 0.94);
+  color: #2a211c;
+  border: 2px solid #3a2c24;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 14px;
+  font-weight: 650;
+  white-space: nowrap;
+  box-shadow: 0 8px 24px rgba(20, 10, 20, 0.18);
+}
+
+.float-name {
+  text-decoration: none;
+  pointer-events: auto;
+}
+
+.float-note {
+  border-radius: 12px;
+  max-width: 180px;
+  white-space: normal;
+  text-align: center;
 }
 
 .farm-scroll.is-dragging {
