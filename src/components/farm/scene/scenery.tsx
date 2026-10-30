@@ -14,10 +14,6 @@ type Spot = {
 
 /** Models that have to be in before the loader finishes. */
 export const CORE_PROPS: Spot[] = [
-  { file: "island_tree_02", position: [-15, 0, -8], height: 8, rotation: 0.4 },
-  { file: "island_tree_02", position: [-12, 0, -11], height: 6.5, rotation: 1.2 },
-  { file: "island_tree_02", position: [15, 0, -9], height: 7.5, rotation: 2.1 },
-  { file: "island_tree_02", position: [18, 0, -5], height: 5.5, rotation: 0.8 },
   { file: "shrub_02", position: [-4.2, 0, 5.2], height: 1.15, rotation: 0.3 },
   { file: "shrub_03", position: [6.4, 0, 5.6], height: 0.9 },
   { file: "shrub_04", position: [9.2, 0, 4.8], height: 1.05, rotation: 1 },
@@ -29,13 +25,10 @@ export const CORE_PROPS: Spot[] = [
   { file: "rock_09", position: [11, 0, 3.5], height: 0.4 },
   { file: "Barrel_01", position: [2.4, 0, 0.2], height: 0.85, rotation: 0.4 },
   { file: "wooden_crate_01", position: [3.1, 0, 0.7], height: 0.55 },
-  { file: "Rockingchair_01", position: [-9.6, 0, 0.15], height: 0.95, rotation: 0.4 },
 ];
 
 /** The rest of the yard, mounted after the first frame so the visit can start. */
 export const EXTRA_PROPS: Spot[] = [
-  { file: "island_tree_02", position: [-18, 0, -2], height: 9, rotation: 2.4 },
-  { file: "island_tree_02", position: [13, 0, -13], height: 8, rotation: 0.2 },
   { file: "shrub_01", position: [-6, 0, -6], height: 1.6 },
   { file: "tree_stump_01", position: [7.5, 0, -4], height: 0.55 },
   { file: "boulder_01", position: [16, 0, 2], height: 1.3, rotation: 0.8 },
@@ -45,7 +38,6 @@ export const EXTRA_PROPS: Spot[] = [
   { file: "nettle_plant", position: [-7, 0, 4.5], height: 0.7 },
   { file: "grass_medium_01", position: [8, 0, -1], height: 0.55 },
   { file: "wooden_barrels_01", position: [3.6, 0, -0.6], height: 1.1 },
-  { file: "wine_barrel_01", position: [-8.2, 0, -1.2], height: 0.8 },
   { file: "wooden_crate_02", position: [2.6, 0, 1.1], height: 0.45 },
   { file: "wooden_bucket_01", position: [-10.4, 0, 0.8], height: 0.35 },
   { file: "wooden_bucket_02", position: [4.2, 0, 1.4], height: 0.4 },
@@ -53,14 +45,12 @@ export const EXTRA_PROPS: Spot[] = [
   { file: "wooden_ladder", position: [3.4, 0, -1.6], height: 2.2, rotation: 0.15 },
   { file: "wooden_lantern_01", position: [-10.8, 0, -0.4], height: 0.55 },
   { file: "rusted_spade_01", position: [1.2, 0, 3.6], height: 1.1 },
-  { file: "garden_gnome", position: [-8.6, 0, 1.6], height: 0.55 },
   { file: "planter_box_01", position: [-11.5, 0, 1.2], height: 0.45 },
   { file: "planter_box_02", position: [5.5, 0, -2.5], height: 0.5 },
   { file: "painted_wooden_bench", position: [6.8, 0, 3.2], height: 0.85, rotation: 0.2 },
   { file: "wooden_picnic_table", position: [8.5, 0, 2.2], height: 0.8 },
   { file: "stone_fire_pit", position: [-2.2, 0, 3.4], height: 0.45 },
   { file: "propane_tank", position: [12, 0, -1], height: 1.1 },
-  { file: "street_lamp_01", position: [1.6, 0, 11], height: 4.2 },
   { file: "modular_wooden_pier", position: [-16.2, 0, 2.4], height: 0.6, rotation: 0.15 },
   { file: "wicker_basket_01", position: [-10, 0, 1.5], height: 0.35 },
   { file: "moss_01", position: [-9, 0, 5.5], height: 0.15 },
@@ -123,17 +113,6 @@ export function Horizon() {
           <meshStandardMaterial color={color} roughness={1} />
         </mesh>
       ))}
-      {[
-        [-18, -48, 16],
-        [-4, -52, 22],
-        [14, -46, 18],
-        [30, -50, 14],
-      ].map(([x, z, h], i) => (
-        <mesh key={`mt-${i}`} position={[x, h * 0.15, z]}>
-          <coneGeometry args={[h * 0.7, h, 6]} />
-          <meshStandardMaterial color={i % 2 ? "#8d97a3" : "#6e7c8a"} roughness={1} />
-        </mesh>
-      ))}
       <mesh rotation={[-Math.PI / 2, 0, 0.04]} position={[1.2, 0.03, 16]} receiveShadow>
         <planeGeometry args={[3.2, 28]} />
         <meshStandardMaterial color="#8b6844" roughness={1} />
@@ -169,7 +148,7 @@ export function Horizon() {
 export function MillWorks() {
   return (
     <group>
-      <MillWheel />
+
       <Well />
       <Gate />
     </group>

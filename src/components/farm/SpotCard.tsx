@@ -108,7 +108,7 @@ export function ShopDialog({
             <h2>Help build the farm</h2>
           </Dialog.Title>
           <Dialog.Description className="pitch">
-            Buy a post, a flower, an animal, or a plot. Landmarks have one sponsor at a time. The red barn is
+            Buy a post, a flower, an animal, or a plot. Landmarks have one sponsor at a time. The courtyard workshop is
             ReelStyles and is not for sale.
           </Dialog.Description>
           <ul className="shop-list">

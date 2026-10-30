@@ -5,7 +5,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { CapsuleCollider, CuboidCollider, Physics, RigidBody, useRapier } from "@react-three/rapier";
 import type { RapierRigidBody } from "@react-three/rapier";
 import * as THREE from "three";
-import { TRACTOR, walk } from "./walk-state";
+import { resetWalkInput, TRACTOR, walk, walkingMovement } from "./walk-state";
 
 const BLOCKS: { position: [number, number, number]; args: [number, number, number] }[] = [
   { position: [1.1, 1.6, -2.2], args: [3.1, 1.6, 2.1] },
@@ -16,22 +16,38 @@ const BLOCKS: { position: [number, number, number]; args: [number, number, numbe
 ];
 
 const keys = { w: false, a: false, s: false, d: false };
-let toggleDrive = false;
+function resetInput() {
+  keys.w = keys.a = keys.s = keys.d = false;
+  resetWalkInput();
+}
+
+function isEditing(target: EventTarget | null) {
+  return target instanceof HTMLElement && Boolean(target.closest("input, textarea, select, [contenteditable]:not([contenteditable='false']), [role='dialog']"));
+}
 
 export function PhysicsYard() {
   useEffect(() => {
     const down = (event: KeyboardEvent) => {
+      if (walk.paused || isEditing(event.target) || event.ctrlKey || event.metaKey || event.altKey) return;
       const key = event.key.toLowerCase();
       if (key === "w" || key === "a" || key === "s" || key === "d") keys[key] = true;
-      if (key === "f" && !event.repeat) toggleDrive = true;
+      if (key === "f" && !event.repeat) walk.toggleDrive = true;
     };
     const up = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
       if (key === "w" || key === "a" || key === "s" || key === "d") keys[key] = false;
     };
+    const onVisibility = () => {
+      if (document.hidden) resetInput();
+    };
+    window.addEventListener("blur", resetInput);
+    document.addEventListener("visibilitychange", onVisibility);
     window.addEventListener("keydown", down);
     window.addEventListener("keyup", up);
     return () => {
+      window.removeEventListener("blur", resetInput);
+      document.removeEventListener("visibilitychange", onVisibility);
+      resetInput();
       window.removeEventListener("keydown", down);
       window.removeEventListener("keyup", up);
       walk.driving = false;
@@ -56,6 +72,10 @@ export function PhysicsYard() {
 }
 
 function input() {
+  if (walk.paused) {
+    resetInput();
+    return { forward: 0, strafe: 0 };
+  }
   const forward = (keys.w || walk.stickY < -0.25 ? 1 : 0) - (keys.s || walk.stickY > 0.25 ? 1 : 0);
   const strafe = (keys.d || walk.stickX > 0.25 ? 1 : 0) - (keys.a || walk.stickX < -0.25 ? 1 : 0);
   return { forward, strafe };
@@ -75,7 +95,7 @@ function Player() {
     next.setSlideEnabled(true);
     controller.current = next;
     return () => {
-      next.free();
+      world.removeCharacterController(next);
       controller.current = null;
     };
   }, [world]);
@@ -84,16 +104,17 @@ function Player() {
     const rigid = body.current;
     const character = controller.current;
     if (!rigid || !character) return;
-    const here = rigid.translation();
+    let here = rigid.translation();
     const tractorX = TRACTOR.x + walk.tx;
     const tractorZ = TRACTOR.z + walk.tz;
-    if (toggleDrive) {
-      toggleDrive = false;
+    if (walk.toggleDrive && !walk.paused) {
+      walk.toggleDrive = false;
       const near = Math.hypot(here.x - tractorX, here.z - tractorZ) < 2.4;
       if (walk.driving || near) {
         walk.driving = !walk.driving;
         if (!walk.driving) {
-          rigid.setTranslation({ x: tractorX + 1.4, y: 1.2, z: tractorZ }, true);
+          here = { x: tractorX + 1.4, y: 1.2, z: tractorZ };
+          rigid.setTranslation(here, true);
           velocityY.current = 0;
         }
       }
@@ -103,12 +124,8 @@ function Player() {
     if (walk.driving) return;
 
     const { forward, strafe } = input();
-    const camYaw = walk.yaw;
-    const sin = Math.sin(camYaw);
-    const cos = Math.cos(camYaw);
-    const speed = 3.6;
-    const dx = (sin * forward + cos * strafe) * speed * dt;
-    const dz = (cos * forward - sin * strafe) * speed * dt;
+    dt = Math.min(dt, 0.05);
+    const { x: dx, z: dz } = walkingMovement(forward, strafe, dt);
     velocityY.current = Math.max(velocityY.current - 9.81 * dt, -20);
     const collider = rigid.collider(0);
     character.computeColliderMovement(collider, { x: dx, y: velocityY.current * dt, z: dz });
@@ -180,7 +197,8 @@ function FollowCam() {
   useFrame((_, dt) => {
     const x = walk.driving ? TRACTOR.x + walk.tx : walk.px;
     const z = walk.driving ? TRACTOR.z + walk.tz : walk.pz;
-    const yaw = walk.yaw;
+    // Keep the walking camera stable while strafing or backing up.
+    const yaw = walk.driving ? walk.yaw : Math.PI;
     const sin = Math.sin(yaw);
     const cos = Math.cos(yaw);
     look.current.set(x - sin * 6.2, walk.driving ? 3.8 : 3.2, z - cos * 6.2);

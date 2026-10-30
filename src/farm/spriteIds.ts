@@ -17,6 +17,7 @@ export const SPRITE_IDS = [
   "hen",
   "cow",
   "sheep",
+  "donkey",
   "cat",
   "dog",
   "tractor",

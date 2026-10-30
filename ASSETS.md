@@ -43,3 +43,10 @@ Animals, the barn, the house, the silo, and the windmill are still original proc
 ## Not from these libraries
 
 The sketch hatch, water tint, and sun shafts are original code.
+
+## Middle Atlas reference photographs
+
+The locally served photographs under `public/farm/references` retain their
+individual public-domain / Creative Commons licenses. Full author, license and
+source credits are in `src/data/morocco-references.json`, displayed at `/references`.
+See `MOROCCO-REFERENCES.md` for their role and redistribution requirements.

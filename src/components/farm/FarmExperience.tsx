@@ -1,18 +1,28 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { Component, useEffect, useMemo, useState, type ReactNode } from "react";
 import { formatMoney } from "@/config/shop";
 import { findSpot, fundRaised, placePlots } from "@/farm/loadFarm";
 import type { FarmData } from "@/farm/types";
 import { ShopDialog, SpotCard } from "./SpotCard";
 import type { LightMode } from "./scene/FarmCanvas";
-import { walk } from "./scene/walk-state";
+import { resetWalkInput, walk } from "./scene/walk-state";
 import "./farm.css";
 
 const FarmCanvas = dynamic(() => import("./scene/FarmCanvas"), { ssr: false });
 
 const BOOT = `(function(){try{var p=new URLSearchParams(location.search);var phase=p.get("phase");var time=p.get("time");var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;var spot=p.get("spot")||p.get("open");var onSpot=location.pathname.indexOf("/spot/")===0;var mode=phase==="sketch"&&!reduce?"sketch":(phase==="color"||reduce||spot||onSpot?"color":"intro");document.documentElement.dataset.farmPhase=mode;document.documentElement.dataset.farmReduce=reduce?"1":"0";var h=new Date().getHours();var light=time==="night"||time==="sunset"||time==="day"?time:(h<6||h>=20?"night":(h>=17?"sunset":"day"));document.documentElement.dataset.farmLight=light;document.documentElement.dataset.farmNight=light==="night"?"1":"0";}catch(e){}})();`;
+
+class FarmBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  render() {
+    if (this.state.failed) return <div className="farm-fallback"><p>The farm couldn’t load on this device.</p><a href="/list">Explore all places in list view →</a></div>;
+    return this.props.children;
+  }
+}
 
 function readSpot() {
   const params = new URLSearchParams(window.location.search);
@@ -68,6 +78,16 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
     return () => window.removeEventListener("keydown", onKey);
   }, [phase]);
 
+  const controlsPaused = !explore || shopOpen || Boolean(active);
+  useEffect(() => {
+    walk.paused = controlsPaused;
+    resetWalkInput();
+    return () => {
+      walk.paused = true;
+      resetWalkInput();
+    };
+  }, [controlsPaused]);
+
   function cycleLight() {
     const next: LightMode = light === "day" ? "sunset" : light === "sunset" ? "night" : "day";
     setLight(next);
@@ -84,7 +104,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
       <header className="hud">
         <div>
           <h1 className="wordmark">medevsmaker</h1>
-          <p className="tagline">the farm{featured ? ` · gate: ${featured.name}` : ""}</p>
+          <p className="tagline">Middle Atlas · Morocco{featured ? ` · gate: ${featured.name}` : ""}</p>
         </div>
         <div className="hud-actions">
           {phase !== "color" && (
@@ -104,6 +124,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
           <button type="button" className="hud-btn" onClick={cycleLight} aria-pressed={light !== "day"}>
             {light === "night" ? "Night" : light === "sunset" ? "Sunset" : "Day"}
           </button>
+          <Link className="hud-btn" href="/references">The place</Link>
           <a className="hud-btn" href="/list">
             List
           </a>
@@ -111,6 +132,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
       </header>
       {phase === "intro" && <div className="intro-bar" aria-hidden="true" />}
       <div className="farm-stage" onPointerDown={() => setHint(false)}>
+        <FarmBoundary>
         <FarmCanvas
           placed={placed}
           farm={farm}
@@ -133,23 +155,33 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
           detail={ready}
           explore={explore}
         />
-        {explore && (
-          <div
-            className="joystick"
-            onPointerDown={(event) => {
-              (event.currentTarget as HTMLDivElement).setPointerCapture(event.pointerId);
-            }}
-            onPointerMove={(event) => {
-              if (event.buttons === 0) return;
-              const rect = (event.currentTarget as HTMLDivElement).getBoundingClientRect();
-              walk.stickX = Math.max(-1, Math.min(1, ((event.clientX - rect.left) / rect.width) * 2 - 1));
-              walk.stickY = Math.max(-1, Math.min(1, ((event.clientY - rect.top) / rect.height) * 2 - 1));
-            }}
-            onPointerUp={() => {
-              walk.stickX = 0;
-              walk.stickY = 0;
-            }}
-          />
+        </FarmBoundary>
+        {explore && !controlsPaused && (
+          <>
+            <div
+              className="joystick"
+              role="group"
+              aria-label="Movement pad: drag up, down, left or right; keyboard users can use WASD"
+              onPointerDown={(event) => {
+                event.currentTarget.setPointerCapture(event.pointerId);
+                const rect = event.currentTarget.getBoundingClientRect();
+                walk.stickX = Math.max(-1, Math.min(1, ((event.clientX - rect.left) / rect.width) * 2 - 1));
+                walk.stickY = Math.max(-1, Math.min(1, ((event.clientY - rect.top) / rect.height) * 2 - 1));
+              }}
+              onPointerMove={(event) => {
+                if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
+                const rect = event.currentTarget.getBoundingClientRect();
+                walk.stickX = Math.max(-1, Math.min(1, ((event.clientX - rect.left) / rect.width) * 2 - 1));
+                walk.stickY = Math.max(-1, Math.min(1, ((event.clientY - rect.top) / rect.height) * 2 - 1));
+              }}
+              onPointerUp={resetWalkInput}
+              onPointerCancel={resetWalkInput}
+              onLostPointerCapture={resetWalkInput}
+            />
+            <button type="button" className="hud-btn tractor-action" onClick={() => { walk.toggleDrive = true; }}>
+              Enter / exit tractor
+            </button>
+          </>
         )}
         <div className={`farm-loader${ready ? " is-done" : ""}`} aria-hidden={ready}>
           <p className="loader-kicker">medevsmaker</p>
@@ -162,7 +194,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
         </div>
       </div>
       {explore && phase === "color" && (
-        <p className="hint">WASD or the pad to walk. F beside the tractor to drive.</p>
+        <p className="hint">WASD or the pad to move. Use F or the tractor button beside the tractor to enter or exit.</p>
       )}
       {hint && !explore && phase === "color" && <p className="hint">Drag to look around. Click a building.</p>}
       <nav id="farm-links" className="sr-only" aria-label="Places on the farm">
@@ -184,7 +216,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
             <a href="/open">Dream Home Fund</a>
           </li>
           <li>
-            <a href="/blog">Journal</a>
+            <Link href="/blog">Journal</Link>
           </li>
         </ul>
       </nav>

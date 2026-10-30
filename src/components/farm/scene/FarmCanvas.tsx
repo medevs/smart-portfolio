@@ -21,6 +21,7 @@ import { CELL, plotPosition } from "@/farm/world";
 import { MODELS, type ModelProps } from "./models";
 import { Surface, Textures } from "./materials";
 import { Horizon, MillWorks, Scenery } from "./scenery";
+import { AtlasLandscape } from "./MiddleAtlas";
 import { PhysicsYard } from "./explore";
 import { walk } from "./walk-state";
 import { SketchEffect, sketchState } from "./SketchEffect";
@@ -54,6 +55,7 @@ export type FarmCanvasProps = {
 export default function FarmCanvas(props: FarmCanvasProps) {
   return (
     <Canvas
+      fallback={<div className="farm-fallback"><p>Explore the farm in list view.</p><a href="/list">See all places →</a></div>}
       shadows
       dpr={props.quality === "low" ? [1, 1.2] : [1, 1.6]}
       camera={{ position: [16, 11.5, 18], fov: 35, near: 0.1, far: 140 }}
@@ -134,12 +136,13 @@ function Scene(props: FarmCanvasProps) {
       <Environment files={hdri} background={false} environmentIntensity={night ? 0.32 : sunset ? 0.75 : 0.55} />
       <Textures>
       <Horizon />
+      <AtlasLandscape />
       <Ground />
       <Lane />
       <HayBales />
       <Rocks />
       <Wildflowers count={quality === "low" ? 40 : 110} />
-      <Grass placed={placed} grid={farm.grid} count={quality === "low" ? 700 : tier.current ? 4200 : 2200} />
+      <Grass placed={placed} grid={farm.grid} count={quality === "low" ? 400 : tier.current ? 2200 : 1200} />
       <Clouds night={night} />
       <Birds />
       {placed.map((entry) => (
@@ -314,7 +317,7 @@ function Ground() {
   }, []);
   return (
     <mesh geometry={geom} receiveShadow>
-      <Surface name="grass" color="#8fbe55" repeat={[18, 18]} roughness={0.88} metalness={0} />
+      <Surface name="grass" color="#a9a477" repeat={[18, 18]} roughness={0.88} metalness={0} />
     </mesh>
   );
 }
@@ -573,13 +576,13 @@ function PlacedModel({
   const Model = MODELS[entry.item.sprite];
   const group = useRef<THREE.Group>(null);
   const [x, , z] = plotPosition(entry.plot, farm.grid);
-  const roam = ["cow", "sheep", "chicken", "hen", "dog", "cat"].includes(entry.item.sprite);
+  const roam = ["cow", "sheep", "donkey", "chicken", "hen", "dog", "cat"].includes(entry.item.sprite);
   useFrame(({ clock }) => {
     const node = group.current;
     if (!node) return;
     if (entry.item.sprite === "tractor") {
       node.position.set(x + walk.tx, 0, z + walk.tz);
-      if (walk.driving) node.rotation.y = walk.yaw;
+      if (walk.driving) node.rotation.y = Math.PI / 2 - walk.yaw;
       return;
     }
     if (!roam) return;

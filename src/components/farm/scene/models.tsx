@@ -4,6 +4,7 @@ import { useLayoutEffect, useMemo, useRef, type ReactElement } from "react";
 import { useFrame } from "@react-three/fiber";
 import { RoundedBox } from "@react-three/drei";
 import * as THREE from "three";
+import { CourtyardHouse, EarthGranary, StoneWorkshop, AtlasCedar, Donkey } from "./MiddleAtlas";
 import { CELL } from "@/farm/world";
 import { Surface, type SurfaceName } from "./materials";
 
@@ -988,15 +989,15 @@ export function PlotStake({ golden }: ModelProps) {
 }
 
 export const MODELS: Record<string, (props: ModelProps) => ReactElement> = {
-  barn: Barn,
-  farmhouse: Farmhouse,
-  silo: Silo,
-  shed: Shed,
-  windmill: Windmill,
+  barn: CourtyardHouse,
+  farmhouse: CourtyardHouse,
+  silo: EarthGranary,
+  shed: StoneWorkshop,
+  windmill: EarthGranary,
   waterTower: WaterTower,
   coop: Coop,
   pond: Pond,
-  tree: Tree,
+  tree: () => <AtlasCedar height={4.8} />,
   blossom: Blossom,
   wheat: Wheat,
   crops: Crops,
@@ -1005,6 +1006,7 @@ export const MODELS: Record<string, (props: ModelProps) => ReactElement> = {
   hen: Hen,
   cow: Cow,
   sheep: Sheep,
+  donkey: Donkey,
   cat: Cat,
   dog: Dog,
   tractor: Tractor,

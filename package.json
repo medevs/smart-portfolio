@@ -8,7 +8,8 @@
     "generate": "npx ts-node ./scripts/generate.ts",
     "start": "next start",
     "lint": "next lint",
-    "vercel-build": "npm run generate && next build"
+    "vercel-build": "npm run generate && next build",
+    "test": "node --test tests/*.test.cjs"
   },
   "dependencies": {
     "@langchain/community": "^0.3.41",
