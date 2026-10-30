@@ -63,35 +63,35 @@ export default function FarmCanvas(props: FarmCanvasProps) {
         antialias: props.quality === "high",
         toneMapping: THREE.ACESFilmicToneMapping,
         toneMappingExposure: 1.05,
-        powerPreference: "high-performance",
-        preserveDrawingBuffer: true,
+        powerPreference: "default",
+        preserveDrawingBuffer: false,
       }}
       onCreated={({ gl }) => {
         gl.setClearColor(props.light === "night" ? "#07091c" : props.light === "sunset" ? "#e8885a" : "#c9d7e6");
       }}
     >
       <AdaptiveDpr pixelated={false} />
-      <LoadWatch onProgress={props.onProgress} onReady={props.onReady} />
+      <LoadWatch onProgress={props.onProgress} />
       <Suspense fallback={null}>
         <Scene {...props} />
+        <FirstFrame onReady={props.onReady} />
       </Suspense>
     </Canvas>
   );
 }
 
-function LoadWatch({ onProgress, onReady }: { onProgress: (value: number) => void; onReady: () => void }) {
-  const { progress, active } = useProgress();
-  const ready = useRef(false);
-  useEffect(() => {
-    const frame = window.requestAnimationFrame(() => {
-      onProgress(progress);
-      if (!ready.current && !active && progress >= 100) {
-        ready.current = true;
-        onReady();
-      }
-    });
-    return () => window.cancelAnimationFrame(frame);
-  }, [active, onProgress, onReady, progress]);
+function LoadWatch({ onProgress }: { onProgress: (value: number) => void }) {
+  const { progress } = useProgress();
+  useEffect(() => { onProgress(progress); }, [onProgress, progress]);
+  return null;
+}
+
+/** Resolving the whole scene and rendering a frame, not a loading-manager percentage, signals readiness. */
+function FirstFrame({ onReady }: { onReady: () => void }) {
+  const frames = useRef(0);
+  useFrame(() => {
+    if (frames.current++ === 2) onReady();
+  });
   return null;
 }
 
