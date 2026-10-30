@@ -104,7 +104,7 @@ A modern, terminal-inspired portfolio website built with Next.js 15, featuring a
    ```bash
    npm run generate
    ```
-   This populates the database with document embeddings for the AI chat.
+   This clears and rebuilds document embeddings for the AI chat. Run it intentionally against the intended database; it is not part of site builds.
 
 6. **Start Development Server**
    ```bash
@@ -155,7 +155,7 @@ npm run start
 ## Available Scripts
 
 - `npm run dev` - Start development server
-- `npm run build` - Generate embeddings and build for production
+- `npm run build` - Build the website for production (no embeddings writes)
 - `npm run generate` - Generate vector embeddings for RAG
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
@@ -180,3 +180,14 @@ src/
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+
+## Build and knowledge indexing
+
+`npm run build` and Vercel's `npm run vercel-build` compile the website only.
+They do not regenerate embeddings or require database-writing credentials.
+
+`npm run generate` is a separate, explicit knowledge-indexing operation. It
+clears and rebuilds the documents in the configured Supabase database and calls
+the embeddings provider. Run it only when intentionally updating that knowledge
+index, against the intended database. Site and design deployments do not run it.

@@ -46,7 +46,7 @@ perfect or claim 3D visual proof from a browser that cannot create WebGL.
 
 - Run `npm test`, `npx tsc --noEmit`, `npm run lint`, `npx next build`.
 - The existing lockfile needs `npm ci --legacy-peer-deps`.
-- Do not run the embeddings generation step: it rewrites the vector store.
+- Builds no longer invoke embeddings generation. Keep `npm run generate` manual; it rewrites the vector store.
 - Verify the generated image loads, no permanent loader appears, all four product
   pins open the correct dialogs and close with Escape, Gather/The place navigation
   works, future visiting language is clear, image/photo credits remain.
@@ -107,3 +107,19 @@ Review validation: darken the small catalog labels to preserve 4.5:1 text
 contrast, and keep the contiguous visible phrase "Open on the farm" in every
 project link's accessible name for speech navigation. Decorative arrows are
 aria-hidden. Contrast and rendered accessible-name regressions cover these.
+
+## Verified catalog deployment and build isolation
+
+PR #9 deployed main 8c512323. The actual browser keyboard sequence Tab →
+Skip to the list → Enter opened /list, with visible project cards and accessible
+names. ReelStyles opened its correct project dialog from that catalog. The
+hidden duplicate navigation is absent from the accessibility tree. Fourteen
+checks passed before merge, including contrast and visible-name regressions.
+
+A deployment audit found that vercel.json invokes `npm run vercel-build`, whose
+package script still ran `npm run generate` before compiling. The generator calls
+`.delete().neq("id", 0)` on the documents collection. Local direct `next build`
+did not prevent that remote build chain. Separate both build scripts from
+indexing; leave `npm run generate` available as an explicit data operation.
+This avoids future visual deployments invoking database writes or embeddings
+provider calls. No indexing command was run during this correction.
