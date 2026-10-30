@@ -8,7 +8,7 @@ type Props = { onSelect: (id: string) => void; onExplore: () => void; loading: b
 const PLACES = [
   { id: "about", name: "The maker’s studio", detail: "Meet medevsmaker", x: 34, y: 57 },
   { id: "reelstyles", name: "ReelStyles", detail: "Tools for moving ideas", x: 62, y: 48 },
-  { id: "mentorclone", name: "MentorClone", detail: "A little knowledge, on demand", x: 93, y: 56 },
+  { id: "mentorclone", name: "MentorClone", detail: "A little knowledge, on demand", x: 77, y: 57 },
   { id: "talkthedoc", name: "TalkTheDoc", detail: "Conversations with your documents", x: 71, y: 64 },
 ];
 
@@ -16,7 +16,7 @@ export function FarmPanorama({ onSelect, onExplore, loading, unavailable }: Prop
   const [selected, setSelected] = useState(0);
   const futurePlaces = [
     { name: "The gathering place", detail: "Future meetups & shared tables", href: "/gather#meetups", x: 32, y: 41 },
-    { name: "Stay a little", detail: "A future welcome for visitors", href: "/gather#visiting", x: 85, y: 40 },
+    { name: "Stay a little", detail: "A future welcome for visitors", href: "/gather#visiting", x: 78, y: 36 },
   ];
   return <section className="atlas-panorama" aria-label="Explore the Middle Atlas farm">
     <div className="atlas-photo-wrap">

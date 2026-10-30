@@ -62,3 +62,18 @@ The previous session's Chromium downloads failed. The cloud browser works for
 actual UI tests but its GPU is disabled; it provides direct proof of the
 unsupported-WebGL case. The local environment lacks /proc RSS; a scratch-only
 Node memory-metrics shim permits `next build`, not part of production code.
+
+## Live verification after PR #7
+
+Production deployed commit 4a6d2df. Cloud browser directly observed the new
+panorama (not the old 4% loader), correct ReelStyles and TalkTheDoc dialogs,
+Escape dismissal, Gather navigation and the full future community page.
+Enter 3D on the GPU-disabled browser leaves the landscape and all project controls
+visible with an explanatory status. No new application errors occurred on the
+initial panorama render (old errors remain in the browser session log).
+
+Visual iteration caught a clipped right-edge MentorClone entrance. Move the
+entrance inward and use the mobile navigation layout up to 900 CSS px, so tall
+narrow crops don't strand project controls. The cloud browser has a fixed
+1363x936 viewport; browser zoom did not change it. A physical mobile viewport
+and GPU-capable procedural-3D test are still pending, and must not be claimed.

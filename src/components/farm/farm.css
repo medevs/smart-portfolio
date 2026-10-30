@@ -1139,7 +1139,7 @@ table.ledger td {
 .scene-loading button { border: 0; background: transparent; color: inherit; text-decoration: underline; cursor: pointer; margin-left: 15px; }
 .scene-loading-dot { width: 7px; height: 7px; border-radius: 50%; background: #e8d398; animation: breathe 1.8s infinite; }
 @keyframes breathe { 50% { opacity: .3; } }
-@media (max-width: 700px) {
+@media (max-width: 900px) {
   .farm-root.is-panorama .hud { padding: 20px 18px; flex-direction: column; gap: 16px; }
   .farm-root.is-panorama .hud-actions { justify-content: flex-start; max-width: 100%; gap: 6px; }
   .farm-root.is-panorama .hud-btn { padding: 8px 13px; min-height: 36px; font-size: 11px; }
@@ -1174,10 +1174,10 @@ table.ledger td {
 .atlas-future-pin .atlas-pin-label { background: #374331b8; }
 .atlas-community-link { position: absolute; right: 4.5%; bottom: 105px; color: #f5edda; border-left: 1px solid #f5edda50; padding-left: 20px; font-family: var(--font-fraunces),serif; font-size: 27px; text-decoration: none; }
 .atlas-community-link span { display: block; font-family: var(--font-nunito),sans-serif; font-size: 10px; letter-spacing: .03em; margin-top: 7px; opacity: .8; }
-@media(max-width:700px) {
+@media(max-width:900px) {
   .atlas-community-link { top: 160px; bottom: auto; right: 20px; font-size: 18px; padding-left: 12px; max-width: 175px; text-align: right; border: 0; text-shadow: 0 2px 10px #122e23; }
   .atlas-community-link span { font-size: 9px; }
 }
-@media(min-width:701px) {
+@media(min-width:901px) {
   .atlas-photo-wrap { inset: auto; left: 50%; top: 50%; width: max(100%, calc((100dvh - 28px) * 1.777)); height: max(100%, 56.25vw); transform: translate(-50%,-50%); }
 }
