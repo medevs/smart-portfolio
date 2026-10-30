@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { Suspense, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
   AdaptiveDpr,
@@ -8,24 +8,30 @@ import {
   Environment,
   Html,
   PerformanceMonitor,
+  SoftShadows,
+  useProgress,
 } from "@react-three/drei";
-import { Bloom, DepthOfField, EffectComposer, N8AO, SMAA, Vignette, wrapEffect } from "@react-three/postprocessing";
+import { Bloom, DepthOfField, EffectComposer, N8AO, SMAA, ToneMapping, Vignette, wrapEffect } from "@react-three/postprocessing";
+import { ToneMappingMode } from "postprocessing";
 import * as THREE from "three";
 import type { FarmData } from "@/farm/types";
 import type { Placed } from "@/farm/loadFarm";
 import { plateFor } from "@/farm/plates";
 import { CELL, plotPosition } from "@/farm/world";
 import { MODELS, type ModelProps } from "./models";
+import { Surface, Textures } from "./materials";
 import { SketchEffect, sketchState } from "./SketchEffect";
 
 const SketchPass = wrapEffect(SketchEffect);
 
 type Quality = "low" | "high";
 
+export type LightMode = "day" | "sunset" | "night";
+
 export type FarmCanvasProps = {
   placed: Placed[];
   farm: FarmData;
-  night: boolean;
+  light: LightMode;
   phase: "intro" | "sketch" | "color";
   reducedMotion: boolean;
   quality: Quality;
@@ -34,6 +40,7 @@ export type FarmCanvasProps = {
   onHover: (id: string | null) => void;
   onSelect: (id: string) => void;
   onReady: () => void;
+  onProgress: (value: number) => void;
   onSketchDone: () => void;
   showGrid: boolean;
   plain: boolean;
@@ -48,23 +55,36 @@ export default function FarmCanvas(props: FarmCanvasProps) {
       gl={{
         antialias: props.quality === "high",
         toneMapping: THREE.ACESFilmicToneMapping,
-        toneMappingExposure: 1.08,
+        toneMappingExposure: 1.05,
         powerPreference: "high-performance",
         preserveDrawingBuffer: true,
       }}
       onCreated={({ gl }) => {
-        gl.setClearColor(props.night ? "#07091c" : "#f2a878");
-        props.onReady();
+        gl.setClearColor(props.light === "night" ? "#07091c" : props.light === "sunset" ? "#e8885a" : "#c9d7e6");
       }}
     >
       <AdaptiveDpr pixelated={false} />
-      <Scene {...props} />
+      <LoadWatch onProgress={props.onProgress} onReady={props.onReady} />
+      <Suspense fallback={null}>
+        <Scene {...props} />
+      </Suspense>
     </Canvas>
   );
 }
 
+function LoadWatch({ onProgress, onReady }: { onProgress: (value: number) => void; onReady: () => void }) {
+  const { progress, active } = useProgress();
+  useEffect(() => {
+    onProgress(progress);
+    if (!active && progress >= 100) onReady();
+  }, [active, onProgress, onReady, progress]);
+  return null;
+}
+
 function Scene(props: FarmCanvasProps) {
-  const { placed, farm, night, quality, activeId, reducedMotion } = props;
+  const { placed, farm, light, quality, activeId, reducedMotion } = props;
+  const night = light === "night";
+  const sunset = light === "sunset";
   const controls = useRef<CameraControls>(null);
   const tier = useRef(quality === "low" ? 0 : 1);
 
@@ -83,7 +103,8 @@ function Scene(props: FarmCanvasProps) {
     controlsApi.setLookAt(x + 6.2, 4.8, z + 7.4, x, 1.7, z, !reducedMotion);
   }, [activeId, farm.grid, placed, reducedMotion]);
 
-  const fog = night ? "#14162c" : "#f0b48a";
+  const fog = night ? "#14162c" : sunset ? "#e7a07a" : "#c5d4e4";
+  const hdri = night ? "/farm/hdri/night.hdr" : sunset ? "/farm/hdri/sunset.hdr" : "/farm/hdri/day.hdr";
 
   return (
     <>
@@ -92,18 +113,20 @@ function Scene(props: FarmCanvasProps) {
           tier.current = 0;
         }}
       />
-      <color attach="background" args={[night ? "#07091c" : "#f2a878"]} />
-      <fog attach="fog" args={[fog, 48, 110]} />
-      <Sky night={night} />
-      <Lights night={night} quality={quality} />
-      <Environment resolution={128} frames={1}>
-        <mesh scale={20}>
-          <sphereGeometry args={[1, 16, 16]} />
-          <meshBasicMaterial color={night ? "#1a2048" : "#ffb07a"} side={THREE.BackSide} />
-        </mesh>
-      </Environment>
+      {quality === "high" && <SoftShadows size={18} samples={12} focus={0.35} />}
+      <color attach="background" args={[night ? "#07091c" : sunset ? "#e8885a" : "#c9d7e6"]} />
+      <fog attach="fog" args={[fog, sunset ? 28 : 42, sunset ? 90 : 120]} />
+      <Sky night={night} sunset={sunset} />
+      <Lights night={night} sunset={sunset} quality={quality} />
+      {sunset && quality === "high" && <SunShafts />}
+      <Environment files={hdri} background={false} environmentIntensity={night ? 0.28 : sunset ? 0.7 : 0.38} />
+      <Textures>
       <Ground />
-      <Grass placed={placed} grid={farm.grid} count={quality === "low" ? 900 : 2200} />
+      <Lane />
+      <HayBales />
+      <Rocks />
+      <Wildflowers count={quality === "low" ? 40 : 110} />
+      <Grass placed={placed} grid={farm.grid} count={quality === "low" ? 1400 : tier.current ? 4800 : 2600} />
       <Clouds night={night} />
       <Birds />
       {placed.map((entry) => (
@@ -118,6 +141,7 @@ function Scene(props: FarmCanvasProps) {
         />
       ))}
       {props.showGrid && <GridHelper grid={farm.grid} />}
+      </Textures>
       <CameraControls
         ref={controls}
         makeDefault
@@ -136,30 +160,38 @@ function Scene(props: FarmCanvasProps) {
   );
 }
 
-function Lights({ night, quality }: { night: boolean; quality: Quality }) {
+function Lights({ night, sunset, quality }: { night: boolean; sunset: boolean; quality: Quality }) {
   const sun = useRef<THREE.DirectionalLight>(null);
   const amb = useRef<THREE.AmbientLight>(null);
   const hemi = useRef<THREE.HemisphereLight>(null);
   const blend = useRef(night ? 1 : 0);
-  const warm = useMemo(() => new THREE.Color("#ffb06a"), []);
+  const setBlend = useRef(sunset ? 1 : 0);
+  const dayColor = useMemo(() => new THREE.Color("#fff4e4"), []);
+  const setColor = useMemo(() => new THREE.Color("#ff7a3c"), []);
   const cool = useMemo(() => new THREE.Color("#9eb6ff"), []);
-  const ambDay = useMemo(() => new THREE.Color("#ffe0c4"), []);
+  const ambDay = useMemo(() => new THREE.Color("#e7eef8"), []);
   const ambNight = useMemo(() => new THREE.Color("#1c2348"), []);
 
   useFrame((_, dt) => {
     blend.current = THREE.MathUtils.damp(blend.current, night ? 1 : 0, 2.2, dt);
+    setBlend.current = THREE.MathUtils.damp(setBlend.current, sunset ? 1 : 0, 2.2, dt);
     const k = blend.current;
+    const s = setBlend.current * (1 - k);
     if (sun.current) {
-      sun.current.intensity = THREE.MathUtils.lerp(2.55, 0.42, k);
-      sun.current.color.copy(warm).lerp(cool, k);
-      sun.current.position.set(THREE.MathUtils.lerp(18, -12, k), THREE.MathUtils.lerp(11, 18, k), THREE.MathUtils.lerp(8, -4, k));
+      sun.current.intensity = THREE.MathUtils.lerp(3.1, 0.28, k) * (1 - s * 0.2);
+      sun.current.color.copy(dayColor).lerp(setColor, s).lerp(cool, k);
+      sun.current.position.set(
+        THREE.MathUtils.lerp(14, 24, s) * (1 - k) + -10 * k,
+        THREE.MathUtils.lerp(THREE.MathUtils.lerp(18, 5.2, s), 16, k),
+        THREE.MathUtils.lerp(6, -2, k)
+      );
     }
     if (amb.current) {
-      amb.current.intensity = THREE.MathUtils.lerp(0.38, 0.16, k);
+      amb.current.intensity = THREE.MathUtils.lerp(0.28, 0.12, k);
       amb.current.color.copy(ambDay).lerp(ambNight, k);
     }
     if (hemi.current) {
-      hemi.current.intensity = THREE.MathUtils.lerp(0.55, 0.18, k);
+      hemi.current.intensity = THREE.MathUtils.lerp(0.42, 0.14, k);
     }
   });
 
@@ -187,12 +219,17 @@ function Lights({ night, quality }: { night: boolean; quality: Quality }) {
   );
 }
 
-function Sky({ night }: { night: boolean }) {
+function Sky({ night, sunset }: { night: boolean; sunset: boolean }) {
   const mat = useRef<THREE.ShaderMaterial>(null);
   const blend = useRef(night ? 1 : 0);
+  const setBlend = useRef(sunset ? 1 : 0);
   useFrame((_, dt) => {
     blend.current = THREE.MathUtils.damp(blend.current, night ? 1 : 0, 2.2, dt);
-    if (mat.current) mat.current.uniforms.uNight.value = blend.current;
+    setBlend.current = THREE.MathUtils.damp(setBlend.current, sunset ? 1 : 0, 2.2, dt);
+    if (mat.current) {
+      mat.current.uniforms.uNight.value = blend.current;
+      mat.current.uniforms.uSunset.value = setBlend.current * (1 - blend.current);
+    }
   });
   return (
     <mesh scale={90}>
@@ -201,7 +238,7 @@ function Sky({ night }: { night: boolean }) {
         ref={mat}
         side={THREE.BackSide}
         depthWrite={false}
-        uniforms={{ uNight: { value: night ? 1 : 0 } }}
+        uniforms={{ uNight: { value: night ? 1 : 0 }, uSunset: { value: sunset ? 1 : 0 } }}
         vertexShader={`
           varying vec3 vDir;
           void main() {
@@ -212,22 +249,24 @@ function Sky({ night }: { night: boolean }) {
         fragmentShader={`
           varying vec3 vDir;
           uniform float uNight;
+          uniform float uSunset;
           void main() {
             vec3 dir = normalize(vDir);
             float h = dir.y;
-            vec3 dayTop = vec3(0.28, 0.22, 0.62);
-            vec3 dayMid = vec3(0.86, 0.42, 0.62);
-            vec3 dayHor = vec3(1.0, 0.62, 0.38);
+            vec3 dayTop = vec3(0.45, 0.62, 0.86);
+            vec3 dayHor = vec3(0.78, 0.86, 0.93);
+            vec3 setTop = vec3(0.28, 0.18, 0.48);
+            vec3 setHor = vec3(1.0, 0.46, 0.22);
             vec3 nightTop = vec3(0.02, 0.03, 0.1);
             vec3 nightHor = vec3(0.16, 0.12, 0.28);
-            vec3 top = mix(dayTop, nightTop, uNight);
-            vec3 mid = mix(dayMid, vec3(0.08, 0.08, 0.2), uNight);
-            vec3 hor = mix(dayHor, nightHor, uNight);
-            vec3 col = mix(hor, mid, smoothstep(0.0, 0.28, h));
-            col = mix(col, top, smoothstep(0.2, 0.85, h));
-            vec3 sunDir = normalize(vec3(0.55, 0.28, 0.25));
-            float sun = pow(max(dot(dir, sunDir), 0.0), 280.0);
-            col += sun * vec3(1.0, 0.82, 0.45) * (1.0 - uNight);
+            vec3 top = mix(mix(dayTop, setTop, uSunset), nightTop, uNight);
+            vec3 hor = mix(mix(dayHor, setHor, uSunset), nightHor, uNight);
+            vec3 col = mix(hor, top, smoothstep(0.0, 0.55, h));
+            vec3 sunDir = normalize(mix(vec3(0.45, 0.72, 0.2), vec3(0.85, 0.12, 0.15), uSunset));
+            float sun = pow(max(dot(dir, sunDir), 0.0), mix(420.0, 80.0, uSunset));
+            col += sun * mix(vec3(1.0, 0.95, 0.85), vec3(1.0, 0.55, 0.2), uSunset) * (1.0 - uNight);
+            float haze = pow(1.0 - max(h, 0.0), 3.0) * uSunset;
+            col += haze * vec3(1.0, 0.55, 0.25) * 0.35;
             float stars = fract(sin(dot(floor(dir.xy * 180.0), vec2(12.9, 78.2))) * 43758.5);
             float star = step(0.992, stars) * step(0.15, h) * uNight;
             col += star;
@@ -244,31 +283,119 @@ function Ground() {
     const g = new THREE.PlaneGeometry(90, 90, 70, 70);
     g.rotateX(-Math.PI / 2);
     const pos = g.attributes.position;
-    const colors = new Float32Array(pos.count * 3);
-    const grass = new THREE.Color("#3e9a4c");
-    const yard = new THREE.Color("#c6a56a");
-    const far = new THREE.Color("#2f6e3c");
     for (let i = 0; i < pos.count; i++) {
       const x = pos.getX(i);
       const z = pos.getZ(i);
-      const roll = Math.sin(x * 0.12) * 0.45 + Math.cos(z * 0.09) * 0.3;
+      const roll = Math.sin(x * 0.12) * 0.35 + Math.cos(z * 0.09) * 0.22;
       const dist = Math.hypot(x, z);
       const flat = THREE.MathUtils.smoothstep(dist, 10, 20);
       pos.setY(i, roll * flat - 0.02);
-      const yardMix = 1 - THREE.MathUtils.smoothstep(dist, 4, 11);
-      const c = grass.clone().lerp(far, THREE.MathUtils.smoothstep(dist, 12, 28)).lerp(yard, yardMix * 0.55);
-      colors[i * 3] = c.r;
-      colors[i * 3 + 1] = c.g;
-      colors[i * 3 + 2] = c.b;
     }
-    g.setAttribute("color", new THREE.BufferAttribute(colors, 3));
     g.computeVertexNormals();
+    g.setAttribute("uv2", g.getAttribute("uv"));
     return g;
   }, []);
   return (
     <mesh geometry={geom} receiveShadow>
-      <meshStandardMaterial vertexColors roughness={0.95} metalness={0} />
+      <Surface name="grass" color="#b7d48a" repeat={[16, 16]} roughness={0.92} metalness={0} />
     </mesh>
+  );
+}
+
+function SunShafts() {
+  return (
+    <group position={[16, 7, -4]} rotation={[0.55, 0.4, -0.2]}>
+      {[0, 1, 2, 3].map((i) => (
+        <mesh key={i} position={[(i - 1.5) * 1.1, -3, 0]}>
+          <planeGeometry args={[0.7, 16]} />
+          <meshBasicMaterial color="#ffc48a" transparent opacity={0.045} depthWrite={false} side={THREE.DoubleSide} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function HayBales() {
+  const spots: [number, number][] = [
+    [3.4, 1.1],
+    [4.3, 1.7],
+    [2.6, 2.2],
+  ];
+  return (
+    <group>
+      {spots.map(([x, z], i) => (
+        <mesh key={i} position={[x, 0.28, z]} rotation={[0, i, Math.PI / 2]} castShadow>
+          <cylinderGeometry args={[0.32, 0.34, 0.55, 10]} />
+          <meshStandardMaterial color="#c6a15a" roughness={0.92} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function Lane() {
+  return (
+    <group>
+      <mesh rotation={[-Math.PI / 2, 0, 0.08]} position={[0.4, 0.025, 2.6]} receiveShadow>
+        <planeGeometry args={[2.6, 18]} />
+        <Surface name="dirt" repeat={[1.4, 8]} roughness={0.92} />
+      </mesh>
+      {[-0.55, 0.55].map((x) => (
+        <mesh key={x} rotation={[-Math.PI / 2, 0, 0.08]} position={[0.4 + x, 0.03, 2.6]} receiveShadow>
+          <planeGeometry args={[0.28, 16]} />
+          <meshStandardMaterial color="#5c4632" roughness={1} transparent opacity={0.45} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function Rocks() {
+  const spots: [number, number, number, number][] = [
+    [-9.2, 0.12, -4.5, 0.7],
+    [-6.4, 0.08, 3.2, 0.35],
+    [8.8, 0.1, 5.4, 0.55],
+    [11.2, 0.14, -2.2, 0.8],
+    [3.4, 0.06, -7.5, 0.4],
+    [-3.2, 0.08, 7.2, 0.28],
+  ];
+  return (
+    <group>
+      {spots.map(([x, y, z, s], i) => (
+        <mesh key={i} position={[x, y, z]} rotation={[0.2, i, 0.4]} scale={s} castShadow receiveShadow>
+          <dodecahedronGeometry args={[1, 0]} />
+          <Surface name="rock" repeat={[1, 1]} roughness={0.9} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function Wildflowers({ count }: { count: number }) {
+  const ref = useRef<THREE.InstancedMesh>(null);
+  const color = useMemo(() => new THREE.Color(), []);
+  useLayoutEffect(() => {
+    const mesh = ref.current;
+    if (!mesh) return;
+    const dummy = new THREE.Object3D();
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 6 + Math.random() * 14;
+      dummy.position.set(Math.cos(angle) * radius, 0.08, Math.sin(angle) * radius);
+      dummy.scale.setScalar(0.35 + Math.random() * 0.5);
+      dummy.updateMatrix();
+      mesh.setMatrixAt(i, dummy.matrix);
+      color.setHSL(Math.random() > 0.5 ? 0.95 : 0.12, 0.55, 0.62);
+      mesh.setColorAt(i, color);
+    }
+    mesh.instanceMatrix.needsUpdate = true;
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+  }, [color, count]);
+  return (
+    <instancedMesh ref={ref} args={[undefined, undefined, count]}>
+      <sphereGeometry args={[0.08, 6, 5]} />
+      <meshStandardMaterial roughness={0.7} />
+    </instancedMesh>
   );
 }
 
@@ -327,14 +454,17 @@ function Grass({ placed, grid, count }: { placed: Placed[]; grid: FarmData["grid
       if (blocked) continue;
       dummy.position.set(x, 0, z);
       dummy.rotation.y = Math.random() * Math.PI;
-      const s = 0.45 + Math.random() * 0.55;
-      dummy.scale.set(s, 0.7 + Math.random() * 0.8, s);
+      const s = 0.55 + Math.random() * 0.7;
+      dummy.scale.set(s, 0.28 + Math.random() * 0.38, s);
       dummy.updateMatrix();
       mesh.setMatrixAt(n, dummy.matrix);
       phases[n] = Math.random() * Math.PI * 2;
+      const tint = new THREE.Color().setHSL(0.28 + Math.random() * 0.06, 0.42, 0.32 + Math.random() * 0.16);
+      mesh.setColorAt(n, tint);
       n++;
     }
     mesh.count = n;
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
     mesh.instanceMatrix.needsUpdate = true;
     mesh.geometry.setAttribute("aPhase", new THREE.InstancedBufferAttribute(phases, 1));
   }, [count, grid, placed]);
@@ -429,12 +559,12 @@ function PlacedModel({
   const golden = Boolean(plate?.golden);
   const interactive = Boolean(entry.item.interactive);
   const size: Record<string, number> = {
-    chicken: 2.4,
-    hen: 2.4,
-    cat: 2.1,
-    dog: 1.7,
-    cow: 1.35,
-    sheep: 1.55,
+    chicken: 1.55,
+    hen: 1.55,
+    cat: 1.25,
+    dog: 1.15,
+    cow: 1,
+    sheep: 1,
   };
   const s = size[entry.item.sprite] ?? 1;
   const labelY = entry.item.sprite === "barn" ? 6.2 : entry.item.sprite === "windmill" || entry.item.sprite === "silo" ? 5.2 : 2.4;
@@ -558,7 +688,8 @@ function Effects({
   });
 
   return (
-    <EffectComposer multisampling={0} enableNormalPass={quality === "high"}>
+      <EffectComposer multisampling={0} enableNormalPass={quality === "high"}>
+      <ToneMapping mode={ToneMappingMode.AGX} />
       <SketchPass />
       <N8AO halfRes aoRadius={0.5} intensity={quality === "high" ? 0.9 : 0} distanceFalloff={1} />
       <Bloom

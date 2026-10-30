@@ -34,10 +34,10 @@ export const plots: Plot[] = [
   { id: "cat", itemId: "cat", col: 6, row: 5, animDelay: 0.2, sponsorable: true },
   { id: "dog", itemId: "dog", col: 7, row: 5, animDelay: 0.15 },
 
-  { id: "cow-1", itemId: "cow", col: 12, row: 5, cols: 2, rows: 2, sponsorable: true },
-  { id: "cow-2", itemId: "cow", col: 14, row: 6, cols: 2, rows: 2, flip: true, animDelay: 0.6, sponsorable: true },
-  { id: "sheep-1", itemId: "sheep", col: 13, row: 6, animDelay: 0.3, sponsorable: true },
-  { id: "sheep-2", itemId: "sheep", col: 16, row: 5, flip: true, animDelay: 0.7, sponsorable: true },
+  { id: "cow-1", itemId: "cow", col: 11, row: 5, cols: 2, rows: 1, sponsorable: true },
+  { id: "cow-2", itemId: "cow", col: 14, row: 5, cols: 2, rows: 1, flip: true, animDelay: 0.6, sponsorable: true },
+  { id: "sheep-1", itemId: "sheep", col: 13, row: 5, animDelay: 0.3, sponsorable: true },
+  { id: "sheep-2", itemId: "sheep", col: 16, row: 4, flip: true, animDelay: 0.7, sponsorable: true },
   { id: "tractor", itemId: "tractor", col: 11, row: 6, cols: 2, rows: 1 },
   { id: "hay", itemId: "hay", col: 16, row: 6, sponsorable: true },
 
@@ -47,7 +47,7 @@ export const plots: Plot[] = [
 
   { id: "flower", itemId: "flower", col: 3, row: 6 },
   { id: "fence-post", itemId: "fence-post", col: 10, row: 7 },
-  { id: "named-animal", itemId: "named-animal", col: 15, row: 7 },
+  { id: "named-animal", itemId: "named-animal", col: 20, row: 7 },
   { id: "plot", itemId: "plot", col: 8, row: 7 },
 
   { id: "fence-1", itemId: "fence", col: 11, row: 7, cols: 2, rows: 1 },

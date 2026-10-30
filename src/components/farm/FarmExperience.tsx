@@ -6,11 +6,12 @@ import { formatMoney } from "@/config/shop";
 import { findSpot, fundRaised, placePlots } from "@/farm/loadFarm";
 import type { FarmData } from "@/farm/types";
 import { ShopDialog, SpotCard } from "./SpotCard";
+import type { LightMode } from "./scene/FarmCanvas";
 import "./farm.css";
 
 const FarmCanvas = dynamic(() => import("./scene/FarmCanvas"), { ssr: false });
 
-const BOOT = `(function(){try{var p=new URLSearchParams(location.search);var phase=p.get("phase");var time=p.get("time");var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;var spot=p.get("spot")||p.get("open");var onSpot=location.pathname.indexOf("/spot/")===0;var mode=phase==="sketch"&&!reduce?"sketch":(phase==="color"||reduce||spot||onSpot?"color":"intro");document.documentElement.dataset.farmPhase=mode;document.documentElement.dataset.farmReduce=reduce?"1":"0";var h=new Date().getHours();var night=time==="night"||(time!=="day"&&(h<6||h>=19));document.documentElement.dataset.farmNight=night?"1":"0";}catch(e){}})();`;
+const BOOT = `(function(){try{var p=new URLSearchParams(location.search);var phase=p.get("phase");var time=p.get("time");var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;var spot=p.get("spot")||p.get("open");var onSpot=location.pathname.indexOf("/spot/")===0;var mode=phase==="sketch"&&!reduce?"sketch":(phase==="color"||reduce||spot||onSpot?"color":"intro");document.documentElement.dataset.farmPhase=mode;document.documentElement.dataset.farmReduce=reduce?"1":"0";var h=new Date().getHours();var light=time==="night"||time==="sunset"||time==="day"?time:(h<6||h>=20?"night":(h>=17?"sunset":"day"));document.documentElement.dataset.farmLight=light;document.documentElement.dataset.farmNight=light==="night"?"1":"0";}catch(e){}})();`;
 
 function readSpot() {
   const params = new URLSearchParams(window.location.search);
@@ -21,7 +22,8 @@ function readSpot() {
 export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; initialSpot?: string | null }) {
   const placed = useMemo(() => placePlots(farm), [farm]);
   const [phase, setPhase] = useState<"intro" | "sketch" | "color">("intro");
-  const [night, setNight] = useState(false);
+  const [light, setLight] = useState<LightMode>("day");
+  const [progress, setProgress] = useState(4);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [shopOpen, setShopOpen] = useState(false);
@@ -45,7 +47,8 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
     const mode = document.documentElement.dataset.farmPhase;
     const nextPhase = mode === "sketch" ? "sketch" : mode === "color" ? "color" : "intro";
     setPhase(nextPhase);
-    setNight(document.documentElement.dataset.farmNight === "1");
+    const stored = document.documentElement.dataset.farmLight;
+    setLight(stored === "night" || stored === "sunset" || stored === "day" ? stored : "day");
     setReducedMotion(document.documentElement.dataset.farmReduce === "1");
     setShowGrid(new URLSearchParams(window.location.search).get("grid") === "1");
     setPlain(new URLSearchParams(window.location.search).get("raw") === "1");
@@ -63,10 +66,11 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
     return () => window.removeEventListener("keydown", onKey);
   }, [phase]);
 
-  function toggleNight() {
-    const next = !night;
-    setNight(next);
-    document.documentElement.dataset.farmNight = next ? "1" : "0";
+  function cycleLight() {
+    const next: LightMode = light === "day" ? "sunset" : light === "sunset" ? "night" : "day";
+    setLight(next);
+    document.documentElement.dataset.farmLight = next;
+    document.documentElement.dataset.farmNight = next === "night" ? "1" : "0";
   }
 
   return (
@@ -92,8 +96,8 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
           <button type="button" className="hud-btn" onClick={() => setShopOpen(true)}>
             Help build
           </button>
-          <button type="button" className="hud-btn" onClick={toggleNight} aria-pressed={night}>
-            {night ? "Night" : "Day"}
+          <button type="button" className="hud-btn" onClick={cycleLight} aria-pressed={light !== "day"}>
+            {light === "night" ? "Night" : light === "sunset" ? "Sunset" : "Day"}
           </button>
           <a className="hud-btn" href="/list">
             List
@@ -105,7 +109,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
         <FarmCanvas
           placed={placed}
           farm={farm}
-          night={night}
+          light={light}
           phase={phase}
           reducedMotion={reducedMotion}
           quality={quality}
@@ -117,6 +121,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
             setHint(false);
           }}
           onReady={() => setReady(true)}
+          onProgress={setProgress}
           onSketchDone={() => setPhase("color")}
           showGrid={showGrid}
           plain={plain}
@@ -125,8 +130,9 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
           <p className="loader-kicker">medevsmaker</p>
           <p className="loader-title">Raising the farm</p>
           <div className="loader-track">
-            <div className="loader-bar" />
+            <div className="loader-bar" style={{ width: `${Math.max(8, Math.min(100, progress))}%`, animation: "none" }} />
           </div>
+          <p className="loader-kicker">{Math.round(progress)}%</p>
         </div>
       </div>
       {hint && phase === "color" && <p className="hint">Drag to look around. Click a building.</p>}

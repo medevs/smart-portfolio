@@ -5,6 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import { RoundedBox } from "@react-three/drei";
 import * as THREE from "three";
 import { CELL } from "@/farm/world";
+import { Surface, type SurfaceName } from "./materials";
 
 export type ModelProps = {
   night: boolean;
@@ -18,24 +19,26 @@ function Mat({
   golden,
   roughness = 0.78,
   metalness = 0.04,
+  surface,
+  repeat = [1, 1],
 }: {
   color: string;
   golden?: boolean;
   roughness?: number;
   metalness?: number;
+  surface?: SurfaceName;
+  repeat?: [number, number];
 }) {
-  if (golden) {
-    return (
-      <meshStandardMaterial
-        color="#e7c56b"
-        metalness={1}
-        roughness={0.2}
-        emissive="#b8862a"
-        emissiveIntensity={0.55}
-      />
-    );
-  }
-  return <meshStandardMaterial color={color} roughness={roughness} metalness={metalness} />;
+  return (
+    <Surface
+      name={surface}
+      color={color}
+      golden={golden}
+      roughness={roughness}
+      metalness={metalness}
+      repeat={repeat}
+    />
+  );
 }
 
 function Glass({ night, w = 0.46, h = 0.62 }: { night: boolean; w?: number; h?: number }) {
@@ -57,22 +60,22 @@ export function Barn({ night, golden }: ModelProps) {
   return (
     <group>
       <RoundedBox args={[6.1, 0.32, 4.15]} position={[0, 0.16, 0]} radius={0.04} smoothness={2} receiveShadow>
-        <Mat color="#9a9188" roughness={0.92} />
+        <Mat surface="rock" color="#ffffff" repeat={[2.2, 1.2]} roughness={0.92} />
       </RoundedBox>
       <RoundedBox args={[5.7, 2.7, 3.75]} position={[0, 1.67, 0]} radius={0.05} smoothness={2} castShadow receiveShadow>
-        <Mat color="#c4453c" golden={golden} roughness={0.74} />
+        <Mat surface="wood" color="#d45348" golden={golden} repeat={[2.6, 1.5]} roughness={0.78} />
       </RoundedBox>
       <mesh position={[0, 2.95, 0]} castShadow>
-        <boxGeometry args={[5.85, 0.1, 3.9]} />
-        <Mat color="#f3e6d0" roughness={0.55} />
+        <boxGeometry args={[5.95, 0.12, 4.05]} />
+        <Mat surface="wood" color="#f4efe6" repeat={[3, 0.3]} roughness={0.55} />
       </mesh>
       <mesh position={[-0.72, 1.15, 1.9]} castShadow>
         <boxGeometry args={[1.22, 2.15, 0.08]} />
-        <Mat color="#f6efe2" roughness={0.5} />
+        <Mat surface="wood" color="#f7f1e6" repeat={[1, 1.6]} roughness={0.55} />
       </mesh>
       <mesh position={[0.72, 1.15, 1.9]} castShadow>
         <boxGeometry args={[1.22, 2.15, 0.08]} />
-        <Mat color="#efe4d0" roughness={0.5} />
+        <Mat surface="wood" color="#f3ebdd" repeat={[1, 1.6]} roughness={0.55} />
       </mesh>
       <mesh position={[-0.72, 1.2, 1.96]} rotation={[0, 0, 0.78]}>
         <boxGeometry args={[1.55, 0.06, 0.04]} />
@@ -91,20 +94,20 @@ export function Barn({ night, golden }: ModelProps) {
         <Mat color="#c4453c" />
       </mesh>
       <mesh position={[-1.45, 3.7, 0]} rotation={[0, 0, 0.58]} castShadow>
-        <boxGeometry args={[3.35, 0.14, 4.15]} />
-        <Mat color="#6d2826" roughness={0.68} golden={golden} />
+        <boxGeometry args={[3.45, 0.16, 4.55]} />
+        <Mat surface="roof" color="#ffffff" golden={golden} repeat={[2.4, 1.6]} roughness={0.85} />
       </mesh>
       <mesh position={[1.45, 3.7, 0]} rotation={[0, 0, -0.58]} castShadow>
-        <boxGeometry args={[3.35, 0.14, 4.15]} />
-        <Mat color="#7a302c" roughness={0.68} golden={golden} />
+        <boxGeometry args={[3.45, 0.16, 4.55]} />
+        <Mat surface="roof" color="#f3f0ea" golden={golden} repeat={[2.4, 1.6]} roughness={0.85} />
       </mesh>
       <mesh position={[-0.72, 4.55, 0]} rotation={[0, 0, 0.28]} castShadow>
-        <boxGeometry args={[2.15, 0.12, 4.2]} />
-        <Mat color="#5c221f" roughness={0.7} />
+        <boxGeometry args={[2.25, 0.14, 4.65]} />
+        <Mat surface="roof" color="#ffffff" repeat={[1.6, 1.5]} roughness={0.82} />
       </mesh>
       <mesh position={[0.72, 4.55, 0]} rotation={[0, 0, -0.28]} castShadow>
-        <boxGeometry args={[2.15, 0.12, 4.2]} />
-        <Mat color="#5c221f" roughness={0.7} />
+        <boxGeometry args={[2.25, 0.14, 4.65]} />
+        <Mat surface="roof" color="#ffffff" repeat={[1.6, 1.5]} roughness={0.82} />
       </mesh>
       <mesh position={[0, 3.35, 1.9]}>
         <boxGeometry args={[0.85, 0.7, 0.06]} />
@@ -119,8 +122,9 @@ export function Barn({ night, golden }: ModelProps) {
       </mesh>
       <mesh position={[0, 5.6, 0]} rotation={[0, Math.PI / 4, 0]} castShadow>
         <coneGeometry args={[0.62, 0.5, 4]} />
-        <Mat color="#6d2826" />
+        <Mat surface="roof" color="#ffffff" repeat={[0.6, 0.4]} />
       </mesh>
+      <Weathervane />
       <group position={[-2.15, 2.15, 1.9]}>
         <Glass night={night} w={0.42} h={0.48} />
       </group>
@@ -135,19 +139,19 @@ export function Farmhouse({ night, golden }: ModelProps) {
   return (
     <group>
       <RoundedBox args={[4.6, 2.5, 3.4]} position={[0, 1.45, 0]} radius={0.06} smoothness={2} castShadow receiveShadow>
-        <Mat color="#f0ddc0" golden={golden} roughness={0.86} />
+        <Mat surface="brick" color="#ffffff" golden={golden} repeat={[2.4, 1.5]} roughness={0.86} />
       </RoundedBox>
       <mesh position={[-1.15, 3.15, 0]} rotation={[0, 0, 0.48]} castShadow>
-        <boxGeometry args={[2.9, 0.14, 3.7]} />
-        <Mat color="#7a4a2c" roughness={0.72} />
+        <boxGeometry args={[3.05, 0.16, 3.95]} />
+        <Mat surface="roof" color="#ffffff" repeat={[1.8, 1.2]} roughness={0.8} />
       </mesh>
       <mesh position={[1.15, 3.15, 0]} rotation={[0, 0, -0.48]} castShadow>
-        <boxGeometry args={[2.9, 0.14, 3.7]} />
-        <Mat color="#6a3e26" roughness={0.72} />
+        <boxGeometry args={[3.05, 0.16, 3.95]} />
+        <Mat surface="roof" color="#f4f1ea" repeat={[1.8, 1.2]} roughness={0.8} />
       </mesh>
       <mesh position={[1.35, 3.7, -0.4]} castShadow>
         <boxGeometry args={[0.42, 0.9, 0.42]} />
-        <Mat color="#a86848" />
+        <Mat surface="brick" color="#e7e2dc" repeat={[0.4, 0.8]} />
       </mesh>
       <Smoke position={[1.35, 4.2, -0.4]} />
       <mesh position={[0, 0.55, 1.85]} castShadow>
@@ -164,16 +168,53 @@ export function Farmhouse({ night, golden }: ModelProps) {
         <Glass night={night} w={0.42} h={0.5} />
       </group>
       <mesh position={[0, 0.18, 2.15]} receiveShadow>
-        <boxGeometry args={[4.8, 0.16, 1.1]} />
-        <Mat color="#c4894e" roughness={0.8} />
+        <boxGeometry args={[4.8, 0.16, 1.2]} />
+        <Mat surface="wood" color="#c4a06a" repeat={[2.4, 0.6]} roughness={0.8} />
       </mesh>
-      <mesh position={[-2.05, 0.55, 2.15]} castShadow>
-        <cylinderGeometry args={[0.08, 0.08, 0.9, 8]} />
-        <Mat color="#6b3e24" />
+      <mesh position={[-2.05, 0.7, 2.15]} castShadow>
+        <cylinderGeometry args={[0.08, 0.09, 1.25, 8]} />
+        <Mat surface="wood" color="#6b4228" repeat={[0.3, 1]} />
       </mesh>
-      <mesh position={[2.05, 0.55, 2.15]} castShadow>
-        <cylinderGeometry args={[0.08, 0.08, 0.9, 8]} />
-        <Mat color="#6b3e24" />
+      <mesh position={[2.05, 0.7, 2.15]} castShadow>
+        <cylinderGeometry args={[0.08, 0.09, 1.25, 8]} />
+        <Mat surface="wood" color="#6b4228" repeat={[0.3, 1]} />
+      </mesh>
+      <mesh position={[0, 1.28, 2.15]}>
+        <boxGeometry args={[4.3, 0.08, 0.08]} />
+        <Mat surface="wood" color="#efe6d4" repeat={[2, 0.2]} />
+      </mesh>
+      <mesh position={[0, 1.22, 2.12]}>
+        <sphereGeometry args={[0.07, 12, 12]} />
+        <meshStandardMaterial
+          color="#fff4d8"
+          emissive="#ffb15e"
+          emissiveIntensity={night ? 3.2 : 0.2}
+          roughness={0.25}
+        />
+      </mesh>
+      {night && <pointLight position={[0, 1.15, 2.2]} color="#ffb56a" intensity={1.4} distance={6} />}
+    </group>
+  );
+}
+
+function Weathervane() {
+  const ref = useRef<THREE.Group>(null);
+  useFrame((_, dt) => {
+    if (ref.current) ref.current.rotation.y += dt * 0.35;
+  });
+  return (
+    <group ref={ref} position={[0, 6.05, 0]}>
+      <mesh>
+        <cylinderGeometry args={[0.012, 0.012, 0.4, 6]} />
+        <meshStandardMaterial color="#b7c0c8" metalness={0.85} roughness={0.28} />
+      </mesh>
+      <mesh position={[0.12, 0.18, 0]} castShadow>
+        <boxGeometry args={[0.46, 0.025, 0.025]} />
+        <meshStandardMaterial color="#d5dde4" metalness={0.9} roughness={0.22} />
+      </mesh>
+      <mesh position={[0.32, 0.18, 0]} rotation={[0, 0, -Math.PI / 2]}>
+        <coneGeometry args={[0.045, 0.1, 4]} />
+        <meshStandardMaterial color="#d5dde4" metalness={0.9} roughness={0.22} />
       </mesh>
     </group>
   );
@@ -216,7 +257,7 @@ export function Silo({ night, golden }: ModelProps) {
     <group>
       <mesh position={[0, 2.1, 0]} castShadow receiveShadow>
         <cylinderGeometry args={[0.95, 1.05, 4.2, 20]} />
-        <Mat color="#efe6d6" golden={golden} roughness={0.45} metalness={golden ? 1 : 0.35} />
+        <Mat color="#cfd3d6" golden={golden} roughness={0.32} metalness={golden ? 1 : 0.72} />
       </mesh>
       <mesh position={[0, 4.25, 0]} castShadow>
         <sphereGeometry args={[0.95, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
@@ -241,7 +282,7 @@ export function Shed({ night, golden }: ModelProps) {
   return (
     <group>
       <RoundedBox args={[2.6, 1.6, 2.1]} position={[0, 0.95, 0]} radius={0.05} smoothness={2} castShadow receiveShadow>
-        <Mat color="#e4c48a" golden={golden} />
+        <Mat surface="wood" color="#e7d3a4" golden={golden} repeat={[1.4, 1]} />
       </RoundedBox>
       <mesh position={[-0.7, 2.05, 0]} rotation={[0, 0, 0.5]} castShadow>
         <boxGeometry args={[1.7, 0.1, 2.35]} />
@@ -349,50 +390,24 @@ export function Coop({ night }: ModelProps) {
 }
 
 export function Pond() {
-  const mat = useRef<THREE.ShaderMaterial>(null);
-  useFrame(({ clock }) => {
-    if (mat.current) mat.current.uniforms.uTime.value = clock.elapsedTime;
-  });
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]} receiveShadow>
-      <circleGeometry args={[2.15, 40]} />
-      <shaderMaterial
-        ref={mat}
-        transparent
-        uniforms={{
-          uTime: { value: 0 },
-          uShallow: { value: new THREE.Color("#3aa7c4") },
-          uDeep: { value: new THREE.Color("#0e4d63") },
-        }}
-        vertexShader={`
-          varying vec2 vUv;
-          varying vec3 vPos;
-          uniform float uTime;
-          void main() {
-            vUv = uv;
-            vec3 p = position;
-            p.z += sin(position.x * 3.0 + uTime * 1.4) * 0.03 + cos(position.y * 2.4 + uTime) * 0.02;
-            vPos = p;
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
-          }
-        `}
-        fragmentShader={`
-          uniform vec3 uShallow;
-          uniform vec3 uDeep;
-          uniform float uTime;
-          varying vec2 vUv;
-          varying vec3 vPos;
-          void main() {
-            float d = distance(vUv, vec2(0.5));
-            float fres = pow(smoothstep(0.15, 0.5, d), 1.2);
-            float ripple = sin(vPos.x * 18.0 + uTime * 2.0) * sin(vPos.y * 14.0 - uTime * 1.6);
-            vec3 col = mix(uDeep, uShallow, fres + ripple * 0.08);
-            col += vec3(0.15, 0.18, 0.12) * smoothstep(0.02, 0.0, abs(ripple) - 0.92);
-            gl_FragColor = vec4(col, 0.92);
-          }
-        `}
-      />
-    </mesh>
+    <group>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
+        <ringGeometry args={[1.85, 2.45, 40]} />
+        <Mat surface="dirt" color="#6a5340" repeat={[2, 0.4]} roughness={1} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.045, 0]}>
+        <circleGeometry args={[2.05, 48]} />
+        <meshStandardMaterial
+          color="#1c6e86"
+          metalness={0.82}
+          roughness={0.08}
+          transparent
+          opacity={0.94}
+          envMapIntensity={1.6}
+        />
+      </mesh>
+    </group>
   );
 }
 
@@ -541,29 +556,66 @@ export function Hen() {
   return <BirdBody color="#e0a84a" comb="#c4453c" />;
 }
 
+function Hoof({
+  position,
+  height = 0.5,
+  radius = 0.065,
+}: {
+  position: [number, number, number];
+  height?: number;
+  radius?: number;
+}) {
+  return (
+    <mesh position={[position[0], height / 2, position[2]]} castShadow>
+      <cylinderGeometry args={[radius * 0.8, radius, height, 7]} />
+      <meshStandardMaterial color="#2c261f" roughness={0.84} />
+    </mesh>
+  );
+}
+
 export function Cow() {
   const tail = useRef<THREE.Group>(null);
   useFrame(({ clock }) => {
-    if (tail.current) tail.current.rotation.z = Math.sin(clock.elapsedTime * 2.2) * 0.4;
+    if (tail.current) tail.current.rotation.z = Math.sin(clock.elapsedTime * 2.2) * 0.35;
   });
   return (
     <group>
-      <mesh position={[0, 0.55, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
-        <capsuleGeometry args={[0.32, 0.7, 4, 8]} />
-        <meshStandardMaterial color="#f6f1e6" roughness={0.72} />
+      <Hoof position={[-0.28, 0.24, 0.16]} />
+      <Hoof position={[-0.28, 0.24, -0.16]} />
+      <Hoof position={[0.32, 0.24, 0.16]} />
+      <Hoof position={[0.32, 0.24, -0.16]} />
+      <mesh position={[0.02, 0.68, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
+        <capsuleGeometry args={[0.26, 0.78, 6, 12]} />
+        <meshStandardMaterial color="#f3efe6" roughness={0.62} />
       </mesh>
-      <mesh position={[-0.18, 0.72, 0.1]}>
-        <sphereGeometry args={[0.16, 8, 8]} />
-        <meshStandardMaterial color="#5c4638" roughness={0.8} />
+      <mesh position={[-0.08, 0.78, 0.12]}>
+        <sphereGeometry args={[0.14, 10, 8]} />
+        <meshStandardMaterial color="#3a322c" roughness={0.8} />
       </mesh>
-      <mesh position={[-0.55, 0.62, 0]} castShadow>
-        <sphereGeometry args={[0.2, 10, 8]} />
-        <meshStandardMaterial color="#f6f1e6" roughness={0.7} />
+      <mesh position={[0.22, 0.74, -0.1]}>
+        <sphereGeometry args={[0.12, 10, 8]} />
+        <meshStandardMaterial color="#3a322c" roughness={0.8} />
       </mesh>
-      <group ref={tail} position={[0.48, 0.7, 0]}>
-        <mesh position={[0.12, -0.05, 0]} rotation={[0, 0, 0.6]}>
-          <cylinderGeometry args={[0.02, 0.02, 0.28, 4]} />
-          <meshStandardMaterial color="#5c4638" />
+      <mesh position={[-0.58, 0.78, 0]} castShadow>
+        <sphereGeometry args={[0.18, 12, 10]} />
+        <meshStandardMaterial color="#f7f3ec" roughness={0.6} />
+      </mesh>
+      <mesh position={[-0.74, 0.68, 0]}>
+        <boxGeometry args={[0.12, 0.1, 0.16]} />
+        <meshStandardMaterial color="#e7c2b0" roughness={0.7} />
+      </mesh>
+      <mesh position={[-0.62, 0.96, 0.08]} rotation={[0, 0, 0.5]}>
+        <coneGeometry args={[0.035, 0.12, 5]} />
+        <meshStandardMaterial color="#d9d4cc" roughness={0.45} />
+      </mesh>
+      <mesh position={[-0.62, 0.96, -0.08]} rotation={[0, 0, 0.5]}>
+        <coneGeometry args={[0.035, 0.12, 5]} />
+        <meshStandardMaterial color="#d9d4cc" roughness={0.45} />
+      </mesh>
+      <group ref={tail} position={[0.5, 0.72, 0]}>
+        <mesh position={[0.12, -0.08, 0]} rotation={[0, 0, 0.7]}>
+          <cylinderGeometry args={[0.018, 0.022, 0.32, 5]} />
+          <meshStandardMaterial color="#3a322c" />
         </mesh>
       </group>
     </group>
@@ -573,17 +625,21 @@ export function Cow() {
 export function Sheep() {
   return (
     <group>
-      <mesh position={[0, 0.42, 0]} castShadow>
-        <sphereGeometry args={[0.32, 12, 10]} />
-        <meshStandardMaterial color="#f7f4ef" roughness={1} />
+      <Hoof position={[-0.12, 0, 0.1]} height={0.28} radius={0.045} />
+      <Hoof position={[-0.12, 0, -0.1]} height={0.28} radius={0.045} />
+      <Hoof position={[0.14, 0, 0.1]} height={0.28} radius={0.045} />
+      <Hoof position={[0.14, 0, -0.1]} height={0.28} radius={0.045} />
+      <mesh position={[0.02, 0.42, 0]} castShadow>
+        <sphereGeometry args={[0.26, 14, 12]} />
+        <meshStandardMaterial color="#f6f3ee" roughness={0.95} />
       </mesh>
-      <mesh position={[-0.28, 0.48, 0]} castShadow>
-        <sphereGeometry args={[0.16, 10, 8]} />
-        <meshStandardMaterial color="#f3efe8" roughness={0.85} />
+      <mesh position={[-0.22, 0.48, 0]} castShadow>
+        <sphereGeometry args={[0.13, 12, 10]} />
+        <meshStandardMaterial color="#2e2924" roughness={0.7} />
       </mesh>
-      <mesh position={[-0.4, 0.46, 0]}>
-        <sphereGeometry args={[0.07, 8, 6]} />
-        <meshStandardMaterial color="#3a2c24" />
+      <mesh position={[-0.32, 0.44, 0]}>
+        <boxGeometry args={[0.06, 0.05, 0.08]} />
+        <meshStandardMaterial color="#1c1916" />
       </mesh>
     </group>
   );
@@ -736,18 +792,18 @@ export function Fence({ cols = 2 }: ModelProps) {
     <group>
       <mesh position={[0, 0.38, 0]}>
         <boxGeometry args={[w, 0.06, 0.06]} />
-        <Mat color="#e7d3b0" roughness={0.75} />
+        <Mat surface="wood" color="#e7d7bc" repeat={[Math.max(2, w), 0.25]} roughness={0.72} />
       </mesh>
       <mesh position={[0, 0.62, 0]}>
         <boxGeometry args={[w, 0.06, 0.06]} />
-        <Mat color="#f0e2c8" roughness={0.7} />
+        <Mat surface="wood" color="#f0e6d2" repeat={[Math.max(2, w), 0.25]} roughness={0.68} />
       </mesh>
       {Array.from({ length: posts }, (_, i) => {
         const x = -w / 2 + (i * w) / (posts - 1);
         return (
           <mesh key={i} position={[x, 0.45, 0]} castShadow>
             <boxGeometry args={[0.08, 0.9, 0.08]} />
-            <Mat color="#f4ead8" />
+            <Mat surface="wood" color="#f4ead8" repeat={[0.3, 0.8]} />
           </mesh>
         );
       })}
