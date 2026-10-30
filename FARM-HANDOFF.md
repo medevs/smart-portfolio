@@ -145,3 +145,18 @@ build, all project dialogs and the no-WebGL fallback. Narrow viewport/physical
 mobile and GPU-capable 3D proof remain unavailable in this browser; do not claim
 those checks. Future events and visits remain concepts; product/sponsor/fund/
 legal routes are unchanged.
+
+## PR #11 status: 2026-10-31
+
+The earlier GitHub write was blocked by a temporary usage-limit approval-review
+failure. A later ordinary retry succeeded after the indicated reset; no alternate
+write route was used. PR #11 is open at ef1cef47009d8042a6c793419e4bc5434ece6ece.
+Vercel preview and GitGuardian checks succeeded. The preview URL redirected to
+Vercel sign-in, so browser verification of the fix is BLOCKED, not passed.
+Do not merge until the actual focus-return behavior is verified. No credentials
+were requested during the unattended review, and no protection was changed.
+Production is still main d250e240. Live /gather and /references retain explicit
+future/unbookable wording and photo/generated-image provenance. Next: complete
+preview authentication in an interactive session, verify all four product dialogs
+and Help build return focus, inspect review/CI, then merge and verify production.
+Narrow-layout and GPU-capable 3D checks remain pending for the reasons above.
