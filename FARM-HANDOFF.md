@@ -81,3 +81,24 @@ and GPU-capable procedural-3D test are still pending, and must not be claimed.
 The existing Help build dialog also linked its Granary offering to /spot/silo,
 while the actual product/plot ID is mentorclone. Resolve stable landmark aliases
 in findSpot so that existing sponsorship links open the correct product.
+
+## Review: 2026-10-30, evening
+
+No open PRs or concurrent remote changes were present; started from main d221647.
+A new live browser session rendered the panorama without application errors.
+Keyboard-only reproduction: Tab focused "Skip to the list of places", Enter
+changed the URL to #farm-links but left the same landscape visible, and Tab
+focused the Granary link in an invisible sr-only navigation block. The visible
+catalog at /list is the intended nonvisual alternative. Point the skip link to
+/list and mark the duplicate hidden index `hidden` so keyboard focus cannot be
+stranded in off-screen links. Product IDs and routes remain unchanged.
+
+The browser rejected a local-file responsive test harness under its URL policy.
+No alternate route or workaround was attempted. This review does not establish
+physical-mobile layout correctness. GPU-capable 3D is still unverified.
+
+The visible /list catalog was also inspected directly. It still called the
+workshop a barn and had no typographic hierarchy. Update the catalog copy,
+prioritize the four main project/maker entrances, remove duplicate place names,
+and add scoped paper/olive styling with clear headings and focus states. All
+existing product, sponsor, fund, journal and legal routes are preserved.

@@ -121,7 +121,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
   return (
     <div className={`farm-root is-${phase}${!ready || sceneFailed ? " is-panorama" : ""}`}>
       <script dangerouslySetInnerHTML={{ __html: BOOT }} />
-      <a className="skip-link" href="#farm-links">
+      <a className="skip-link" href="/list">
         Skip to the list of places
       </a>
       <header className="hud">
@@ -216,7 +216,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
         <p className="hint">WASD or the pad to move. Use F or the tractor button beside the tractor to enter or exit.</p>
       )}
       {hint && ready && !sceneFailed && !explore && phase === "color" && <p className="hint">Drag to look around. Click a building.</p>}
-      <nav id="farm-links" className="sr-only" aria-label="Places on the farm">
+      <nav id="farm-links" hidden aria-label="Places on the farm">
         <ul>
           {placed
             .filter((entry) => entry.item.interactive)
