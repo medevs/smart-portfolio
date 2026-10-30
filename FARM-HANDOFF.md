@@ -102,3 +102,8 @@ workshop a barn and had no typographic hierarchy. Update the catalog copy,
 prioritize the four main project/maker entrances, remove duplicate place names,
 and add scoped paper/olive styling with clear headings and focus states. All
 existing product, sponsor, fund, journal and legal routes are preserved.
+
+Review validation: darken the small catalog labels to preserve 4.5:1 text
+contrast, and keep the contiguous visible phrase "Open on the farm" in every
+project link's accessible name for speech navigation. Decorative arrows are
+aria-hidden. Contrast and rendered accessible-name regressions cover these.

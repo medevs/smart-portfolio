@@ -49,7 +49,7 @@ export default async function ListPage() {
                   </h3>
                   {item.pitch && <p>{item.pitch}</p>}
                   <p>
-                    <Link href={`/spot/${plot.id}`} aria-label={`Open ${item.name} on the farm`}>Open on the farm ↗</Link>
+                    <Link href={`/spot/${plot.id}`} aria-label={`Open on the farm: ${item.name}`}>Open on the farm <span aria-hidden="true">↗</span></Link>
                     {item.cta && (
                       <>
                         {" · "}
