@@ -77,3 +77,7 @@ entrance inward and use the mobile navigation layout up to 900 CSS px, so tall
 narrow crops don't strand project controls. The cloud browser has a fixed
 1363x936 viewport; browser zoom did not change it. A physical mobile viewport
 and GPU-capable procedural-3D test are still pending, and must not be claimed.
+
+The existing Help build dialog also linked its Granary offering to /spot/silo,
+while the actual product/plot ID is mentorclone. Resolve stable landmark aliases
+in findSpot so that existing sponsorship links open the correct product.

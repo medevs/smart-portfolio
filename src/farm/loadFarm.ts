@@ -98,7 +98,7 @@ export async function loadFarm(): Promise<FarmData> {
 }
 
 export function findSpot(placed: Placed[], id: string) {
-  return placed.find((entry) => entry.plot.id === id || entry.item.id === id) ?? null;
+  return placed.find((entry) => entry.plot.id === id || entry.item.id === id || entry.item.landmark === id) ?? null;
 }
 
 export function fundRaised(file: FundFile) {
