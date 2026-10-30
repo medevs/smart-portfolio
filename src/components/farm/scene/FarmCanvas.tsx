@@ -21,7 +21,7 @@ import { CELL, plotPosition } from "@/farm/world";
 import { MODELS, type ModelProps } from "./models";
 import { Surface, Textures } from "./materials";
 import { Horizon, MillWorks, Scenery } from "./scenery";
-import { Walker } from "./explore";
+import { PhysicsYard } from "./explore";
 import { walk } from "./walk-state";
 import { SketchEffect, sketchState } from "./SketchEffect";
 
@@ -139,7 +139,7 @@ function Scene(props: FarmCanvasProps) {
       <HayBales />
       <Rocks />
       <Wildflowers count={quality === "low" ? 40 : 110} />
-      <Grass placed={placed} grid={farm.grid} count={quality === "low" ? 1400 : tier.current ? 4800 : 2600} />
+      <Grass placed={placed} grid={farm.grid} count={quality === "low" ? 700 : tier.current ? 4200 : 2200} />
       <Clouds night={night} />
       <Birds />
       {placed.map((entry) => (
@@ -155,9 +155,9 @@ function Scene(props: FarmCanvasProps) {
       ))}
       {props.showGrid && <GridHelper grid={farm.grid} />}
       <MillWorks />
-      <Scenery detail={props.detail} />
+      <Scenery detail={props.detail && props.quality === "high"} />
       </Textures>
-      <Walker active={props.explore} />
+      <Suspense fallback={null}>{props.explore ? <PhysicsYard /> : null}</Suspense>
       <CameraControls
         ref={controls}
         makeDefault
@@ -577,9 +577,9 @@ function PlacedModel({
   useFrame(({ clock }) => {
     const node = group.current;
     if (!node) return;
-    if (entry.item.sprite === "tractor" && walk.driving) {
+    if (entry.item.sprite === "tractor") {
       node.position.set(x + walk.tx, 0, z + walk.tz);
-      node.rotation.y = walk.yaw;
+      if (walk.driving) node.rotation.y = walk.yaw;
       return;
     }
     if (!roam) return;
@@ -719,26 +719,31 @@ function Effects({
     }
   });
 
+  const passes = [
+    <ToneMapping key="tone" mode={ToneMappingMode.AGX} />,
+    <HueSaturation key="sat" saturation={quality === "high" ? 0.16 : 0.06} />,
+    <BrightnessContrast key="grade" brightness={0.01} contrast={quality === "high" ? 0.08 : 0.03} />,
+    <SketchPass key="sketch" />,
+    <Bloom
+      key="bloom"
+      intensity={night ? 0.7 : 0.08}
+      luminanceThreshold={night ? 0.45 : 0.96}
+      luminanceSmoothing={0.3}
+      mipmapBlur
+    />,
+    <Vignette key="vignette" eskil={false} offset={0.16} darkness={night ? 0.65 : 0.35} />,
+  ];
+  if (quality === "high") {
+    passes.splice(4, 0, <N8AO key="ao" halfRes aoRadius={0.5} intensity={0.85} distanceFalloff={1} />);
+    if (focused) {
+      passes.push(<DepthOfField key="dof" focusDistance={0.02} focalLength={0.04} bokehScale={1.2} />);
+    }
+    passes.push(<SMAA key="smaa" />);
+  }
+
   return (
-      <EffectComposer multisampling={0} enableNormalPass={quality === "high"}>
-      <ToneMapping mode={ToneMappingMode.AGX} />
-      <HueSaturation saturation={0.16} />
-      <BrightnessContrast brightness={0.01} contrast={0.08} />
-      <SketchPass />
-      <N8AO halfRes aoRadius={0.5} intensity={quality === "high" ? 0.9 : 0} distanceFalloff={1} />
-      <Bloom
-        intensity={night ? 0.9 : 0.12}
-        luminanceThreshold={night ? 0.45 : 0.95}
-        luminanceSmoothing={0.3}
-        mipmapBlur
-      />
-      <DepthOfField
-        focusDistance={0.02}
-        focalLength={0.04}
-        bokehScale={quality === "high" && focused ? 1.2 : 0}
-      />
-      <Vignette eskil={false} offset={0.16} darkness={night ? 0.65 : 0.4} />
-      <SMAA />
+    <EffectComposer multisampling={0} enableNormalPass={quality === "high"}>
+      {passes}
     </EffectComposer>
   );
 }

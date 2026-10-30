@@ -20,6 +20,7 @@
     "@react-three/drei": "^10.0.6",
     "@react-three/fiber": "^9.1.2",
     "@react-three/postprocessing": "^3.0.4",
+    "@react-three/rapier": "^2.2.0",
     "@supabase/supabase-js": "^2.49.4",
     "@tailwindcss/typography": "^0.5.10",
     "@types/node": "^20",

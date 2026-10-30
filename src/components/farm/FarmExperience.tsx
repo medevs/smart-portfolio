@@ -154,13 +154,17 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
         <div className={`farm-loader${ready ? " is-done" : ""}`} aria-hidden={ready}>
           <p className="loader-kicker">medevsmaker</p>
           <p className="loader-title">Raising the farm</p>
+          <p className="loader-kicker">Drawing the ground, then letting the color in</p>
           <div className="loader-track">
             <div className="loader-bar" style={{ width: `${Math.max(8, Math.min(100, progress))}%`, animation: "none" }} />
           </div>
           <p className="loader-kicker">{Math.round(progress)}%</p>
         </div>
       </div>
-      {hint && phase === "color" && <p className="hint">Drag to look around. Click a building.</p>}
+      {explore && phase === "color" && (
+        <p className="hint">WASD or the pad to walk. F beside the tractor to drive.</p>
+      )}
+      {hint && !explore && phase === "color" && <p className="hint">Drag to look around. Click a building.</p>}
       <nav id="farm-links" className="sr-only" aria-label="Places on the farm">
         <ul>
           {placed
