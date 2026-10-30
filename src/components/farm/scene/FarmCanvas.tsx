@@ -11,7 +11,7 @@ import {
   SoftShadows,
   useProgress,
 } from "@react-three/drei";
-import { Bloom, DepthOfField, EffectComposer, N8AO, SMAA, ToneMapping, Vignette, wrapEffect } from "@react-three/postprocessing";
+import { Bloom, BrightnessContrast, DepthOfField, EffectComposer, HueSaturation, N8AO, SMAA, ToneMapping, Vignette, wrapEffect } from "@react-three/postprocessing";
 import { ToneMappingMode } from "postprocessing";
 import * as THREE from "three";
 import type { FarmData } from "@/farm/types";
@@ -20,6 +20,10 @@ import { plateFor } from "@/farm/plates";
 import { CELL, plotPosition } from "@/farm/world";
 import { MODELS, type ModelProps } from "./models";
 import { Surface, Textures } from "./materials";
+import { Horizon, MillWorks, Scenery } from "./scenery";
+import { AtlasLandscape } from "./MiddleAtlas";
+import { PhysicsYard } from "./explore";
+import { walk } from "./walk-state";
 import { SketchEffect, sketchState } from "./SketchEffect";
 
 const SketchPass = wrapEffect(SketchEffect);
@@ -44,11 +48,14 @@ export type FarmCanvasProps = {
   onSketchDone: () => void;
   showGrid: boolean;
   plain: boolean;
+  detail: boolean;
+  explore: boolean;
 };
 
 export default function FarmCanvas(props: FarmCanvasProps) {
   return (
     <Canvas
+      fallback={<div className="farm-fallback"><p>Explore the farm in list view.</p><a href="/list">See all places →</a></div>}
       shadows
       dpr={props.quality === "low" ? [1, 1.2] : [1, 1.6]}
       camera={{ position: [16, 11.5, 18], fov: 35, near: 0.1, far: 140 }}
@@ -74,9 +81,16 @@ export default function FarmCanvas(props: FarmCanvasProps) {
 
 function LoadWatch({ onProgress, onReady }: { onProgress: (value: number) => void; onReady: () => void }) {
   const { progress, active } = useProgress();
+  const ready = useRef(false);
   useEffect(() => {
-    onProgress(progress);
-    if (!active && progress >= 100) onReady();
+    const frame = window.requestAnimationFrame(() => {
+      onProgress(progress);
+      if (!ready.current && !active && progress >= 100) {
+        ready.current = true;
+        onReady();
+      }
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, [active, onProgress, onReady, progress]);
   return null;
 }
@@ -103,7 +117,7 @@ function Scene(props: FarmCanvasProps) {
     controlsApi.setLookAt(x + 6.2, 4.8, z + 7.4, x, 1.7, z, !reducedMotion);
   }, [activeId, farm.grid, placed, reducedMotion]);
 
-  const fog = night ? "#14162c" : sunset ? "#e7a07a" : "#c5d4e4";
+  const fog = night ? "#12162a" : sunset ? "#e8b48a" : "#b9d4ee";
   const hdri = night ? "/farm/hdri/night.hdr" : sunset ? "/farm/hdri/sunset.hdr" : "/farm/hdri/day.hdr";
 
   return (
@@ -114,19 +128,21 @@ function Scene(props: FarmCanvasProps) {
         }}
       />
       {quality === "high" && <SoftShadows size={18} samples={12} focus={0.35} />}
-      <color attach="background" args={[night ? "#07091c" : sunset ? "#e8885a" : "#c9d7e6"]} />
-      <fog attach="fog" args={[fog, sunset ? 28 : 42, sunset ? 90 : 120]} />
+      <color attach="background" args={[night ? "#07091c" : sunset ? "#e8885a" : "#8ec8ef"]} />
+      <fog attach="fog" args={[fog, night ? 40 : sunset ? 55 : 70, night ? 110 : 160]} />
       <Sky night={night} sunset={sunset} />
       <Lights night={night} sunset={sunset} quality={quality} />
       {sunset && quality === "high" && <SunShafts />}
-      <Environment files={hdri} background={false} environmentIntensity={night ? 0.28 : sunset ? 0.7 : 0.38} />
+      <Environment files={hdri} background={false} environmentIntensity={night ? 0.32 : sunset ? 0.75 : 0.55} />
       <Textures>
+      <Horizon />
+      <AtlasLandscape />
       <Ground />
       <Lane />
       <HayBales />
       <Rocks />
       <Wildflowers count={quality === "low" ? 40 : 110} />
-      <Grass placed={placed} grid={farm.grid} count={quality === "low" ? 1400 : tier.current ? 4800 : 2600} />
+      <Grass placed={placed} grid={farm.grid} count={quality === "low" ? 400 : tier.current ? 2200 : 1200} />
       <Clouds night={night} />
       <Birds />
       {placed.map((entry) => (
@@ -141,7 +157,10 @@ function Scene(props: FarmCanvasProps) {
         />
       ))}
       {props.showGrid && <GridHelper grid={farm.grid} />}
+      <MillWorks />
+      <Scenery detail={props.detail && props.quality === "high"} />
       </Textures>
+      <Suspense fallback={null}>{props.explore ? <PhysicsYard /> : null}</Suspense>
       <CameraControls
         ref={controls}
         makeDefault
@@ -152,6 +171,7 @@ function Scene(props: FarmCanvasProps) {
         minAzimuthAngle={-Math.PI * 0.85}
         maxAzimuthAngle={Math.PI * 0.35}
         smoothTime={reducedMotion ? 0 : 0.45}
+        enabled={!props.explore}
       />
       {props.plain ? null : (
         <Effects night={night} phase={props.phase} reduced={reducedMotion} quality={quality} onSketchDone={props.onSketchDone} focused={!!activeId} />
@@ -178,7 +198,7 @@ function Lights({ night, sunset, quality }: { night: boolean; sunset: boolean; q
     const k = blend.current;
     const s = setBlend.current * (1 - k);
     if (sun.current) {
-      sun.current.intensity = THREE.MathUtils.lerp(3.1, 0.28, k) * (1 - s * 0.2);
+      sun.current.intensity = THREE.MathUtils.lerp(3.6, 0.34, k) * (1 - s * 0.15);
       sun.current.color.copy(dayColor).lerp(setColor, s).lerp(cool, k);
       sun.current.position.set(
         THREE.MathUtils.lerp(14, 24, s) * (1 - k) + -10 * k,
@@ -253,8 +273,8 @@ function Sky({ night, sunset }: { night: boolean; sunset: boolean }) {
           void main() {
             vec3 dir = normalize(vDir);
             float h = dir.y;
-            vec3 dayTop = vec3(0.45, 0.62, 0.86);
-            vec3 dayHor = vec3(0.78, 0.86, 0.93);
+            vec3 dayTop = vec3(0.16, 0.45, 0.92);
+            vec3 dayHor = vec3(0.62, 0.82, 0.96);
             vec3 setTop = vec3(0.28, 0.18, 0.48);
             vec3 setHor = vec3(1.0, 0.46, 0.22);
             vec3 nightTop = vec3(0.02, 0.03, 0.1);
@@ -297,7 +317,7 @@ function Ground() {
   }, []);
   return (
     <mesh geometry={geom} receiveShadow>
-      <Surface name="grass" color="#b7d48a" repeat={[16, 16]} roughness={0.92} metalness={0} />
+      <Surface name="grass" color="#a9a477" repeat={[18, 18]} roughness={0.88} metalness={0} />
     </mesh>
   );
 }
@@ -554,7 +574,21 @@ function PlacedModel({
   onSelect: (id: string) => void;
 }) {
   const Model = MODELS[entry.item.sprite];
+  const group = useRef<THREE.Group>(null);
   const [x, , z] = plotPosition(entry.plot, farm.grid);
+  const roam = ["cow", "sheep", "donkey", "chicken", "hen", "dog", "cat"].includes(entry.item.sprite);
+  useFrame(({ clock }) => {
+    const node = group.current;
+    if (!node) return;
+    if (entry.item.sprite === "tractor") {
+      node.position.set(x + walk.tx, 0, z + walk.tz);
+      if (walk.driving) node.rotation.y = Math.PI / 2 - walk.yaw;
+      return;
+    }
+    if (!roam) return;
+    const t = clock.elapsedTime * 0.35 + (entry.plot.animDelay ?? 0);
+    node.position.set(x + Math.sin(t) * 0.45, 0, z + Math.cos(t * 0.8) * 0.28);
+  });
   const plate = plateFor(entry, farm);
   const golden = Boolean(plate?.golden);
   const interactive = Boolean(entry.item.interactive);
@@ -576,6 +610,7 @@ function PlacedModel({
   };
   return (
     <group
+      ref={group}
       position={[x, 0, z]}
       scale={[entry.plot.flip ? -s : s, s, s]}
       onClick={(event) => {
@@ -687,24 +722,31 @@ function Effects({
     }
   });
 
+  const passes = [
+    <ToneMapping key="tone" mode={ToneMappingMode.AGX} />,
+    <HueSaturation key="sat" saturation={quality === "high" ? 0.16 : 0.06} />,
+    <BrightnessContrast key="grade" brightness={0.01} contrast={quality === "high" ? 0.08 : 0.03} />,
+    <SketchPass key="sketch" />,
+    <Bloom
+      key="bloom"
+      intensity={night ? 0.7 : 0.08}
+      luminanceThreshold={night ? 0.45 : 0.96}
+      luminanceSmoothing={0.3}
+      mipmapBlur
+    />,
+    <Vignette key="vignette" eskil={false} offset={0.16} darkness={night ? 0.65 : 0.35} />,
+  ];
+  if (quality === "high") {
+    passes.splice(4, 0, <N8AO key="ao" halfRes aoRadius={0.5} intensity={0.85} distanceFalloff={1} />);
+    if (focused) {
+      passes.push(<DepthOfField key="dof" focusDistance={0.02} focalLength={0.04} bokehScale={1.2} />);
+    }
+    passes.push(<SMAA key="smaa" />);
+  }
+
   return (
-      <EffectComposer multisampling={0} enableNormalPass={quality === "high"}>
-      <ToneMapping mode={ToneMappingMode.AGX} />
-      <SketchPass />
-      <N8AO halfRes aoRadius={0.5} intensity={quality === "high" ? 0.9 : 0} distanceFalloff={1} />
-      <Bloom
-        intensity={night ? 0.9 : 0.12}
-        luminanceThreshold={night ? 0.45 : 0.95}
-        luminanceSmoothing={0.3}
-        mipmapBlur
-      />
-      <DepthOfField
-        focusDistance={0.02}
-        focalLength={0.04}
-        bokehScale={quality === "high" && focused ? 1.2 : 0}
-      />
-      <Vignette eskil={false} offset={0.16} darkness={night ? 0.65 : 0.4} />
-      <SMAA />
+    <EffectComposer multisampling={0} enableNormalPass={quality === "high"}>
+      {passes}
     </EffectComposer>
   );
 }

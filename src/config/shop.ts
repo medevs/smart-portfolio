@@ -149,15 +149,15 @@ export const offerings: Offering[] = [
   },
   {
     id: "windmill",
-    title: "Windmill",
+    title: "Granary tower",
     blurb: "One sponsor. The next person pays double to take it over.",
     landmark: "windmill",
     paypal: "landmark",
   },
   {
     id: "silo",
-    title: "Silo",
-    blurb: "Sponsor the silo. MentorClone stays; your name goes on the band.",
+    title: "Granary",
+    blurb: "Sponsor the granary. MentorClone stays; your name goes on the wall.",
     landmark: "silo",
     paypal: "landmark",
   },

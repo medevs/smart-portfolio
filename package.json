@@ -8,7 +8,8 @@
     "generate": "npx ts-node ./scripts/generate.ts",
     "start": "next start",
     "lint": "next lint",
-    "vercel-build": "npm run generate && next build"
+    "vercel-build": "npm run generate && next build",
+    "test": "node --test tests/*.test.cjs"
   },
   "dependencies": {
     "@langchain/community": "^0.3.41",
@@ -20,6 +21,7 @@
     "@react-three/drei": "^10.0.6",
     "@react-three/fiber": "^9.1.2",
     "@react-three/postprocessing": "^3.0.4",
+    "@react-three/rapier": "^2.2.0",
     "@supabase/supabase-js": "^2.49.4",
     "@tailwindcss/typography": "^0.5.10",
     "@types/node": "^20",

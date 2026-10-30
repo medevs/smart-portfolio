@@ -8,7 +8,7 @@ export default async function HomePage() {
     "@type": "WebSite",
     name: "medevsmaker",
     url: "https://medevsmaker.vercel.app",
-    description: "A farm of things made in code, with a barn for ReelStyles.",
+    description: "A farm of things made in code, inspired by Morocco’s Middle Atlas, with a courtyard workshop for ReelStyles.",
   };
 
   return (

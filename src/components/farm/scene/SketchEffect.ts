@@ -22,7 +22,10 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   float hatch = step(0.4, shade) * step(0.55, fract((uv.x + uv.y) * 220.0));
   float inkAmt = clamp(edge * 0.95 + shade * 0.28 + hatch * 0.22, 0.0, 1.0);
   vec3 sketch = mix(paper, ink, inkAmt);
-  outputColor = vec4(mix(sketch, inputColor.rgb, uMix), inputColor.a);
+  float diag = uv.x * 0.72 + uv.y * 0.28;
+  float edge = uMix * 1.2;
+  float reveal = 1.0 - smoothstep(edge - 0.14, edge, diag);
+  outputColor = vec4(mix(sketch, inputColor.rgb, reveal), inputColor.a);
 }
 `;
 

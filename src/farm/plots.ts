@@ -38,6 +38,7 @@ export const plots: Plot[] = [
   { id: "cow-2", itemId: "cow", col: 14, row: 5, cols: 2, rows: 1, flip: true, animDelay: 0.6, sponsorable: true },
   { id: "sheep-1", itemId: "sheep", col: 13, row: 5, animDelay: 0.3, sponsorable: true },
   { id: "sheep-2", itemId: "sheep", col: 16, row: 4, flip: true, animDelay: 0.7, sponsorable: true },
+  { id: "donkey", itemId: "donkey", col: 19, row: 4, animDelay: 0.8 },
   { id: "tractor", itemId: "tractor", col: 11, row: 6, cols: 2, rows: 1 },
   { id: "hay", itemId: "hay", col: 16, row: 6, sponsorable: true },
 

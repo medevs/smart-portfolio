@@ -1058,3 +1058,40 @@ table.ledger td {
     opacity: 1 !important;
   }
 }
+
+.joystick {
+  position: absolute;
+  left: 16px;
+  bottom: 52px;
+  z-index: 5;
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 250, 244, 0.75);
+  background: rgba(20, 16, 18, 0.28);
+  touch-action: none;
+}
+
+.tractor-action {
+  position: absolute;
+  right: 16px;
+  bottom: 76px;
+  z-index: 5;
+  min-height: 48px;
+}
+
+.farm-fallback {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 24px;
+  background: #252c26;
+  color: #f4eada;
+  text-align: center;
+}
+.farm-fallback a { text-decoration: underline; }
