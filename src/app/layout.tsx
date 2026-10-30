@@ -1,91 +1,59 @@
-import Footer from "@/components/Footer";
-import Navbar from "@/components/Navbar";
+import LegalFooter from "@/components/LegalFooter";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { seoConfig, personalInfo } from "@/config";
+import { seoConfig } from "@/config";
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Fraunces, Nunito } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+const nunito = Nunito({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-nunito",
+  display: "swap",
 });
 
-const jetbrainsMono = JetBrains_Mono({
+const fraunces = Fraunces({
   subsets: ["latin"],
-  variable: "--font-mono",
+  variable: "--font-fraunces",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   metadataBase: new URL(seoConfig.siteUrl),
   title: {
-    template: `%s | ${personalInfo.fullName}`,
-    default: `${personalInfo.fullName} - ${personalInfo.title}`,
+    template: `%s · medevsmaker`,
+    default: "medevsmaker — a farm you can wander",
   },
   description: seoConfig.description,
   keywords: seoConfig.keywords,
-  authors: [{ name: seoConfig.author.name, url: seoConfig.author.url }],
-  creator: personalInfo.fullName,
-  icons: {
-    icon: [
-      { url: "/icons/favicon-16x16.svg", sizes: "16x16", type: "image/svg+xml" },
-      { url: "/icons/favicon-32x32.svg", sizes: "32x32", type: "image/svg+xml" },
-    ],
-    apple: [
-      { url: "/icons/apple-touch-icon.svg", sizes: "180x180", type: "image/svg+xml" },
-    ],
-    other: [
-      { rel: "icon", url: "/icons/android-chrome-192x192.svg", sizes: "192x192", type: "image/svg+xml" },
-    ],
-  },
+  authors: [{ name: "medevsmaker", url: seoConfig.siteUrl }],
+  creator: "medevsmaker",
   openGraph: {
     type: "website",
-    locale: seoConfig.openGraph.locale,
+    locale: "en_US",
     url: seoConfig.siteUrl,
-    siteName: seoConfig.siteName,
-    title: seoConfig.openGraph.title,
-    description: seoConfig.openGraph.description,
-    images: seoConfig.openGraph.images,
+    siteName: "medevsmaker",
+    title: "medevsmaker — a farm you can wander",
+    description: seoConfig.description,
   },
   twitter: {
     card: "summary_large_image",
-    title: seoConfig.twitter.title,
-    description: seoConfig.twitter.description,
-    images: seoConfig.twitter.images,
-    creator: seoConfig.twitter.creator,
+    title: "medevsmaker — a farm you can wander",
+    description: seoConfig.description,
+    creator: "@medevsmaker",
   },
   robots: {
     index: true,
     follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
   },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}
-        suppressHydrationWarning
-      >
+    <html lang="en" className={`${nunito.variable} ${fraunces.variable}`} suppressHydrationWarning>
+      <body className="font-sans antialiased" suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-          <div className="h-screen flex flex-col overflow-hidden bg-background text-foreground">
-            <Navbar />
-            <main className="flex-1 overflow-hidden">
-              {children}
-            </main>
-            <Footer />
-          </div>
+          {children}
+          <LegalFooter />
         </ThemeProvider>
       </body>
     </html>

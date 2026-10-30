@@ -1,48 +1,36 @@
 import type { SEOConfig } from "./types";
-import { personalInfo } from "./personal";
 
 export const seoConfig: SEOConfig = {
-  siteName: `${personalInfo.fullName} Portfolio`,
+  siteName: "medevsmaker",
   siteUrl: "https://medevsmaker.vercel.app",
   description:
-    "Full Stack Developer & AI Engineer specializing in React, Next.js, TypeScript, and AI-powered applications. Building intelligent software with modern web technologies.",
+    "Wander medevsmaker's farm. The barn is ReelStyles — style packs for Claude Code that make videos in code with HyperFrames and Remotion.",
   keywords: [
-    "Full Stack Developer",
-    "AI Engineer",
-    "React",
-    "Next.js",
-    "TypeScript",
-    "LangChain",
-    "OpenAI",
-    "Web Development",
-    "Software Engineer",
-    personalInfo.fullName,
+    "medevsmaker",
+    "ReelStyles",
+    "HyperFrames",
+    "Remotion",
+    "MentorClone",
+    "TalkTheDoc",
   ],
   author: {
-    name: personalInfo.fullName,
-    url: personalInfo.website,
+    name: "medevsmaker",
+    url: "https://medevsmaker.vercel.app",
   },
   openGraph: {
     type: "website",
     locale: "en_US",
-    title: `${personalInfo.fullName} - ${personalInfo.title}`,
+    title: "medevsmaker — a farm you can wander",
     description:
-      "Full Stack Developer & AI Engineer building intelligent software with modern web technologies.",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: `${personalInfo.fullName} - ${personalInfo.title}`,
-      },
-    ],
+      "An illustrated farm you can wander. The barn is ReelStyles. Help build the dream home.",
+    images: [],
   },
   twitter: {
     card: "summary_large_image",
-    title: `${personalInfo.fullName} - ${personalInfo.title}`,
+    title: "medevsmaker — a farm you can wander",
     description:
-      "Full Stack Developer & AI Engineer building intelligent software with modern web technologies.",
-    images: ["/og-image.png"],
-    creator: "@medevs",
+      "An illustrated farm you can wander. The barn is ReelStyles. Help build the dream home.",
+    images: [],
+    creator: "@medevsmaker",
   },
 };

@@ -8,12 +8,6 @@ export const socialLinks: SocialLink[] = [
     icon: "Github",
   },
   {
-    name: "LinkedIn",
-    url: "https://linkedin.com/in/ahmed-oublihi",
-    username: "ahmed-oublihi",
-    icon: "Linkedin",
-  },
-  {
     name: "Twitter",
     url: "https://twitter.com/medevsmaker",
     username: "@medevsmaker",

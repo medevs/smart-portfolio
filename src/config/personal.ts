@@ -1,10 +1,10 @@
 import type { PersonalInfo } from "./types";
 
 export const personalInfo: PersonalInfo = {
-  firstName: "Ahmed",
+  firstName: "medevsmaker",
   lastName: "",
-  fullName: "Ahmed",
-  email: "oublihi.a@gmail.com",
+  fullName: "medevsmaker",
+  email: "",
   location: {
     city: "Bremen",
     country: "Germany",
@@ -15,9 +15,9 @@ export const personalInfo: PersonalInfo = {
     status: "available",
     message: "Available for work",
   },
-  resumeUrl: "/Ahmed_CV.pdf",
+  resumeUrl: "",
   profileImage: "/images/profile.jpeg",
   website: "https://medevsmaker.vercel.app",
   summary:
-    "Full Stack Developer specializing in JavaScript, PHP, and modern web technologies. Experienced in developing efficient web applications and optimizing enterprise software. Combining technical expertise with a passion for AI to create innovative solutions.",
+    "Full-stack developer shipping web apps and tools for making videos in code. The farm is home base.",
 };
