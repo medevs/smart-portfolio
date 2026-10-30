@@ -6,6 +6,7 @@ import { Component, useEffect, useMemo, useState, type ReactNode } from "react";
 import { formatMoney } from "@/config/shop";
 import { findSpot, fundRaised, placePlots } from "@/farm/loadFarm";
 import type { FarmData } from "@/farm/types";
+import { FarmPanorama } from "./FarmPanorama";
 import { ShopDialog, SpotCard } from "./SpotCard";
 import type { LightMode } from "./scene/FarmCanvas";
 import { resetWalkInput, walk } from "./scene/walk-state";
@@ -15,9 +16,10 @@ const FarmCanvas = dynamic(() => import("./scene/FarmCanvas"), { ssr: false });
 
 const BOOT = `(function(){try{var p=new URLSearchParams(location.search);var phase=p.get("phase");var time=p.get("time");var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;var spot=p.get("spot")||p.get("open");var onSpot=location.pathname.indexOf("/spot/")===0;var mode=phase==="sketch"&&!reduce?"sketch":(phase==="color"||reduce||spot||onSpot?"color":"intro");document.documentElement.dataset.farmPhase=mode;document.documentElement.dataset.farmReduce=reduce?"1":"0";var h=new Date().getHours();var light=time==="night"||time==="sunset"||time==="day"?time:(h<6||h>=20?"night":(h>=17?"sunset":"day"));document.documentElement.dataset.farmLight=light;document.documentElement.dataset.farmNight=light==="night"?"1":"0";}catch(e){}})();`;
 
-class FarmBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+class FarmBoundary extends Component<{ children: ReactNode; onError: () => void }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
+  componentDidCatch() { this.props.onError(); }
   render() {
     if (this.state.failed) return <div className="farm-fallback"><p>The farm couldn’t load on this device.</p><a href="/list">Explore all places in list view →</a></div>;
     return this.props.children;
@@ -45,6 +47,27 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
   const [plain, setPlain] = useState(false);
   const [hint, setHint] = useState(true);
   const [explore, setExplore] = useState(false);
+  const [sceneRequested, setSceneRequested] = useState(false);
+  const [sceneFailed, setSceneFailed] = useState(false);
+
+  function openScene() {
+    const probe = document.createElement("canvas");
+    const gl = probe.getContext("webgl2") || probe.getContext("webgl");
+    if (!gl) {
+      setSceneFailed(true);
+      return;
+    }
+    gl.getExtension("WEBGL_lose_context")?.loseContext();
+    setSceneFailed(false);
+    setSceneRequested(true);
+    setPhase("color");
+  }
+
+  useEffect(() => {
+    if (!sceneRequested || ready || sceneFailed) return;
+    const timeout = window.setTimeout(() => { setSceneFailed(true); setSceneRequested(false); }, 25000);
+    return () => window.clearTimeout(timeout);
+  }, [sceneRequested, ready, sceneFailed]);
 
   const active = activeId ? findSpot(placed, activeId) : null;
   const raised = fundRaised(farm.fund);
@@ -96,7 +119,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
   }
 
   return (
-    <div className={`farm-root is-${phase}`}>
+    <div className={`farm-root is-${phase}${!ready || sceneFailed ? " is-panorama" : ""}`}>
       <script dangerouslySetInnerHTML={{ __html: BOOT }} />
       <a className="skip-link" href="#farm-links">
         Skip to the list of places
@@ -107,7 +130,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
           <p className="tagline">Middle Atlas · Morocco{featured ? ` · gate: ${featured.name}` : ""}</p>
         </div>
         <div className="hud-actions">
-          {phase !== "color" && (
+          {sceneRequested && !sceneFailed && phase !== "color" && (
             <button type="button" className="hud-btn skip-btn" onClick={() => setPhase("color")}>
               Skip
             </button>
@@ -118,21 +141,24 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
           <button type="button" className="hud-btn" onClick={() => setShopOpen(true)}>
             Help build
           </button>
-          <button type="button" className="hud-btn" onClick={() => setExplore((value) => !value)} aria-pressed={explore}>
+          {ready && !sceneFailed && <button type="button" className="hud-btn" onClick={() => setExplore((value) => !value)} aria-pressed={explore}>
             {explore ? "Orbit" : "Walk"}
-          </button>
-          <button type="button" className="hud-btn" onClick={cycleLight} aria-pressed={light !== "day"}>
+          </button>}
+          {ready && !sceneFailed && <button type="button" className="hud-btn" onClick={cycleLight} aria-pressed={light !== "day"}>
             {light === "night" ? "Night" : light === "sunset" ? "Sunset" : "Day"}
-          </button>
+          </button>}
+          <Link className="hud-btn" href="/gather">Gather</Link>
           <Link className="hud-btn" href="/references">The place</Link>
           <a className="hud-btn" href="/list">
             List
           </a>
         </div>
       </header>
-      {phase === "intro" && <div className="intro-bar" aria-hidden="true" />}
+      {sceneRequested && phase === "intro" && <div className="intro-bar" aria-hidden="true" />}
       <div className="farm-stage" onPointerDown={() => setHint(false)}>
-        <FarmBoundary>
+        {(!ready || sceneFailed) && <FarmPanorama onSelect={setActiveId} onExplore={openScene} loading={sceneRequested && !sceneFailed} unavailable={sceneFailed} />}
+        {sceneRequested && !sceneFailed && <div className={`farm-canvas-wrap${ready ? " is-ready" : ""}`}>
+        <FarmBoundary onError={() => { setSceneFailed(true); setSceneRequested(false); setReady(false); }}>
         <FarmCanvas
           placed={placed}
           farm={farm}
@@ -147,16 +173,17 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
             setActiveId(id);
             setHint(false);
           }}
-          onReady={() => setReady(true)}
+          onReady={() => { setReady(true); setPhase("color"); }}
           onProgress={setProgress}
           onSketchDone={() => setPhase("color")}
           showGrid={showGrid}
           plain={plain}
           detail={ready}
-          explore={explore}
+          explore={explore && ready}
         />
         </FarmBoundary>
-        {explore && !controlsPaused && (
+        </div>}
+        {explore && ready && !sceneFailed && !controlsPaused && (
           <>
             <div
               className="joystick"
@@ -183,20 +210,12 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
             </button>
           </>
         )}
-        <div className={`farm-loader${ready ? " is-done" : ""}`} aria-hidden={ready}>
-          <p className="loader-kicker">medevsmaker</p>
-          <p className="loader-title">Raising the farm</p>
-          <p className="loader-kicker">Drawing the ground, then letting the color in</p>
-          <div className="loader-track">
-            <div className="loader-bar" style={{ width: `${Math.max(8, Math.min(100, progress))}%`, animation: "none" }} />
-          </div>
-          <p className="loader-kicker">{Math.round(progress)}%</p>
-        </div>
+        {sceneRequested && !ready && !sceneFailed && <div className="scene-loading" role="status"><span className="scene-loading-dot" /> Opening the 3D world · {Math.round(progress)}% <button onClick={() => { setSceneRequested(false); setSceneFailed(false); }}>Cancel</button></div>}
       </div>
       {explore && phase === "color" && (
         <p className="hint">WASD or the pad to move. Use F or the tractor button beside the tractor to enter or exit.</p>
       )}
-      {hint && !explore && phase === "color" && <p className="hint">Drag to look around. Click a building.</p>}
+      {hint && ready && !sceneFailed && !explore && phase === "color" && <p className="hint">Drag to look around. Click a building.</p>}
       <nav id="farm-links" className="sr-only" aria-label="Places on the farm">
         <ul>
           {placed

@@ -50,3 +50,20 @@ The locally served photographs under `public/farm/references` retain their
 individual public-domain / Creative Commons licenses. Full author, license and
 source credits are in `src/data/morocco-references.json`, displayed at `/references`.
 See `MOROCCO-REFERENCES.md` for their role and redistribution requirements.
+
+## Imagined Middle Atlas panorama
+
+`public/farm/atlas-homestead.webp` is an AI-generated imagined homestead, generated
+with the built-in image tool on 2026-10-30. It is not a photograph of an actual
+property. The site labels it as an imagined farm. It was guided by the three
+credited reference photographs of Casbat othman-oumoussa, Near Ain Louh 1 and
+Midelt ayachi. Keep those source credits with the scene. The first two references
+retain CC BY-SA 4.0 and CC BY-SA 3.0 respectively; the third is public domain.
+The generated panorama is distributed under CC BY-SA 4.0 to preserve the source
+attribution and share-alike requirements. Source credits and links are at /references.
+
+Generation brief: photorealistic elevated landscape of a modest Middle Atlas
+homestead; earth plaster, irregular limestone, flat roofs, timber lintels, apple
+orchard, narrow irrigation channel, stone well, sheep, donkey and old tractor;
+muted regional foothills and broad ridges; late afternoon; no western barns,
+silos, windmills, fantasy palaces, UI or embedded text.
