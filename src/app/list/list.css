@@ -1,0 +1,28 @@
+.farm-directory { color: #283c2e; background: #f2efe5; }
+.farm-directory .wrap { max-width: 1060px; padding: 48px 28px 100px; }
+.farm-directory .directory-kicker { font-size: 10px; font-weight: 650; text-transform: uppercase; letter-spacing: .18em; margin: 44px 0 18px; color: #4f6248; }
+.farm-directory h1 { font-family: var(--font-fraunces), Georgia, serif; font-weight: 450; font-size: clamp(38px, 5vw, 64px); line-height: 1.1; letter-spacing: -.04em; margin: 0 0 20px; }
+.farm-directory h1 + p { max-width: 620px; color: #586653; font-size: 15px; line-height: 1.85; }
+.farm-directory h2 { font-family: var(--font-fraunces), Georgia, serif; font-size: 30px; font-weight: 450; letter-spacing: -.025em; margin: 55px 0 24px; scroll-margin-top: 25px; }
+.farm-directory a { color: #3a5b3c; text-decoration: underline; text-decoration-color: #9da88a; text-underline-offset: 4px; }
+.farm-directory a:hover { color: #182f20; }
+.farm-directory a:focus-visible { outline: 2px solid #4c6c3e; outline-offset: 5px; border-radius: 2px; }
+.farm-directory .directory-nav { display: flex; flex-wrap: wrap; gap: 12px 26px; padding: 22px 0; margin-top: 32px; border-block: 1px solid #344b302b; font-size: 12px; }
+.farm-directory .card-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding: 0; list-style: none; }
+.farm-directory .card-list > li { margin: 0; padding: 24px; border: 1px solid #344b302b; border-radius: 6px; background: #faf8f0; }
+.farm-directory .card-list h3 { font-family: var(--font-fraunces), Georgia, serif; font-size: 24px; line-height: 1.25; margin: 0 0 14px; font-weight: 500; }
+.farm-directory .card-list h3 span { display: block; font-family: var(--font-nunito), sans-serif; text-transform: uppercase; letter-spacing: .12em; font-size: 9px; font-weight: 600; color: #5f6d52; margin-top: 7px; }
+.farm-directory .card-list p { font-size: 13px; line-height: 1.8; margin: 12px 0; }
+.farm-directory .card-list p:last-child { margin-bottom: 0; }
+.farm-directory .card-list .directory-pending { color: #69755f; font-size: 11px; }
+.farm-directory h2 + ul:not(.card-list) { list-style: none; padding: 0; }
+.farm-directory h2 + ul:not(.card-list) > li { border-bottom: 1px solid #344b301c; padding: 13px 0; line-height: 1.8; font-size: 13px; }
+@media (max-width: 700px) {
+  .farm-directory .wrap { padding: 30px 22px 80px; }
+  .farm-directory .card-list { grid-template-columns: minmax(0, 1fr); }
+  .farm-directory .card-list > li { padding: 22px; }
+  .farm-directory .directory-kicker { margin-top: 35px; }
+  .farm-directory h2 { margin-top: 42px; font-size: 27px; }
+}
+.paper-page.farm-directory { padding: 0; }
+.farm-directory .card-list article { border: 0; border-radius: 0; padding: 0; background: transparent; }

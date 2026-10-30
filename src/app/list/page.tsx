@@ -5,6 +5,7 @@ import { loadFarm, plotsRemaining } from "@/farm/loadFarm";
 import { getSortedPostsData } from "../../../utils/markdown";
 import type { Metadata } from "next";
 import Link from "next/link";
+import "./list.css";
 
 export const metadata: Metadata = {
   title: "List",
@@ -13,21 +14,28 @@ export const metadata: Metadata = {
 
 export default async function ListPage() {
   const [farm, posts] = await Promise.all([loadFarm(), getSortedPostsData()]);
-  const interactive = farm.plots.filter((plot) => farm.items.find((item) => item.id === plot.itemId)?.interactive);
+  const featured = ["reelstyles", "about", "mentorclone", "talkthedoc"];
+  const rank = (itemId: string) => { const index = featured.indexOf(itemId); return index < 0 ? featured.length : index; };
+  const interactive = farm.plots
+    .filter((plot) => farm.items.find((item) => item.id === plot.itemId)?.interactive)
+    .sort((a, b) => rank(a.itemId) - rank(b.itemId));
 
   return (
-    <main className="paper-page">
+    <main className="paper-page farm-directory">
       <div className="wrap">
         <p>
           <Link href="/">← Wander the farm</Link>
         </p>
-        <h1>medevsmaker</h1>
+        <p className="directory-kicker">medevsmaker · Middle Atlas</p>
+        <h1>Explore the farm.</h1>
         <p>
-          A farm of things made in code. The barn is ReelStyles. This page is the plain list, for reading, search, and
-          keyboards.
+          Every project, place and field note in one readable list. ReelStyles lives in the courtyard workshop. You can explore everything here without opening the 3D world.
         </p>
 
-        <h2>Places</h2>
+        <nav className="directory-nav" aria-label="Farm directory sections">
+          <a href="#places">Projects & places</a><Link href="/gather">Future gatherings</Link><a href="#field-notes">Field notes</a><Link href="/open">Dream Home Fund</Link>
+        </nav>
+        <h2 id="places">Projects & places</h2>
         <ul className="card-list">
           {interactive.map((plot) => {
             const item = farm.items.find((entry) => entry.id === plot.itemId);
@@ -37,11 +45,11 @@ export default async function ListPage() {
                 <article>
                   <h3>
                     {item.name}
-                    {item.place ? ` · ${item.place}` : ""}
+                    {item.place && item.place !== item.name ? <span>{item.place}</span> : null}
                   </h3>
                   {item.pitch && <p>{item.pitch}</p>}
                   <p>
-                    <Link href={`/spot/${plot.id}`}>Open on the farm</Link>
+                    <Link href={`/spot/${plot.id}`} aria-label={`Open on the farm: ${item.name}`}>Open on the farm <span aria-hidden="true">↗</span></Link>
                     {item.cta && (
                       <>
                         {" · "}
@@ -51,7 +59,7 @@ export default async function ListPage() {
                   </p>
                   {item.links?.map((link) =>
                     link.todo || !link.href ? (
-                      <p key={link.label}>TODO: {link.label}</p>
+                      <p key={link.label} className="directory-pending">{link.label} — not available yet</p>
                     ) : (
                       <p key={link.label}>
                         <a href={link.href}>{link.label}</a>
@@ -87,7 +95,7 @@ export default async function ListPage() {
           <Link href="/open">Dream Home Fund</Link>
         </p>
 
-        <h2>Field notes</h2>
+        <h2 id="field-notes">Field notes</h2>
         <ul>
           {posts.map((post) => (
             <li key={post.id}>
