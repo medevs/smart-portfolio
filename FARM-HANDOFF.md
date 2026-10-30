@@ -123,3 +123,40 @@ did not prevent that remote build chain. Separate both build scripts from
 indexing; leave `npm run generate` available as an explicit data operation.
 This avoids future visual deployments invoking database writes or embeddings
 provider calls. No indexing command was run during this correction.
+
+## Dialog keyboard review: 2026-10-30, late evening
+
+Started at main d250e240 with no open PRs. Live panorama rendered and unsupported
+WebGL retained the landscape and project controls. Console contained only browser
+extension metadata errors, with no application errors observed. Reproduced a
+keyboard fault: opening ReelStyles and pressing Escape left focus on body; the
+next Tab restarted at the skip link instead of continuing from the entrance.
+Radix dialogs are controlled without a Dialog.Trigger because entrances also
+live in the panorama/scene. Capture the actual opener before auto-focus and
+restore it on close for both project and support dialogs. Ignore removed openers
+and deep links with no opener, leaving default behavior intact.
+
+Seventeen tests, separate TypeScript and lint checks, and direct `npx next build`
+passed. Existing HeroSection dependency lint warning remains. A concurrent first
+TypeScript attempt raced Next's regeneration of .next/types; rerunning after the
+build completed passed. Do not run those two checks concurrently.
+Next: verify focus return in deployed preview and production, including Help
+build, all project dialogs and the no-WebGL fallback. Narrow viewport/physical
+mobile and GPU-capable 3D proof remain unavailable in this browser; do not claim
+those checks. Future events and visits remain concepts; product/sponsor/fund/
+legal routes are unchanged.
+
+## PR #11 status: 2026-10-31
+
+The earlier GitHub write was blocked by a temporary usage-limit approval-review
+failure. A later ordinary retry succeeded after the indicated reset; no alternate
+write route was used. PR #11 is open at ef1cef47009d8042a6c793419e4bc5434ece6ece.
+Vercel preview and GitGuardian checks succeeded. The preview URL redirected to
+Vercel sign-in, so browser verification of the fix is BLOCKED, not passed.
+Do not merge until the actual focus-return behavior is verified. No credentials
+were requested during the unattended review, and no protection was changed.
+Production is still main d250e240. Live /gather and /references retain explicit
+future/unbookable wording and photo/generated-image provenance. Next: complete
+preview authentication in an interactive session, verify all four product dialogs
+and Help build return focus, inspect review/CI, then merge and verify production.
+Narrow-layout and GPU-capable 3D checks remain pending for the reasons above.
