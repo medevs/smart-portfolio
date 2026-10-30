@@ -45,12 +45,17 @@ function Glass({ night, w = 0.46, h = 0.62 }: { night: boolean; w?: number; h?: 
   return (
     <mesh>
       <planeGeometry args={[w, h]} />
-      <meshStandardMaterial
-        color={night ? "#ffd7a8" : "#b7dbe6"}
+      <meshPhysicalMaterial
+        color={night ? "#ffd7a8" : "#d7f0f6"}
         emissive={night ? "#ffb15e" : "#000000"}
-        emissiveIntensity={night ? 2.4 : 0}
-        roughness={0.12}
-        metalness={0.05}
+        emissiveIntensity={night ? 2.2 : 0}
+        roughness={0.04}
+        metalness={0}
+        clearcoat={1}
+        clearcoatRoughness={0.06}
+        envMapIntensity={1.5}
+        transparent
+        opacity={night ? 1 : 0.82}
       />
     </mesh>
   );
@@ -125,11 +130,19 @@ export function Barn({ night, golden }: ModelProps) {
         <Mat surface="roof" color="#ffffff" repeat={[0.6, 0.4]} />
       </mesh>
       <Weathervane />
+      <mesh position={[0, 3.05, 2.2]} castShadow>
+        <boxGeometry args={[6.2, 0.07, 0.09]} />
+        <meshStandardMaterial color="#9aa3ab" metalness={0.82} roughness={0.32} />
+      </mesh>
+      <mesh position={[0, 0.48, 1.9]}>
+        <boxGeometry args={[5.72, 0.42, 0.06]} />
+        <Mat surface="wood" color="#7a3a32" repeat={[3, 0.4]} roughness={0.9} />
+      </mesh>
       <group position={[-2.15, 2.15, 1.9]}>
-        <Glass night={night} w={0.42} h={0.48} />
+        <WindowFrame night={night} w={0.42} h={0.48} />
       </group>
       <group position={[2.15, 2.15, 1.9]}>
-        <Glass night={night} w={0.42} h={0.48} />
+        <WindowFrame night={night} w={0.42} h={0.48} />
       </group>
     </group>
   );
@@ -197,6 +210,19 @@ export function Farmhouse({ night, golden }: ModelProps) {
   );
 }
 
+function WindowFrame({ night, w, h }: { night: boolean; w: number; h: number }) {
+  const t = 0.045;
+  return (
+    <group>
+      <mesh position={[0, 0, -0.03]}>
+        <boxGeometry args={[w + t * 2, h + t * 2, 0.04]} />
+        <Mat surface="wood" color="#f6f1e6" repeat={[0.6, 0.6]} />
+      </mesh>
+      <Glass night={night} w={w} h={h} />
+    </group>
+  );
+}
+
 function Weathervane() {
   const ref = useRef<THREE.Group>(null);
   useFrame((_, dt) => {
@@ -257,15 +283,21 @@ export function Silo({ night, golden }: ModelProps) {
     <group>
       <mesh position={[0, 2.1, 0]} castShadow receiveShadow>
         <cylinderGeometry args={[0.95, 1.05, 4.2, 20]} />
-        <Mat color="#cfd3d6" golden={golden} roughness={0.32} metalness={golden ? 1 : 0.72} />
+        <Mat color="#d5d8dc" golden={golden} roughness={0.28} metalness={golden ? 1 : 0.78} />
       </mesh>
-      <mesh position={[0, 4.25, 0]} castShadow>
-        <sphereGeometry args={[0.95, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
-        <Mat color="#d4534a" roughness={0.55} />
+      <mesh position={[0, 4.35, 0]} castShadow>
+        <coneGeometry args={[1.12, 0.85, 20]} />
+        <meshStandardMaterial color="#b7bcc2" metalness={0.86} roughness={0.28} />
       </mesh>
+      {[1.1, 2.1, 3.1].map((y) => (
+        <mesh key={y} position={[0, y, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[1.02, 0.025, 8, 24]} />
+          <meshStandardMaterial color="#8e949b" metalness={0.9} roughness={0.3} />
+        </mesh>
+      ))}
       <mesh position={[0, 2.6, 0]}>
         <cylinderGeometry args={[1.06, 1.06, 0.12, 20]} />
-        <Mat color="#c4453c" metalness={0.2} />
+        <meshStandardMaterial color="#9aa1a8" metalness={0.84} roughness={0.32} />
       </mesh>
       <mesh position={[0, 0.55, 0.95]} castShadow>
         <boxGeometry args={[0.5, 0.9, 0.08]} />
@@ -303,10 +335,37 @@ export function Shed({ night, golden }: ModelProps) {
   );
 }
 
+function Gear({ teeth, radius }: { teeth: number; radius: number }) {
+  return (
+    <group>
+      <mesh rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[radius * 0.78, radius * 0.78, 0.05, teeth]} />
+        <meshStandardMaterial color="#aeb6be" metalness={0.84} roughness={0.3} />
+      </mesh>
+      {Array.from({ length: teeth }, (_, i) => {
+        const a = (i / teeth) * Math.PI * 2;
+        return (
+          <mesh key={i} position={[Math.cos(a) * radius, Math.sin(a) * radius, 0]} rotation={[0, 0, a]}>
+            <boxGeometry args={[0.07, 0.045, 0.05]} />
+            <meshStandardMaterial color="#d5dde3" metalness={0.8} roughness={0.32} />
+          </mesh>
+        );
+      })}
+    </group>
+  );
+}
+
 export function Windmill({ night, golden }: ModelProps) {
   const blades = useRef<THREE.Group>(null);
+  const big = useRef<THREE.Group>(null);
+  const small = useRef<THREE.Group>(null);
+  const rod = useRef<THREE.Mesh>(null);
   useFrame((_, dt) => {
-    if (blades.current) blades.current.rotation.z -= dt * 0.7;
+    const step = dt * 0.8;
+    if (blades.current) blades.current.rotation.z -= step;
+    if (big.current) big.current.rotation.z -= step * 0.5;
+    if (small.current) small.current.rotation.z += step;
+    if (rod.current && big.current) rod.current.position.y = 0.55 + Math.sin(-big.current.rotation.z) * 0.16;
   });
   return (
     <group>
@@ -335,6 +394,16 @@ export function Windmill({ night, golden }: ModelProps) {
       <group position={[0, 1.4, 0.9]}>
         <Glass night={night} w={0.28} h={0.34} />
       </group>
+      <group ref={big} position={[-0.22, 1.15, 0.95]}>
+        <Gear teeth={12} radius={0.28} />
+      </group>
+      <group ref={small} position={[0.28, 1.15, 0.95]}>
+        <Gear teeth={6} radius={0.14} />
+      </group>
+      <mesh ref={rod} position={[0.28, 0.55, 0.95]}>
+        <boxGeometry args={[0.035, 0.7, 0.035]} />
+        <meshStandardMaterial color="#6d5844" metalness={0.35} roughness={0.55} />
+      </mesh>
     </group>
   );
 }
@@ -470,28 +539,43 @@ export function Crops({ cols = 3, rows = 1 }: ModelProps) {
 }
 
 function Field({ color, cols, rows, height }: { color: string; cols: number; rows: number; height: number }) {
-  const w = Math.max(1.2, cols * CELL * 0.85);
-  const d = Math.max(1.2, rows * CELL * 0.85);
-  const count = Math.min(220, Math.floor((w * d) / 0.18));
-  const geom = useMemo(() => new THREE.ConeGeometry(0.035, height, 4), [height]);
+  const w = Math.max(1.4, cols * CELL * 0.9);
+  const d = Math.max(1.4, rows * CELL * 0.9);
+  const rowCount = Math.max(3, Math.round(d / 0.42));
+  const perRow = Math.max(8, Math.round(w / 0.16));
+  const count = rowCount * perRow;
+  const geom = useMemo(() => new THREE.BoxGeometry(0.08, height, 0.08), [height]);
   const ref = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
   useLayoutEffect(() => {
     const mesh = ref.current;
     if (!mesh) return;
-    for (let i = 0; i < count; i++) {
-      dummy.position.set((Math.random() - 0.5) * w, height / 2, (Math.random() - 0.5) * d);
-      dummy.rotation.y = Math.random() * Math.PI;
-      dummy.scale.setScalar(0.75 + Math.random() * 0.5);
-      dummy.updateMatrix();
-      mesh.setMatrixAt(i, dummy.matrix);
+    let n = 0;
+    for (let r = 0; r < rowCount; r++) {
+      const z = -d / 2 + ((r + 0.5) * d) / rowCount;
+      for (let c = 0; c < perRow; c++) {
+        const x = -w / 2 + ((c + 0.5) * w) / perRow;
+        dummy.position.set(x, height / 2, z);
+        dummy.rotation.y = (c % 2) * 0.15;
+        dummy.scale.set(1, 0.75 + ((c * 3 + r) % 5) * 0.08, 1);
+        dummy.updateMatrix();
+        mesh.setMatrixAt(n, dummy.matrix);
+        n++;
+      }
     }
+    mesh.count = n;
     mesh.instanceMatrix.needsUpdate = true;
-  }, [count, d, dummy, height, w]);
+  }, [count, d, dummy, height, perRow, rowCount, w]);
   return (
-    <instancedMesh ref={ref} args={[geom, undefined, count]}>
-      <meshStandardMaterial color={color} roughness={0.85} />
-    </instancedMesh>
+    <group>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
+        <planeGeometry args={[w + 0.3, d + 0.3]} />
+        <Mat surface="dirt" color="#8a6a45" repeat={[2, 1.2]} roughness={1} />
+      </mesh>
+      <instancedMesh ref={ref} args={[geom, undefined, count]} castShadow>
+        <meshStandardMaterial color={color} roughness={0.78} />
+      </instancedMesh>
+    </group>
   );
 }
 

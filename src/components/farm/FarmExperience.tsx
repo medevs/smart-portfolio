@@ -7,6 +7,7 @@ import { findSpot, fundRaised, placePlots } from "@/farm/loadFarm";
 import type { FarmData } from "@/farm/types";
 import { ShopDialog, SpotCard } from "./SpotCard";
 import type { LightMode } from "./scene/FarmCanvas";
+import { walk } from "./scene/walk-state";
 import "./farm.css";
 
 const FarmCanvas = dynamic(() => import("./scene/FarmCanvas"), { ssr: false });
@@ -33,6 +34,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
   const [quality, setQuality] = useState<"low" | "high">("high");
   const [plain, setPlain] = useState(false);
   const [hint, setHint] = useState(true);
+  const [explore, setExplore] = useState(false);
 
   const active = activeId ? findSpot(placed, activeId) : null;
   const raised = fundRaised(farm.fund);
@@ -96,6 +98,9 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
           <button type="button" className="hud-btn" onClick={() => setShopOpen(true)}>
             Help build
           </button>
+          <button type="button" className="hud-btn" onClick={() => setExplore((value) => !value)} aria-pressed={explore}>
+            {explore ? "Orbit" : "Walk"}
+          </button>
           <button type="button" className="hud-btn" onClick={cycleLight} aria-pressed={light !== "day"}>
             {light === "night" ? "Night" : light === "sunset" ? "Sunset" : "Day"}
           </button>
@@ -125,7 +130,27 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
           onSketchDone={() => setPhase("color")}
           showGrid={showGrid}
           plain={plain}
+          detail={ready}
+          explore={explore}
         />
+        {explore && (
+          <div
+            className="joystick"
+            onPointerDown={(event) => {
+              (event.currentTarget as HTMLDivElement).setPointerCapture(event.pointerId);
+            }}
+            onPointerMove={(event) => {
+              if (event.buttons === 0) return;
+              const rect = (event.currentTarget as HTMLDivElement).getBoundingClientRect();
+              walk.stickX = Math.max(-1, Math.min(1, ((event.clientX - rect.left) / rect.width) * 2 - 1));
+              walk.stickY = Math.max(-1, Math.min(1, ((event.clientY - rect.top) / rect.height) * 2 - 1));
+            }}
+            onPointerUp={() => {
+              walk.stickX = 0;
+              walk.stickY = 0;
+            }}
+          />
+        )}
         <div className={`farm-loader${ready ? " is-done" : ""}`} aria-hidden={ready}>
           <p className="loader-kicker">medevsmaker</p>
           <p className="loader-title">Raising the farm</p>
