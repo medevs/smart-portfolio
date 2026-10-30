@@ -10,7 +10,7 @@ import {
 } from "../../../../utils/markdown";
 import Link from "next/link";
 import { ArrowLeft, Calendar, Clock, Tag, User, Terminal } from "lucide-react";
-import heroImage from "@/assets/Ahmed.jpeg";
+const heroImage = "/images/profile.jpeg";
 
 export async function generateStaticParams() {
   const paths = await getAllPostIds();
@@ -65,7 +65,7 @@ export default async function BlogPost({
         className="inline-flex items-center gap-2 text-terminal-muted hover:text-terminal-green transition-colors mb-6 font-mono text-sm"
       >
         <ArrowLeft size={16} />
-        <span>cd ~/portfolio</span>
+        <span>Back to the farm</span>
       </Link>
 
       {/* Terminal header */}

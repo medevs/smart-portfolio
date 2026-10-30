@@ -5,7 +5,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Blog",
-  description: "Articles about web development, AI, and software engineering by Ahmed.",
+  description: "Notes on web development, AI, and shipping software.",
 };
 
 export default async function BlogPage() {
@@ -14,7 +14,7 @@ export default async function BlogPage() {
   const categories = [...new Set(posts.map(post => post.category))];
 
   return (
-    <div className="h-full overflow-y-auto">
+    <div>
       <div className="max-w-6xl mx-auto px-4 py-8 pb-20">
         {/* Header */}
         <div className="mb-8">
@@ -23,7 +23,7 @@ export default async function BlogPage() {
             className="inline-flex items-center gap-2 text-terminal-muted hover:text-terminal-green transition-colors mb-6 font-mono text-sm"
           >
             <ArrowLeft size={16} />
-            <span>cd ~/portfolio</span>
+            <span>Back to the farm</span>
           </Link>
 
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">

@@ -112,7 +112,7 @@ export default function AgentChat({ open, onClose }: AgentChatProps) {
                 <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-terminal-green animate-pulse ring-2 ring-surface-primary/50" />
               </div>
               <div>
-                <h3 className="text-sm font-medium text-foreground">Ahmed&apos;s AI</h3>
+                <h3 className="text-sm font-medium text-foreground">medevsmaker&apos;s AI</h3>
                 <p className="text-xs text-terminal-muted">Always online</p>
               </div>
             </div>
@@ -151,7 +151,7 @@ export default function AgentChat({ open, onClose }: AgentChatProps) {
 
               <div className="space-y-2">
                 <p className="text-foreground font-medium text-sm">
-                  Hey! I&apos;m Ahmed&apos;s AI Agent
+                  Hey! I&apos;m medevsmaker&apos;s AI Agent
                 </p>
                 <p className="text-terminal-muted text-xs max-w-[280px]">
                   Ask me about skills, projects, experience, or anything else!

@@ -57,25 +57,20 @@ const slashCommands: Record<string, SlashCommand> = {
 };
 
 const githubLink = socialLinks.find((l) => l.name === "GitHub");
-const linkedinLink = socialLinks.find((l) => l.name === "LinkedIn");
 
 const easterEggs: Record<string, string> = {
-  "sudo hire ahmed": `
+  "sudo hire": `
 \`\`\`bash
-$ sudo hire ahmed
+$ sudo hire
 [sudo] verifying recruiter credentials... ✓
 [████████████████████████████] 100%
 
 ✅ HIRE REQUEST APPROVED
 
-Ready to build something awesome together!
+Ready to build something awesome together.
 
-📧 ${personalInfo.email}
-💼 ${linkedinLink?.url.replace("https://", "")}
 🐙 ${githubLink?.url.replace("https://", "")}
 \`\`\`
-
-*Pro tip: He comes with free AI integration skills!*
 `,
   "hello world": `
 \`\`\`javascript
@@ -97,12 +92,11 @@ Welcome to ${personalInfo.firstName}'s portfolio. The rabbit hole goes deep - tr
 const fallbackContext = `
 ${personalInfo.fullName} - ${personalInfo.title}
 Location: ${personalInfo.location.display}
-Email: ${personalInfo.email}
 GitHub: ${githubLink?.url.replace("https://", "")}
-LinkedIn: ${linkedinLink?.url.replace("https://", "")}
+X: https://x.com/medevsmaker
 
 Currently working at ePhilos AG as a Full Stack Developer.
-Skills: React, Next.js, TypeScript, PHP, Node.js, LangChain, OpenAI
+Skills: React, Next.js, TypeScript, PHP, Node.js
 `;
 
 export const aiConfig: AIConfig = {

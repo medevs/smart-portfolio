@@ -1,0 +1,12 @@
+{
+  "landmarks": {
+    "windmill": { "takeovers": 0, "sponsor": null },
+    "silo": { "takeovers": 0, "sponsor": null },
+    "waterTower": { "takeovers": 0, "sponsor": null }
+  },
+  "scarecrowWeek": { "weekOf": null, "sponsor": null },
+  "dog": { "status": "auction-placeholder", "name": null, "sponsor": null },
+  "plotsSold": 0,
+  "featuredGate": null,
+  "placed": []
+}

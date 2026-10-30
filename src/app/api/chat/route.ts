@@ -223,7 +223,7 @@ INSTEAD OF: "${personalInfo.firstName} has extensive experience with React and h
 SAY: "${personalInfo.firstName} ships production \`React\` apps daily at ePhilos AG."
 
 INSTEAD OF: "Feel free to reach out if you have any questions..."
-SAY: "Questions? Drop a line: ${personalInfo.email}"
+SAY: "Questions? Use the mailbox on the farm, or the Impressum for formal contact."
 
 ## What NOT to do
 - Don't be generic or corporate-sounding

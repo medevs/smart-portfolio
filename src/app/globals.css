@@ -624,3 +624,76 @@
 :is(.dark) .bento-card:hover {
   box-shadow: 0 8px 30px rgba(0,0,0,0.4), 0 0 20px hsl(var(--terminal-green) / 0.06);
 }
+
+.legal-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  height: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  font-size: 12px;
+  background: rgba(255, 250, 244, 0.94);
+  color: #3a2c24;
+  border-top: 1px solid rgba(58, 44, 36, 0.15);
+}
+
+.legal-footer a {
+  color: inherit;
+  font-weight: 750;
+}
+
+.paper-page {
+  min-height: 100dvh;
+  background: #f6f1e7;
+  color: #2a211c;
+  padding: 32px 20px 64px;
+}
+
+.paper-page .wrap {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.paper-page h1,
+.paper-page h2,
+.paper-page h3 {
+  font-family: var(--font-fraunces), Georgia, serif;
+}
+
+.paper-page a {
+  color: #8d2f2a;
+}
+
+.paper-page .card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.paper-page .card-list article {
+  border: 2px solid #3a2c24;
+  border-radius: 16px;
+  padding: 14px 16px;
+  background: #fffaf3;
+}
+
+.paper-page table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.paper-page th,
+.paper-page td {
+  text-align: left;
+  padding: 8px 6px;
+  border-bottom: 1px solid #eadcc6;
+  vertical-align: top;
+}
