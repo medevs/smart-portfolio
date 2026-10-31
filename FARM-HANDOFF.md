@@ -109,3 +109,11 @@ for its SPIR-V target; this is compiler validation, not a WebGL screenshot).
 Runtime shader compile failures now disable optional postprocessing so the
 underlying 3D renderer can keep drawing, rather than staying black. Twenty tests,
 TypeScript and lint pass. Run direct next build and wait for CI/deployment.
+
+PR #14 merged at e9b57fafebcc7ea3cd924a7caed362966235096e and Vercel production
+succeeded. Review then identified that core-material shader failures must not use
+an effects-only recovery. Match Three r170's generated `SHADER_NAME EffectMaterial`
+prefix for that narrow recovery; unknown/core sources call full scene recovery.
+Twenty-one tests, TypeScript and lint pass, including routing coverage. Visual GPU
+validation is still not claimed; the user's supplied log establishes the original
+GPU error exactly and the compiler regression reproduces it independently.
