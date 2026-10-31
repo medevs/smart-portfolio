@@ -99,11 +99,11 @@ export function Scenery({ detail }: { detail: boolean }) {
 
 export function Horizon() {
   const hills = [
-    [-28, -18, 10, "#6ea24a"],
-    [8, -24, 14, "#7eae56"],
-    [32, -16, 11, "#628f42"],
-    [-40, 4, 8, "#87b45c"],
-    [42, 8, 9, "#6d9848"],
+    [-28, -18, 10, "#7b8860"],
+    [8, -24, 14, "#93986b"],
+    [32, -16, 11, "#71805a"],
+    [-40, 4, 8, "#9c9f73"],
+    [42, 8, 9, "#848b5d"],
   ] as const;
   return (
     <group>

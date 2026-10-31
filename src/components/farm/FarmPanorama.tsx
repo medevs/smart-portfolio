@@ -33,8 +33,8 @@ export function FarmPanorama({ onSelect, onExplore, loading, unavailable }: Prop
       <p className="atlas-eyebrow"><span /> A maker’s little corner of Morocco</p>
       <h2>Rooted here.<br /><em>Building everywhere.</em></h2>
       <p className="atlas-description">A home for making. A farm for gathering. Software, shared tables, and a future welcome in the Middle Atlas.</p>
-      <div className="atlas-cta-row"><button className="atlas-primary" onClick={() => onSelect("reelstyles")}>Explore the work <span aria-hidden="true">↗</span></button><button className="atlas-secondary" onClick={onExplore} disabled={loading}>{loading ? "Opening the 3D world…" : "Enter the 3D farm"} <span aria-hidden="true">→</span></button></div>
-      <p className="atlas-support" role="status">{unavailable ? "3D isn’t available on this device. Every project is still open to explore here." : "Choose a place in the landscape to discover what’s inside."}</p>
+      <div className="atlas-cta-row"><button className="atlas-primary" onClick={() => onSelect("reelstyles")}>Explore the work <span aria-hidden="true">↗</span></button><button className="atlas-secondary" onClick={onExplore} disabled={loading}>{loading ? "Opening the 3D world…" : unavailable ? "Retry the 3D farm" : "Enter the 3D farm"} <span aria-hidden="true">→</span></button></div>
+      <p className="atlas-support" role="status">{unavailable ? "The 3D world couldn’t start here. Retry it, or explore every project below." : "Choose a place in the landscape to discover what’s inside."}</p>
     </div>
     <div className="atlas-mobile-places" aria-label="Explore projects">{PLACES.map(place => <button key={place.id} onClick={() => onSelect(place.id)}>{place.name} <span aria-hidden="true">↗</span></button>)}</div>
     <Link href="/gather" className="atlas-community-link">A place to gather <span>Meetups · future visits · community ↗</span></Link>

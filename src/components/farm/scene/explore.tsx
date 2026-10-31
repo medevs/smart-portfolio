@@ -5,6 +5,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { CapsuleCollider, CuboidCollider, Physics, RigidBody, useRapier } from "@react-three/rapier";
 import type { RapierRigidBody } from "@react-three/rapier";
 import * as THREE from "three";
+import { GROUND_HALF, YARD_WALLS } from "./yard-boundaries";
 import { resetWalkInput, TRACTOR, walk, walkingMovement } from "./walk-state";
 
 const BLOCKS: { position: [number, number, number]; args: [number, number, number] }[] = [
@@ -13,6 +14,10 @@ const BLOCKS: { position: [number, number, number]; args: [number, number, numbe
   { position: [8.8, 2.1, -3.2], args: [1.2, 2.1, 1.2] },
   { position: [14.3, 1.1, -2.2], args: [1.6, 1.1, 1.3] },
   { position: [19.5, 2.2, -5.5], args: [1.3, 2.2, 1.3] },
+  { position: [0, 1.8, -18], args: [5.2, 1.8, 2.4] },
+  { position: [17, 1.24, -16.52], args: [2.16, 1.24, 1.04] },
+  { position: [24, 1.24, -16.52], args: [2.16, 1.24, 1.04] },
+  { position: [-3, .5, 19], args: [3, .5, .65] },
 ];
 
 const keys = { w: false, a: false, s: false, d: false };
@@ -57,9 +62,9 @@ export function PhysicsYard() {
   return (
     <Physics gravity={[0, -9.81, 0]} timeStep={1 / 60}>
       <RigidBody type="fixed" colliders={false} position={[0, -0.3, 0]}>
-        <CuboidCollider args={[70, 0.3, 70]} />
+        <CuboidCollider args={[GROUND_HALF, 0.3, GROUND_HALF]} />
       </RigidBody>
-      {BLOCKS.map((block) => (
+      {[...BLOCKS, ...YARD_WALLS].map((block) => (
         <RigidBody key={block.position.join(",")} type="fixed" colliders={false} position={block.position}>
           <CuboidCollider args={block.args} />
         </RigidBody>
@@ -133,7 +138,7 @@ function Player() {
     if (character.computedGrounded() && velocityY.current < 0) velocityY.current = 0;
     const next = {
       x: here.x + move.x,
-      y: Math.max(0.9, here.y + move.y),
+      y: here.y + move.y,
       z: here.z + move.z,
     };
     rigid.setNextKinematicTranslation(next);

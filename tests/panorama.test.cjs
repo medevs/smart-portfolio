@@ -28,7 +28,7 @@ test('the first render has a real landscape and all product entrances without wa
 
 test('unsupported 3D keeps the landscape and product controls visible', () => {
   const html = render({ unavailable: true });
-  assert.match(html, /3D isn’t available on this device/);
+  assert.match(html, /The 3D world couldn’t start here/);
   assert.match(html, /atlas-homestead.webp/);
   assert.match(html, /Explore the work/);
 });
