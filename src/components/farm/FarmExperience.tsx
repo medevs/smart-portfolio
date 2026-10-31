@@ -46,6 +46,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
   const [plain, setPlain] = useState(false);
   const [hint, setHint] = useState(true);
   const [explore, setExplore] = useState(false);
+  const [walkFailed, setWalkFailed] = useState(false);
   const [sceneRequested, setSceneRequested] = useState(true);
   const [attempt, setAttempt] = useState(0);
   const [sceneFailed, setSceneFailed] = useState(false);
@@ -143,7 +144,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
           <button type="button" className="hud-btn" onClick={() => setShopOpen(true)}>
             Help build
           </button>
-          {ready && !sceneFailed && <button type="button" className="hud-btn" onClick={() => setExplore((value) => !value)} aria-pressed={explore}>
+          {ready && !sceneFailed && <button type="button" className="hud-btn" onClick={() => { setWalkFailed(false); setExplore((value) => !value); }} aria-pressed={explore}>
             {explore ? "Orbit" : "Walk"}
           </button>}
           {ready && !sceneFailed && <button type="button" className="hud-btn" onClick={cycleLight} aria-pressed={light !== "day"}>
@@ -177,6 +178,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
           }}
           onReady={() => { setReady(true); setPhase("color"); }}
           onFailure={failScene}
+          onWalkFailure={() => { setExplore(false); setWalkFailed(true); }}
           onSketchDone={() => setPhase("color")}
           showGrid={showGrid}
           plain={plain}
@@ -221,10 +223,11 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
           <Link href="/gather">Future gatherings & visits ↗</Link>
         </nav>}
       </div>
+      {walkFailed && <p className="hint" role="status">Walking couldn’t start. You can still orbit and open projects; press Walk to retry.</p>}
       {explore && phase === "color" && (
         <p className="hint">WASD or the pad to move. Use F or the tractor button beside the tractor to enter or exit.</p>
       )}
-      {hint && ready && !sceneFailed && !explore && phase === "color" && <p className="hint">Drag to look around. Click a building.</p>}
+      {hint && !walkFailed && ready && !sceneFailed && !explore && phase === "color" && <p className="hint">Drag to look around. Click a building.</p>}
       <nav id="farm-links" hidden aria-label="Places on the farm">
         <ul>
           {placed

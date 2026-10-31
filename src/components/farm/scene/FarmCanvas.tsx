@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import {
   AdaptiveDpr,
@@ -45,6 +45,7 @@ export type FarmCanvasProps = {
   onSelect: (id: string) => void;
   onReady: () => void;
   onFailure: () => void;
+  onWalkFailure: () => void;
   onSketchDone: () => void;
   showGrid: boolean;
   plain: boolean;
@@ -57,9 +58,11 @@ export default function FarmCanvas(props: FarmCanvasProps) {
   const effectiveQuality = degraded ? "low" : props.quality;
   return (
     <SceneRoot low={effectiveQuality === "low"} onFailure={props.onFailure}>
+      <Suspense fallback={null}>
       <AdaptiveDpr pixelated={false} />
       <Scene {...props} quality={effectiveQuality} onDecline={() => setDegraded(true)} />
       <FirstFrame onReady={props.onReady} />
+      </Suspense>
     </SceneRoot>
   );
 }
@@ -133,7 +136,7 @@ function Scene(props: FarmCanvasProps & { onDecline: () => void }) {
       <MillWorks />
       <OptionalAsset><Scenery detail={props.detail && props.quality === "high"} /></OptionalAsset>
       </Textures>
-      <OptionalAsset>{props.explore ? <PhysicsYard /> : null}</OptionalAsset>
+      {props.explore && <OptionalAsset onFailure={props.onWalkFailure} fallback={<Html center><span className="world-place-label" role="status">Starting walking controls…</span></Html>}><PhysicsYard /></OptionalAsset>}
       <CameraControls
         ref={controls}
         makeDefault

@@ -1,7 +1,7 @@
 "use client";
 
 import { Component, useEffect, useRef, type ReactNode } from "react";
-import { createRoot, events, extend } from "@react-three/fiber";
+import { createRoot, events, extend, type RootState } from "@react-three/fiber";
 import * as THREE from "three";
 
 extend(THREE as unknown as Parameters<typeof extend>[0]);
@@ -24,6 +24,7 @@ export function SceneRoot({ children, low, onFailure }: { children: ReactNode; l
   const host = useRef<HTMLDivElement>(null);
   const root = useRef<ReturnType<typeof createRoot<HTMLCanvasElement>> | null>(null);
   const configured = useRef(false);
+  const state = useRef<RootState | null>(null);
   const current = useRef({ children, low, onFailure });
   current.current = { children, low, onFailure };
 
@@ -44,11 +45,12 @@ export function SceneRoot({ children, low, onFailure }: { children: ReactNode; l
     };
     const resize = async () => {
       const { width, height, top, left } = container.getBoundingClientRect();
-      if (!width || !height || disposed || starting) return;
-      if (configured.current) {
-        await renderer.configure({ size: { width, height, top, left } });
+      if (!width || !height || disposed) return;
+      if (state.current) {
+        state.current.setSize(width, height, top, left);
         return;
       }
+      if (starting || configured.current) return;
       starting = true;
       await renderer.configure({
         size: { width, height, top, left },
@@ -57,13 +59,19 @@ export function SceneRoot({ children, low, onFailure }: { children: ReactNode; l
         dpr: current.current.low ? [1, 1.2] : [1, 1.5],
         camera: { position: [34, 25, 39], fov: 45, near: 0.1, far: 240 },
         gl: { antialias: !current.current.low, powerPreference: "default", preserveDrawingBuffer: false },
-        onCreated: state => state.events.connect?.(element),
+        onCreated: created => {
+          if (disposed) return;
+          state.current = created;
+          created.events.connect?.(element);
+          const bounds = container.getBoundingClientRect();
+          created.setSize(bounds.width, bounds.height, bounds.top, bounds.left);
+          created.setDpr(current.current.low ? [1, 1.2] : [1, 1.5]);
+        },
       });
       starting = false;
       if (disposed) return;
       configured.current = true;
       renderer.render(<SceneBoundary onFailure={() => current.current.onFailure()}>{current.current.children}</SceneBoundary>);
-      await resize();
     };
     const lost = (event: Event) => {
       event.preventDefault();
@@ -76,6 +84,7 @@ export function SceneRoot({ children, low, onFailure }: { children: ReactNode; l
     return () => {
       disposed = true;
       configured.current = false;
+      state.current = null;
       observer.disconnect();
       element.removeEventListener("webglcontextlost", lost);
       renderer.unmount();
@@ -87,7 +96,7 @@ export function SceneRoot({ children, low, onFailure }: { children: ReactNode; l
   useEffect(() => {
     if (!configured.current || !root.current) return;
     root.current.render(<SceneBoundary onFailure={onFailure}>{children}</SceneBoundary>);
-    void root.current.configure({ dpr: low ? [1, 1.2] : [1, 1.5] }).catch(onFailure);
+    state.current?.setDpr(low ? [1, 1.2] : [1, 1.5]);
   }, [children, low, onFailure]);
 
   return <div ref={host} className="world-renderer" />;

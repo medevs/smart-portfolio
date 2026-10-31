@@ -174,3 +174,12 @@ so it could not start a local browser preview. Do not start a workaround server.
 Next: deploy branch preview, inspect actual renderer startup, console and controls,
 then verify GPU rendering, camera/walking/tractor, labels, dialogs and narrow layout
 before claiming the whole world is finished. Vercel preview may require sign-in.
+
+Follow-up validation: avoid repeated partial root.configure calls with this
+installed Fiber version; their defaults can reset shadows and DPR. Configure the
+root once, then use the created RootState's setSize/setDpr setters. Keep an outer
+core Suspense boundary as a safety net, with optional downloads isolated inside.
+Physics download failures now return to orbit with a visible retry explanation
+rather than leaving Walk silently inactive. The actual deployed PR #12 preview
+redirected to Vercel sign-in after its successful build; browser QA is pending
+that access. No GPU visual result is claimed.
