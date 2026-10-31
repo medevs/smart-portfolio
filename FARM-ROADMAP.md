@@ -69,31 +69,24 @@ and confirm Vercel production. Then inspect the live browser and console and
 exercise available flows. Record exactly what ran. GPU-disabled browser results
 prove recovery/UI only; they cannot prove the GPU scene, touch or frame rate.
 
-## Current execution status
+## Current execution status · 2026-10-31
 
-Research and issue breakdown complete. Implementation is in progress on
-codex/atlas-game-v1 from main cf33f403. PR #11 remains separate and open.
-Environment blockers retained in FARM-HANDOFF.md: disabled cloud GPU, no narrow
-viewport control, absent supported local preview daemon and declined protected
-preview sign-in. Do not bypass these boundaries.
+PR #22 merged at 1835e68; PR #23 at 74ba24b. Both passed Farm checks and Vercel
+production. 29 tests, TypeScript, lint and direct Next build pass. Live browser
+map/journal/pause/help/settings, save/reload, product dialogs and keyboard checks
+are recorded in FARM-HANDOFF.md. Live QA caught and fixed map label overlap and
+product Escape reopening Pause, then rechecked both on production.
 
-### Implementation checkpoint
+| Issue | Status |
+| --- | --- |
+| #16 | Implemented; full rendered travel/camera/movement gate remains |
+| #17 | Closed: activity and persistence acceptance verified |
+| #18 | Desktop production UI verified; narrow/touch gate remains |
+| #19 | Closed: scene/clock tests and live settings/audio controls verified; GPU visuals remain #20 |
+| #20 | Open: cloud GPU disabled and no narrow viewport control; no visual GPU or touch claim |
+| #21 | Compatible updates shipped; 14 high/33 moderate security findings need deliberate migrations |
 
-The v1 systems above are implemented on the branch: animated generic visitor,
-normalized sprint, proximity-only activity loop, inventory, safe physics travel,
-map/journal/pause/settings/help, browser saves, shared clock, daylight, synthesized
-opt-in wind and visible watered/delivered props. 29 automated checks pass;
-TypeScript, lint and direct Next build pass. GitHub Farm checks now repeats them.
-Compatible packages and Next 15.5.28 are updated. Audit retains 14 high/33 moderate
-findings requiring a separately verified legacy-stack migration (#21).
-Production browser evidence and full GPU/touch gate (#20) remain pending.
-
-### Shipped checkpoint · PR #22
-
-Merged at `1835e68`; GitHub Farm checks and Vercel production passed. Live map,
-journal, reset cancellation, pause/help, settings persistence and audio enable/mute
-controls were exercised at 1363×936. All four product dialogs retain their links.
-#17 is closed with state/persistence evidence. #16/#18/#19 retain final integration
-and visual checks; #20 remains open for GPU/touch; #21 retains security migrations.
-Live QA found overlapping map labels and product-Escape reopening Pause; follow-up
-uses numbered map markers/status and inspects shortcuts before dialog dismissal.
+The 3D game is primary. No claim of photorealism or complete visual/gameplay QA is
+made. Keep #20 open until a GPU-capable full playthrough and touch review pass.
+PR #11 remains separate. Do not bypass missing local preview infrastructure,
+blocked local-file harness navigation or declined protected-preview sign-in.
