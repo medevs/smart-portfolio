@@ -91,3 +91,21 @@ Use a branch; run npm test, npx tsc --noEmit, npm run lint and npx next build, w
 for CI, then merge verified work and confirm production. Preserve honest limits.
 The existing lockfile needs npm ci --legacy-peer-deps. This executor needs the
 scratch-only runtime-memory.cjs shim for Next's /proc RSS lookup; do not commit it.
+
+## Black-frame root cause (2026-10-31)
+
+The user reported a black screen and supplied browser console output. It proves
+EffectMaterial's fragment failed at `float edge = e2UMix * 1.2` with `edge:
+redefinition`, followed by repeated INVALID_OPERATION/useProgram errors. This is
+a real shader defect on a functioning GPU, separate from this cloud browser's
+GPU-disabled startup failure. Earlier scene-graph/build tests did not compile
+GLSL and missed it.
+
+Reproduced before editing with the glslang compiler: compilation failed on that
+same redefinition. Rename the reveal threshold, correct reversed smoothstep
+edges, and omit the unused sketch pass in normal color mode. The actual shader
+body now compiles in a regression test using @webgpu/glslang (ES 3.1 host wrapper
+for its SPIR-V target; this is compiler validation, not a WebGL screenshot).
+Runtime shader compile failures now disable optional postprocessing so the
+underlying 3D renderer can keep drawing, rather than staying black. Twenty tests,
+TypeScript and lint pass. Run direct next build and wait for CI/deployment.
