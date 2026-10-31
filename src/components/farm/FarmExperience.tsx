@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Component, useEffect, useMemo, useState, type ReactNode } from "react";
+import { Component, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { formatMoney } from "@/config/shop";
 import { findSpot, fundRaised, placePlots } from "@/farm/loadFarm";
 import type { FarmData } from "@/farm/types";
@@ -14,7 +14,7 @@ import "./farm.css";
 
 const FarmCanvas = dynamic(() => import("./scene/FarmCanvas"), { ssr: false });
 
-const BOOT = `(function(){try{var p=new URLSearchParams(location.search);var phase=p.get("phase");var time=p.get("time");var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;var spot=p.get("spot")||p.get("open");var onSpot=location.pathname.indexOf("/spot/")===0;var mode=phase==="sketch"&&!reduce?"sketch":(phase==="color"||reduce||spot||onSpot?"color":"intro");document.documentElement.dataset.farmPhase=mode;document.documentElement.dataset.farmReduce=reduce?"1":"0";var h=new Date().getHours();var light=time==="night"||time==="sunset"||time==="day"?time:(h<6||h>=20?"night":(h>=17?"sunset":"day"));document.documentElement.dataset.farmLight=light;document.documentElement.dataset.farmNight=light==="night"?"1":"0";}catch(e){}})();`;
+const BOOT = `(function(){try{var p=new URLSearchParams(location.search);var phase=p.get("phase");var time=p.get("time");var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;document.documentElement.dataset.farmPhase=phase==="sketch"&&!reduce?"sketch":"color";document.documentElement.dataset.farmReduce=reduce?"1":"0";var light=time==="night"||time==="sunset"?time:"day";document.documentElement.dataset.farmLight=light;document.documentElement.dataset.farmNight=light==="night"?"1":"0";}catch(e){}})();`;
 
 class FarmBoundary extends Component<{ children: ReactNode; onError: () => void }, { failed: boolean }> {
   state = { failed: false };
@@ -34,9 +34,8 @@ function readSpot() {
 
 export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; initialSpot?: string | null }) {
   const placed = useMemo(() => placePlots(farm), [farm]);
-  const [phase, setPhase] = useState<"intro" | "sketch" | "color">("intro");
+  const [phase, setPhase] = useState<"intro" | "sketch" | "color">("color");
   const [light, setLight] = useState<LightMode>("day");
-  const [progress, setProgress] = useState(4);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [shopOpen, setShopOpen] = useState(false);
@@ -47,27 +46,30 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
   const [plain, setPlain] = useState(false);
   const [hint, setHint] = useState(true);
   const [explore, setExplore] = useState(false);
-  const [sceneRequested, setSceneRequested] = useState(false);
+  const [sceneRequested, setSceneRequested] = useState(true);
+  const [attempt, setAttempt] = useState(0);
   const [sceneFailed, setSceneFailed] = useState(false);
 
+  const failScene = useCallback(() => {
+    setSceneFailed(true);
+    setSceneRequested(false);
+    setReady(false);
+    setExplore(false);
+  }, []);
+
   function openScene() {
-    const probe = document.createElement("canvas");
-    const gl = probe.getContext("webgl2") || probe.getContext("webgl");
-    if (!gl) {
-      setSceneFailed(true);
-      return;
-    }
-    gl.getExtension("WEBGL_lose_context")?.loseContext();
+    setReady(false);
     setSceneFailed(false);
+    setAttempt(value => value + 1);
     setSceneRequested(true);
     setPhase("color");
   }
 
   useEffect(() => {
     if (!sceneRequested || ready || sceneFailed) return;
-    const timeout = window.setTimeout(() => { setSceneFailed(true); setSceneRequested(false); }, 25000);
+    const timeout = window.setTimeout(failScene, 25000);
     return () => window.clearTimeout(timeout);
-  }, [sceneRequested, ready, sceneFailed]);
+  }, [sceneRequested, ready, sceneFailed, failScene]);
 
   const active = activeId ? findSpot(placed, activeId) : null;
   const raised = fundRaised(farm.fund);
@@ -80,7 +82,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
 
   useEffect(() => {
     const mode = document.documentElement.dataset.farmPhase;
-    const nextPhase = mode === "sketch" ? "sketch" : mode === "color" ? "color" : "intro";
+    const nextPhase = mode === "sketch" ? "sketch" : mode === "intro" ? "intro" : "color";
     setPhase(nextPhase);
     const stored = document.documentElement.dataset.farmLight;
     setLight(stored === "night" || stored === "sunset" || stored === "day" ? stored : "day");
@@ -119,7 +121,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
   }
 
   return (
-    <div className={`farm-root is-${phase}${!ready || sceneFailed ? " is-panorama" : ""}`}>
+    <div className={`farm-root is-${phase}${sceneFailed ? " is-panorama" : " is-world"}`}>
       <script dangerouslySetInnerHTML={{ __html: BOOT }} />
       <a className="skip-link" href="/list">
         Skip to the list of places
@@ -156,9 +158,9 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
       </header>
       {sceneRequested && phase === "intro" && <div className="intro-bar" aria-hidden="true" />}
       <div className="farm-stage" onPointerDown={() => setHint(false)}>
-        {(!ready || sceneFailed) && <FarmPanorama onSelect={setActiveId} onExplore={openScene} loading={sceneRequested && !sceneFailed} unavailable={sceneFailed} />}
+        {sceneFailed && <FarmPanorama onSelect={setActiveId} onExplore={openScene} loading={sceneRequested && !sceneFailed} unavailable={sceneFailed} />}
         {sceneRequested && !sceneFailed && <div className={`farm-canvas-wrap${ready ? " is-ready" : ""}`}>
-        <FarmBoundary onError={() => { setSceneFailed(true); setSceneRequested(false); setReady(false); }}>
+        <FarmBoundary key={attempt} onError={failScene}>
         <FarmCanvas
           placed={placed}
           farm={farm}
@@ -174,7 +176,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
             setHint(false);
           }}
           onReady={() => { setReady(true); setPhase("color"); }}
-          onProgress={setProgress}
+          onFailure={failScene}
           onSketchDone={() => setPhase("color")}
           showGrid={showGrid}
           plain={plain}
@@ -210,7 +212,14 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
             </button>
           </>
         )}
-        {sceneRequested && !ready && !sceneFailed && <div className="scene-loading" role="status"><span className="scene-loading-dot" /> Opening the 3D world · {Math.round(progress)}% <button onClick={() => { setSceneRequested(false); setSceneFailed(false); }}>Cancel</button></div>}
+        {sceneRequested && !ready && !sceneFailed && <div className="scene-loading" role="status"><span className="scene-loading-dot" /> Opening the 3D farm… <button onClick={failScene}>Use the accessible view</button></div>}
+        {!sceneFailed && <nav className="world-projects" aria-label="Farm projects">
+          <button onClick={() => setActiveId("about")}>Maker’s studio</button>
+          <button onClick={() => setActiveId("reelstyles")}>ReelStyles</button>
+          <button onClick={() => setActiveId("mentorclone")}>MentorClone</button>
+          <button onClick={() => setActiveId("talkthedoc")}>TalkTheDoc</button>
+          <Link href="/gather">Future gatherings & visits ↗</Link>
+        </nav>}
       </div>
       {explore && phase === "color" && (
         <p className="hint">WASD or the pad to move. Use F or the tractor button beside the tractor to enter or exit.</p>

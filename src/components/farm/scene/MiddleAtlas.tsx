@@ -1,5 +1,8 @@
 "use client";
 
+import { useLayoutEffect, useMemo, useRef } from "react";
+import { Html } from "@react-three/drei";
+import * as THREE from "three";
 import { Surface } from "./materials";
 import type { ModelProps } from "./models";
 
@@ -36,6 +39,7 @@ export function CourtyardHouse({ night, golden }: ModelProps) {
     <Block position={[2.65, 0.95, 1.15]} size={[0.24, 1.55, 2.3]} stone />
     {[-1.85, 1.85].map(x => <Block key={x} position={[x, 0.85, 2.2]} size={[1.7, 1.35, 0.25]} stone />)}
     <Block position={[0, 1.05, 0.69]} size={[0.92, 1.9, 0.16]} color="#534b38" />
+    <SolarRoof />
     <Window x={-1.65} y={1.92} z={0.72} night={night} />
     <Window x={1.65} y={1.92} z={0.72} night={night} />
     {[-1.95, -0.98, 0, 0.98, 1.95].map(x => <Block key={x} position={[x, 2.75, 0.98]} size={[0.1, 0.12, 1.1]} color="#64513b" />)}
@@ -69,26 +73,16 @@ export function AtlasCedar({ height = 6 }: { height?: number }) {
   </group>;
 }
 
-function AppleTree() {
-  return <group>
-    <mesh position={[0, 0.9, 0]} castShadow><cylinderGeometry args={[0.07, 0.14, 1.8, 7]} /><Surface name="wood" color="#806644" /></mesh>
-    <mesh position={[0, 2, 0]} scale={[1, 0.85, 1]} castShadow><icosahedronGeometry args={[1, 2]} /><meshStandardMaterial color="#667c40" roughness={1} /></mesh>
-    {[0, 1, 2, 3, 4, 5].map(i => <mesh key={i} position={[Math.sin(i * 2.4) * 0.85, 1.7 + (i % 3) * 0.28, Math.cos(i * 2.4) * 0.85]} castShadow><sphereGeometry args={[0.09, 7, 6]} /><meshStandardMaterial color="#b35737" roughness={0.7} /></mesh>)}
-  </group>;
-}
-
-export function AtlasLandscape() {
+export function AtlasLandscape({ night = false }: { night?: boolean }) {
   return <group>
     {/* An orchard in rows, with a narrow stone-lined seguia beside it. */}
-    {[0, 1, 2].flatMap(row => [0, 1, 2, 3].map(col => <group key={`${row}:${col}`} position={[-20 + col * 2.6, 0, 8 + row * 2.8]}><AppleTree /></group>))}
+    <Orchard />
+    <FutureSpaces night={night} />
+    <group position={[0, 0, -17]}><ModernHomestead night={night} /></group>
     {[-0.36, 0.36].map(x => <Block key={x} position={[-10.4 + x, 0.12, 9.5]} size={[0.16, 0.24, 14]} stone color="#ae9c7f" />)}
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-10.4, 0.1, 9.5]}><planeGeometry args={[0.56, 14]} /><meshStandardMaterial color="#648f88" roughness={0.22} metalness={0.1} /></mesh>
     {Array.from({length: 16}, (_, i) => <group key={i} position={[-28 + i * 3.8, 0, -17 - (i % 3) * 3]}><AtlasCedar height={5.2 + (i % 4) * 0.6} /></group>)}
-    {/* Layered rocky ridges rather than isolated cone peaks. */}
-    {Array.from({length: 10}, (_, i) => <group key={i} position={[-48 + i * 10, -1, -59 - (i % 2) * 6]} scale={[1.7, 1, 0.8]}>
-      <mesh position={[0, 8 + (i % 3), 0]} castShadow><coneGeometry args={[12, 20 + (i % 3) * 3, 5]} /><meshStandardMaterial color={i % 2 ? "#85867f" : "#99968a"} roughness={1} /></mesh>
-      <mesh position={[0, 16 + (i % 3) * 1.7, 0]}><coneGeometry args={[4.1, 7 + (i % 3), 5]} /><meshStandardMaterial color="#e3e4d9" roughness={1} /></mesh>
-    </group>)}
+    <AtlasRidge />
   </group>;
 }
 
@@ -101,5 +95,129 @@ export function Donkey() {
     {[-0.09, 0.09].map(z => <mesh key={z} position={[-0.55, 1.68, z]} rotation={[0, 0, -0.15]} castShadow><capsuleGeometry args={[0.04, 0.26, 4, 6]} /><meshStandardMaterial color="#797467" roughness={1} /></mesh>)}
     <mesh position={[-0.73, 1.44, 0.15]}><sphereGeometry args={[0.018, 6, 6]} /><meshStandardMaterial color="#282720" /></mesh>
     <mesh position={[0.54, 0.72, 0]} rotation={[0, 0, 0.25]}><cylinderGeometry args={[0.025, 0.04, 0.5, 6]} /><meshStandardMaterial color="#625f53" /></mesh>
+  </group>;
+}
+
+function SolarRoof() {
+  return <group position={[0, 3.13, -0.65]} rotation={[-0.16, 0, 0]}>
+    {[-1.25, 0, 1.25].map(x => <mesh key={x} position={[x, 0, 0]} castShadow>
+      <boxGeometry args={[1.08, 0.06, 1.45]} /><meshStandardMaterial color="#263d49" metalness={0.4} roughness={0.3} />
+    </mesh>)}
+  </group>;
+}
+
+type Instance = { position: [number, number, number]; scale?: [number, number, number]; rotation?: number };
+function Repeated({ instances, shape, color }: { instances: Instance[]; shape: "trunk" | "canopy" | "apple" | "crop"; color: string }) {
+  const mesh = useRef<THREE.InstancedMesh>(null);
+  useLayoutEffect(() => {
+    if (!mesh.current) return;
+    const object = new THREE.Object3D();
+    instances.forEach((instance, i) => {
+      object.position.set(...instance.position);
+      object.scale.set(...(instance.scale ?? [1, 1, 1]));
+      object.rotation.set(0, instance.rotation ?? 0, 0);
+      object.updateMatrix();
+      mesh.current!.setMatrixAt(i, object.matrix);
+    });
+    mesh.current.instanceMatrix.needsUpdate = true;
+    mesh.current.computeBoundingSphere();
+  }, [instances]);
+  return <instancedMesh ref={mesh} args={[undefined, undefined, instances.length]} castShadow receiveShadow>
+    {shape === "trunk" ? <cylinderGeometry args={[0.08, 0.15, 1.8, 7]} /> : shape === "apple" ? <sphereGeometry args={[0.1, 6, 5]} /> : shape === "crop" ? <sphereGeometry args={[0.18, 7, 5]} /> : <icosahedronGeometry args={[1.15, 2]} />}
+    <meshStandardMaterial color={color} roughness={0.93} />
+  </instancedMesh>;
+}
+
+/** Rows and crop beds use instancing, keeping the expanded land to a few draws. */
+function Orchard() {
+  const trees = useMemo<Instance[]>(() => Array.from({ length: 48 }, (_, i) => ({
+    position: [-31 + (i % 6) * 3, 0.9, 8 + Math.floor(i / 6) * 3], rotation: i * 2.4,
+  })), []);
+  const crowns = useMemo<Instance[]>(() => trees.map((tree, i) => ({ ...tree, position: [tree.position[0], 2.1, tree.position[2]], scale: [1, 0.82 + i % 3 * 0.05, 1] })), [trees]);
+  const apples = useMemo<Instance[]>(() => trees.flatMap(tree => Array.from({ length: 5 }, (_, i) => ({ position: [tree.position[0] + Math.sin(i * 2.4) * .95, 1.85 + i % 3 * .3, tree.position[2] + Math.cos(i * 2.4) * .95] }))), [trees]);
+  const crops = useMemo<Instance[]>(() => Array.from({ length: 240 }, (_, i) => ({ position: [8 + (i % 20) * .55, .22, 13 + Math.floor(i / 20) * .7], scale: [1, .7, 1] })), []);
+  return <group>
+    <Repeated instances={trees} shape="trunk" color="#71533d" />
+    <Repeated instances={crowns} shape="canopy" color="#657b43" />
+    <Repeated instances={apples} shape="apple" color="#b65c36" />
+    <Repeated instances={crops} shape="crop" color="#526c3d" />
+    {[0, 1, 2, 3].map(i => <Block key={i} position={[13.3, .06, 13.7 + i * 2.1]} size={[12, .12, 1.5]} color="#806849" />)}
+    <Block position={[-23.5, .04, 18.5]} size={[20, .08, 24]} color="#a08c61" />
+  </group>;
+}
+
+function AtlasRidge() {
+  const geometry = useMemo(() => {
+    const g = new THREE.PlaneGeometry(210, 48, 100, 16);
+    g.rotateX(-Math.PI / 2);
+    const positions = g.attributes.position;
+    const colors = [];
+    const rock = new THREE.Color("#8b8e87"), snow = new THREE.Color("#e5e5dc");
+    for (let i = 0; i < positions.count; i++) {
+      const x = positions.getX(i), z = positions.getZ(i);
+      const ridge = 11 + 5 * Math.sin(x * .075) + 3 * Math.cos(x * .19) + 1.4 * Math.sin(x * .7);
+      const y = Math.max(0, ridge * Math.sin((z + 24) / 48 * Math.PI)) + Math.sin(x * .4 + z * .25);
+      positions.setY(i, y);
+      const color = rock.clone().lerp(snow, THREE.MathUtils.smoothstep(y + Math.sin(x) * .7, 12, 17));
+      colors.push(color.r, color.g, color.b);
+    }
+    g.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
+    g.computeVertexNormals();
+    return g;
+  }, []);
+  return <mesh geometry={geometry} position={[0, -1, -66]}><meshStandardMaterial vertexColors roughness={1} /></mesh>;
+}
+
+function MakerAtWork() {
+  return <group position={[0, 0, .3]}>
+    <Block position={[0, .85, 0]} size={[1.65, .1, .65]} color="#725c42" />
+    {[-.65, .65].map(x => <Block key={x} position={[x, .4, 0]} size={[.07, .8, .07]} color="#38423d" />)}
+    <Block position={[0, 1.17, -.16]} size={[.55, .37, .04]} color="#293f45" />
+    <mesh position={[0, 1.05, .55]} castShadow><capsuleGeometry args={[.18, .38, 4, 8]} /><meshStandardMaterial color="#4c6655" /></mesh>
+    <mesh position={[0, 1.51, .55]} castShadow><sphereGeometry args={[.14, 10, 8]} /><meshStandardMaterial color="#665649" /></mesh>
+    <Block position={[0, .65, .65]} size={[.45, .1, .45]} color="#584635" />
+  </group>;
+}
+
+function FutureSpaces({ night }: { night: boolean }) {
+  return <group>
+    {/* The distant maker is symbolic; no personal likeness is inferred. */}
+    <group position={[-11, 0, .3]}><MakerAtWork /></group>
+    <group position={[-3, 0, 19]}>
+      <Block position={[0, .1, 0]} size={[9, .2, 6]} stone color="#b9ab8d" />
+      {[-4, 4].flatMap(x => [-2.5, 2.5].map(z => <Block key={`${x}:${z}`} position={[x, 1.6, z]} size={[.16, 3, .16]} color="#796146" />))}
+      {Array.from({ length: 13 }, (_, i) => <Block key={i} position={[-4 + i * .67, 3.15, 0]} size={[.1, .14, 5.6]} color="#766144" />)}
+      <Block position={[0, .9, 0]} size={[6, .12, 1.3]} color="#8e7250" />
+      {[-1.1, 1.1].map(z => <Block key={z} position={[0, .5, z]} size={[6, .13, .4]} color="#8e7250" />)}
+      <Html position={[0, 3.8, 0]} center distanceFactor={28}><a className="world-place-label" href="/gather#meetups">Future gathering courtyard ↗</a></Html>
+    </group>
+    {[0, 1].map(i => <group key={i} position={[17 + i * 7, 0, -16]} scale={.8}>
+      <CourtyardHouse night={night} />
+      <Html position={[0, 4.4, 0]} center distanceFactor={28}><a className="world-place-label" href="/gather#visiting">Future guest space ↗</a></Html>
+    </group>)}
+    {/* Greenhouse and utility structures remain behind the productive beds. */}
+    {[0, 1, 2].map(i => <group key={i} position={[23 + i * 1.7, 0, 15]}>
+      <Block position={[0, .65, 0]} size={[1.1, 1.1, .8]} color="#d0b16c" />
+      <Block position={[0, 1.24, 0]} size={[1.2, .12, .9]} color="#7f9b91" />
+    </group>)}
+  </group>;
+}
+
+function ModernHomestead({ night }: { night: boolean }) {
+  return <group>
+    <Block position={[0, .15, 0]} size={[11.5, .3, 8.5]} stone color="#aa9b80" />
+    <Block position={[0, 1.8, -1]} size={[10.4, 3.3, 4.8]} color="#baa17f" />
+    <Block position={[0, 3.5, -1]} size={[10.8, .18, 5.2]} color="#99876b" />
+    {[-4, -2, 0, 2, 4].map(x => <group key={x} position={[x, 1.7, 1.43]}>
+      <Block position={[0, 0, 0]} size={[1.7, 2.4, .12]} color="#34443f" />
+      <mesh position={[0, 0, .08]}><planeGeometry args={[1.5, 2.18]} />
+        <meshStandardMaterial color={night ? "#e8ba70" : "#668a91"} roughness={.2} metalness={.3} emissive="#d99943" emissiveIntensity={night ? .8 : 0} />
+      </mesh>
+    </group>)}
+    <group position={[0, .55, -1]}><SolarRoof /></group>
+    {[-5, 5].map(x => <Block key={x} position={[x, 1.65, 3.4]} size={[.15, 3.1, .15]} color="#745d41" />)}
+    {Array.from({ length: 17 }, (_, i) => <Block key={i} position={[-5 + i * .625, 3.2, 2.7]} size={[.1, .12, 2.1]} color="#796447" />)}
+    <Block position={[-3.8, .45, 3.2]} size={[1.4, .6, .7]} stone color="#b29c7b" />
+    <Block position={[3.8, .45, 3.2]} size={[1.4, .6, .7]} stone color="#b29c7b" />
   </group>;
 }

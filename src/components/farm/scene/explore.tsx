@@ -13,6 +13,10 @@ const BLOCKS: { position: [number, number, number]; args: [number, number, numbe
   { position: [8.8, 2.1, -3.2], args: [1.2, 2.1, 1.2] },
   { position: [14.3, 1.1, -2.2], args: [1.6, 1.1, 1.3] },
   { position: [19.5, 2.2, -5.5], args: [1.3, 2.2, 1.3] },
+  { position: [0, 1.8, -18], args: [5.2, 1.8, 2.4] },
+  { position: [17, 1.24, -16.52], args: [2.16, 1.24, 1.04] },
+  { position: [24, 1.24, -16.52], args: [2.16, 1.24, 1.04] },
+  { position: [-3, .5, 19], args: [3, .5, .65] },
 ];
 
 const keys = { w: false, a: false, s: false, d: false };
@@ -133,7 +137,7 @@ function Player() {
     if (character.computedGrounded() && velocityY.current < 0) velocityY.current = 0;
     const next = {
       x: here.x + move.x,
-      y: Math.max(0.9, here.y + move.y),
+      y: here.y + move.y,
       z: here.z + move.z,
     };
     rigid.setNextKinematicTranslation(next);

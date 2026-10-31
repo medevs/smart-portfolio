@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useMemo, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
+import { OptionalAsset } from "./OptionalAsset";
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 
@@ -25,6 +26,10 @@ const URLS = (Object.keys(FILES) as SurfaceName[]).flatMap((name) =>
 
 /** Loads the CC0 surface set once. Suspends until every map is in. */
 export function Textures({ children }: { children: ReactNode }) {
+  return <OptionalAsset fallback={children}><LoadedTextures>{children}</LoadedTextures></OptionalAsset>;
+}
+
+function LoadedTextures({ children }: { children: ReactNode }) {
   const loaded = useTexture(URLS);
   const lib = useMemo(() => {
     const out = {} as Record<SurfaceName, Set>;
@@ -113,5 +118,6 @@ export function Surface({
     };
     return mat;
   }, [color, golden, lib, metalness, name, roughness, rx, ry]);
+  useEffect(() => () => material.dispose(), [material]);
   return <primitive object={material} attach="material" />;
 }

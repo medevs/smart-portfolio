@@ -1181,3 +1181,28 @@ table.ledger td {
 @media(min-width:901px) {
   .atlas-photo-wrap { inset: auto; left: 50%; top: 50%; width: max(100%, calc((100dvh - 28px) * 1.777)); height: max(100%, 56.25vw); transform: translate(-50%,-50%); }
 }
+
+/* 3D is the main visit. The photograph is mounted only after a genuine failure. */
+.farm-root.is-world { background: linear-gradient(#a5c8dd, #e5dbc1); }
+.world-renderer, .world-renderer canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+.farm-root.is-world .farm-canvas-wrap { opacity: 1; visibility: visible; }
+.farm-root.is-world .hud { padding: 22px 26px; gap: 14px; }
+.farm-root.is-world .hud-actions { flex-wrap: wrap; justify-content: flex-end; }
+.farm-root.is-world .hud-btn { background: #f7f1e4ec; color: #293b30; border: 1px solid #35453440; min-height: 42px; }
+.farm-root.is-world .wordmark { color: #263a2c; text-shadow: 0 1px 8px #fff8; }
+.farm-root.is-world .tagline { color: #293b30; text-shadow: 0 1px 6px #fff; }
+.world-projects { position: absolute; z-index: 5; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; gap: 7px; flex-wrap: wrap; justify-content: center; width: min(760px, calc(100% - 32px)); }
+.world-projects button, .world-projects a, .world-place-label { border: 1px solid #4d5a434d; border-radius: 6px; background: #f9f4e8ed; color: #2b3d30; padding: 10px 13px; font: inherit; font-size: 12px; text-decoration: none; cursor: pointer; box-shadow: 0 3px 12px #2538271a; }
+.world-projects button:hover, .world-projects a:hover { background: #fffdf5; }
+.world-projects :focus-visible { outline: 3px solid #83612d; outline-offset: 3px; }
+.world-place-label { white-space: nowrap; font-size: 11px; padding: 7px 10px; }
+.farm-root.is-world .hint { bottom: 88px; pointer-events: none; }
+.farm-root.is-world .scene-loading { bottom: 130px; background: #faf5e9f0; color: #2b3d30; }
+@media(max-width:900px) {
+  .farm-root.is-world .hud { padding: 14px; flex-direction: column; }
+  .farm-root.is-world .hud-actions { justify-content: flex-start; gap: 5px; }
+  .farm-root.is-world .hud-btn { padding: 7px 10px; min-height: 36px; font-size: 11px; }
+  .world-projects { bottom: 12px; gap: 5px; }
+  .world-projects button, .world-projects a { font-size: 11px; padding: 9px 10px; }
+  .farm-root.is-world .hint { bottom: 105px; font-size: 10px; max-width: calc(100% - 30px); }
+}

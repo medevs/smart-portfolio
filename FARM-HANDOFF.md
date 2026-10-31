@@ -1,6 +1,14 @@
 # Farm: current work and next verification
 
-## User direction (2026-10-30)
+## Current direction (2026-10-31)
+
+The user explicitly rejected the panorama as the main experience. Restore and
+finish the animated explorable 3D world; a photograph is only a failure fallback.
+Do not interpret the disabled GPU in the cloud browser as evidence that 3D cannot
+run on the user's device. Follow the three repository principle skills and the
+installed R3F implementation plus official R3F renderer/performance docs.
+
+## Earlier user direction (2026-10-30)
 
 Make the farm authentic to Morocco's Middle Atlas: Ifrane, Azrou, Ain Leuh,
 Midelt. The user approved the photoreal panorama direction and asks for a bigger,
@@ -21,7 +29,7 @@ The old live site showed a fullscreen loader stuck at 4%. Cloud-browser console
 proved WebGL context creation failed (GL_RENDERER Disabled). The Canvas fallback
 was behind the loader. A successful build did not establish render success.
 
-## Current repair
+## Previous panorama repair (superseded by the current direction)
 
 A photorealistic AI-generated landscape appears on first paint with product
 hotspots. The larger earth/stone homestead includes modern windows, maker studio,
@@ -123,3 +131,46 @@ did not prevent that remote build chain. Separate both build scripts from
 indexing; leave `npm run generate` available as an explicit data operation.
 This avoids future visual deployments invoking database writes or embeddings
 provider calls. No indexing command was run during this correction.
+
+
+## Restoring the 3D world (2026-10-31)
+
+Branch codex/restore-atlas-world starts from main d250e240. PR #11 remains
+separate, with no concurrent source changes observed in the scene area.
+
+Root causes traced in source:
+- FarmExperience initialized sceneRequested=false, so healthy devices never
+  attempted 3D automatically. It now starts the renderer on arrival. The panorama
+  mounts only on a startup/runtime failure or explicit accessible-view action.
+- The entire scene was under one Suspense boundary waiting on HDRI, all 18 texture
+  maps and scanned props. Base geometry now renders immediately; optional assets
+  have isolated Suspense and error boundaries and cannot block the main world.
+- The installed Fiber Canvas invokes async configure from an effect without
+  handling its rejection. A React boundary alone does not catch that failure.
+  SceneRoot owns and awaits the documented createRoot/configure lifecycle,
+  catches setup rejection, observes resizing and handles context-loss events.
+  Each effect owns a fresh canvas so StrictMode cleanup cannot dispose a new root.
+- The performance downgrade mutated a ref without rerendering. It now changes
+  state, reducing DPR, shadow/effect workload, detail props and grass density.
+  Removed duplicate renderer/composer tone mapping. Day is the initial lighting;
+  sunset/night remain explicit controls. The global percent loader is gone.
+
+Expanded scene: 48 apple trees and 240 crop plants with four instanced draws,
+a larger modern earthen/stone homestead with glazed frontage and solar roof,
+future guest houses, a pergola/shared table, utility bee boxes, a symbolic maker
+at a desk, continuous rocky snowy ridge and muted fields informed by the local
+Ain Leuh photograph. Product and sponsor IDs, legal and fund routes remain stable.
+Added colliders for the new house, guest blocks and gathering table. Removed the
+hard-coded vertical character clamp so Rapier's computed ground movement applies.
+The procedural world remains an interpretation, not a surveyed real property.
+
+Verification: 18 tests, TypeScript and lint pass (existing HeroSection warning),
+and direct next build succeeds without indexing. Added @react-three/test-renderer
+as a dev dependency to mount the actual scene graph, validate finite geometry,
+instancing and every existing item model; these are NOT WebGL visual tests.
+Core existing yard has 276 meshes before optional scanned props.
+The supported sites-preview command is present but its daemon mailbox is absent,
+so it could not start a local browser preview. Do not start a workaround server.
+Next: deploy branch preview, inspect actual renderer startup, console and controls,
+then verify GPU rendering, camera/walking/tractor, labels, dialogs and narrow layout
+before claiming the whole world is finished. Vercel preview may require sign-in.

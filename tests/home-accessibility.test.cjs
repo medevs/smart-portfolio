@@ -24,7 +24,9 @@ test('keyboard skip opens the real catalog and duplicate off-screen links are no
   const html = renderToStaticMarkup(React.createElement(FarmExperience, { farm: await loadFarm() }));
   assert.match(html, /class="skip-link" href="\/list"/);
   assert.match(html, /<nav id="farm-links" hidden=""/);
-  assert.ok(html.includes('Explore the work'));
+  assert.ok(html.includes('Farm projects'));
+  assert.ok(html.includes('Opening the 3D farm'));
+  assert.doesNotMatch(html, /atlas-homestead.webp/);
 });
 
 test('the visible catalog prioritizes the main work and preserves sponsor and community routes', async () => {

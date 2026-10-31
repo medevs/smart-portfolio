@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useEffect, useLayoutEffect, useMemo, useRef } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useFrame } from "@react-three/fiber";
 import {
   AdaptiveDpr,
   CameraControls,
@@ -9,10 +9,8 @@ import {
   Html,
   PerformanceMonitor,
   SoftShadows,
-  useProgress,
 } from "@react-three/drei";
-import { Bloom, BrightnessContrast, DepthOfField, EffectComposer, HueSaturation, N8AO, SMAA, ToneMapping, Vignette, wrapEffect } from "@react-three/postprocessing";
-import { ToneMappingMode } from "postprocessing";
+import { Bloom, BrightnessContrast, DepthOfField, EffectComposer, HueSaturation, N8AO, SMAA, Vignette, wrapEffect } from "@react-three/postprocessing";
 import * as THREE from "three";
 import type { FarmData } from "@/farm/types";
 import type { Placed } from "@/farm/loadFarm";
@@ -24,6 +22,8 @@ import { Horizon, MillWorks, Scenery } from "./scenery";
 import { AtlasLandscape } from "./MiddleAtlas";
 import { PhysicsYard } from "./explore";
 import { walk } from "./walk-state";
+import { SceneRoot } from "./SceneRoot";
+import { OptionalAsset } from "./OptionalAsset";
 import { SketchEffect, sketchState } from "./SketchEffect";
 
 const SketchPass = wrapEffect(SketchEffect);
@@ -44,7 +44,7 @@ export type FarmCanvasProps = {
   onHover: (id: string | null) => void;
   onSelect: (id: string) => void;
   onReady: () => void;
-  onProgress: (value: number) => void;
+  onFailure: () => void;
   onSketchDone: () => void;
   showGrid: boolean;
   plain: boolean;
@@ -53,40 +53,18 @@ export type FarmCanvasProps = {
 };
 
 export default function FarmCanvas(props: FarmCanvasProps) {
+  const [degraded, setDegraded] = useState(false);
+  const effectiveQuality = degraded ? "low" : props.quality;
   return (
-    <Canvas
-      fallback={<div className="farm-fallback"><p>Explore the farm in list view.</p><a href="/list">See all places →</a></div>}
-      shadows
-      dpr={props.quality === "low" ? [1, 1.2] : [1, 1.6]}
-      camera={{ position: [16, 11.5, 18], fov: 35, near: 0.1, far: 140 }}
-      gl={{
-        antialias: props.quality === "high",
-        toneMapping: THREE.ACESFilmicToneMapping,
-        toneMappingExposure: 1.05,
-        powerPreference: "default",
-        preserveDrawingBuffer: false,
-      }}
-      onCreated={({ gl }) => {
-        gl.setClearColor(props.light === "night" ? "#07091c" : props.light === "sunset" ? "#e8885a" : "#c9d7e6");
-      }}
-    >
+    <SceneRoot low={effectiveQuality === "low"} onFailure={props.onFailure}>
       <AdaptiveDpr pixelated={false} />
-      <LoadWatch onProgress={props.onProgress} />
-      <Suspense fallback={null}>
-        <Scene {...props} />
-        <FirstFrame onReady={props.onReady} />
-      </Suspense>
-    </Canvas>
+      <Scene {...props} quality={effectiveQuality} onDecline={() => setDegraded(true)} />
+      <FirstFrame onReady={props.onReady} />
+    </SceneRoot>
   );
 }
 
-function LoadWatch({ onProgress }: { onProgress: (value: number) => void }) {
-  const { progress } = useProgress();
-  useEffect(() => { onProgress(progress); }, [onProgress, progress]);
-  return null;
-}
-
-/** Resolving the whole scene and rendering a frame, not a loading-manager percentage, signals readiness. */
+/** Two completed frames of the core world establish readiness; decorative downloads do not gate it. */
 function FirstFrame({ onReady }: { onReady: () => void }) {
   const frames = useRef(0);
   useFrame(() => {
@@ -95,17 +73,16 @@ function FirstFrame({ onReady }: { onReady: () => void }) {
   return null;
 }
 
-function Scene(props: FarmCanvasProps) {
+function Scene(props: FarmCanvasProps & { onDecline: () => void }) {
   const { placed, farm, light, quality, activeId, reducedMotion } = props;
   const night = light === "night";
   const sunset = light === "sunset";
   const controls = useRef<CameraControls>(null);
-  const tier = useRef(quality === "low" ? 0 : 1);
 
   useEffect(() => {
     const controlsApi = controls.current;
     if (!controlsApi) return;
-    controlsApi.setLookAt(18, 12.5, 20, 0.2, 1.6, -1, false);
+    controlsApi.setLookAt(34, 25, 39, 0, 1.2, 0, false);
   }, []);
 
   useEffect(() => {
@@ -122,27 +99,23 @@ function Scene(props: FarmCanvasProps) {
 
   return (
     <>
-      <PerformanceMonitor
-        onDecline={() => {
-          tier.current = 0;
-        }}
-      />
+      <PerformanceMonitor onDecline={props.onDecline} />
       {quality === "high" && <SoftShadows size={18} samples={12} focus={0.35} />}
       <color attach="background" args={[night ? "#07091c" : sunset ? "#e8885a" : "#8ec8ef"]} />
       <fog attach="fog" args={[fog, night ? 40 : sunset ? 55 : 70, night ? 110 : 160]} />
       <Sky night={night} sunset={sunset} />
       <Lights night={night} sunset={sunset} quality={quality} />
       {sunset && quality === "high" && <SunShafts />}
-      <Environment files={hdri} background={false} environmentIntensity={night ? 0.32 : sunset ? 0.75 : 0.55} />
+      <OptionalAsset><Environment files={hdri} background={false} environmentIntensity={night ? 0.32 : sunset ? 0.75 : 0.55} /></OptionalAsset>
       <Textures>
       <Horizon />
-      <AtlasLandscape />
+      <AtlasLandscape night={night} />
       <Ground />
       <Lane />
       <HayBales />
       <Rocks />
       <Wildflowers count={quality === "low" ? 40 : 110} />
-      <Grass placed={placed} grid={farm.grid} count={quality === "low" ? 400 : tier.current ? 2200 : 1200} />
+      <Grass placed={placed} grid={farm.grid} count={quality === "low" ? 400 : 1600} />
       <Clouds night={night} />
       <Birds />
       {placed.map((entry) => (
@@ -158,23 +131,21 @@ function Scene(props: FarmCanvasProps) {
       ))}
       {props.showGrid && <GridHelper grid={farm.grid} />}
       <MillWorks />
-      <Scenery detail={props.detail && props.quality === "high"} />
+      <OptionalAsset><Scenery detail={props.detail && props.quality === "high"} /></OptionalAsset>
       </Textures>
-      <Suspense fallback={null}>{props.explore ? <PhysicsYard /> : null}</Suspense>
+      <OptionalAsset>{props.explore ? <PhysicsYard /> : null}</OptionalAsset>
       <CameraControls
         ref={controls}
         makeDefault
         minDistance={5}
-        maxDistance={34}
+        maxDistance={85}
         maxPolarAngle={Math.PI / 2.05}
         minPolarAngle={0.35}
-        minAzimuthAngle={-Math.PI * 0.85}
-        maxAzimuthAngle={Math.PI * 0.35}
         smoothTime={reducedMotion ? 0 : 0.45}
         enabled={!props.explore}
       />
       {props.plain ? null : (
-        <Effects night={night} phase={props.phase} reduced={reducedMotion} quality={quality} onSketchDone={props.onSketchDone} focused={!!activeId} />
+        <OptionalAsset><Effects night={night} phase={props.phase} reduced={reducedMotion} quality={quality} onSketchDone={props.onSketchDone} focused={!!activeId} /></OptionalAsset>
       )}
     </>
   );
@@ -308,7 +279,7 @@ function Ground() {
       const z = pos.getZ(i);
       const roll = Math.sin(x * 0.12) * 0.35 + Math.cos(z * 0.09) * 0.22;
       const dist = Math.hypot(x, z);
-      const flat = THREE.MathUtils.smoothstep(dist, 10, 20);
+      const flat = THREE.MathUtils.smoothstep(dist, 38, 60);
       pos.setY(i, roll * flat - 0.02);
     }
     g.computeVertexNormals();
@@ -433,7 +404,7 @@ function Grass({ placed, grid, count }: { placed: Placed[]; grid: FarmData["grid
   }, []);
   const ref = useRef<THREE.InstancedMesh>(null);
   const material = useMemo(() => {
-    const mat = new THREE.MeshLambertMaterial({ color: "#4ea85a", side: THREE.DoubleSide });
+    const mat = new THREE.MeshLambertMaterial({ color: "#7e8c4c", side: THREE.DoubleSide });
     mat.onBeforeCompile = (shader) => {
       shader.uniforms.uTime = { value: 0 };
       shader.vertexShader =
@@ -479,7 +450,7 @@ function Grass({ placed, grid, count }: { placed: Placed[]; grid: FarmData["grid
       dummy.updateMatrix();
       mesh.setMatrixAt(n, dummy.matrix);
       phases[n] = Math.random() * Math.PI * 2;
-      const tint = new THREE.Color().setHSL(0.28 + Math.random() * 0.06, 0.42, 0.32 + Math.random() * 0.16);
+      const tint = new THREE.Color().setHSL(0.20 + Math.random() * 0.06, 0.32, 0.32 + Math.random() * 0.13);
       mesh.setColorAt(n, tint);
       n++;
     }
@@ -723,7 +694,6 @@ function Effects({
   });
 
   const passes = [
-    <ToneMapping key="tone" mode={ToneMappingMode.AGX} />,
     <HueSaturation key="sat" saturation={quality === "high" ? 0.16 : 0.06} />,
     <BrightnessContrast key="grade" brightness={0.01} contrast={quality === "high" ? 0.08 : 0.03} />,
     <SketchPass key="sketch" />,
