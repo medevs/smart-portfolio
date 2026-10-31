@@ -1,197 +1,93 @@
-# Farm: current work and next verification
+# Middle Atlas farm handoff
 
-## Current direction (2026-10-31)
+## Current direction
 
-The user explicitly rejected the panorama as the main experience. Restore and
-finish the animated explorable 3D world; a photograph is only a failure fallback.
-Do not interpret the disabled GPU in the cloud browser as evidence that 3D cannot
-run on the user's device. Follow the three repository principle skills and the
-installed R3F implementation plus official R3F renderer/performance docs.
+The user explicitly wants the animated, explorable **3D world as the main
+experience**. The panorama is a failure fallback only. Continue toward a larger,
+slightly modern Moroccan farm inspired by Ifrane, Azrou, Ain Leuh and Midelt:
+maker studio for @medevsmaker, agricultural land, orchard, a future gathering
+courtyard, future visitor spaces and a welcoming maker community.
 
-## Earlier user direction (2026-10-30)
+Keep product links, plot/sponsor IDs, fund and legal pages. Events and visits are
+future concepts: no invented dates, address, bookings or operating claims. The
+small maker figure is symbolic, not a portrait. Do not spend money, enable paid
+services or contact third parties. User authorized tested pushes and merges.
 
-Make the farm authentic to Morocco's Middle Atlas: Ifrane, Azrou, Ain Leuh,
-Midelt. The user approved the photoreal panorama direction and asks for a bigger,
-slightly modern farm with more things, themselves represented in the scene,
-future maker meetups, tourists/visitors and a welcoming community. They authorized
-independent decisions, cloud overnight work, and pushing/merging tested changes.
-Six hourly overnight reviews were scheduled; avoid overlapping writes.
+## Shipped
 
-Keep medevsmaker as the public identity. No exact likeness was supplied for this
-scene: a tiny back-facing maker at the studio is a representation, not a portrait.
-Visiting and meetup spaces are future visions, not open/bookable operations.
-Do not invent dates, prices, guest capacity, location/address, real event listings,
-booking functionality or collected signups. Updates point to the existing public X.
+- PR #9: visible keyboard skip destination at /list; styled, accessible catalog.
+- PR #10: site build scripts run Next only. `npm run generate` is a separate,
+  explicit operation that rewrites the configured vector store. Do not run it.
+- PR #12 merged at **aa9a84e2e03313e9ba54d7d66ce0734562355404**.
+  Vercel production deployment succeeded on 2026-10-31.
 
-## Root cause reproduced
+PR #12 restores automatic 3D startup. It expands the procedural world with 48
+instanced apple trees, 240 crop plants, a larger earth/stone home with glazed
+frontage and solar roof, maker desk, future pergola/shared table and guest houses,
+bee boxes, continuous rocky snowy ridge and a stone perimeter. Future-place
+labels link to /gather. All existing product models remain at stable plots.
+The world is a regional interpretation, not a surveyed property or photogrammetry.
+Real photo sources/credits: MOROCCO-REFERENCES.md and src/data/morocco-references.json.
 
-The old live site showed a fullscreen loader stuck at 4%. Cloud-browser console
-proved WebGL context creation failed (GL_RENDERER Disabled). The Canvas fallback
-was behind the loader. A successful build did not establish render success.
+## Root causes fixed
 
-## Previous panorama repair (superseded by the current direction)
+1. `sceneRequested=false` prevented automatic 3D even on healthy devices.
+2. A global Suspense boundary waited for HDRI, all texture maps and scanned props.
+   Core geometry now renders first; optional downloads have isolated boundaries.
+3. The installed Fiber Canvas starts async configure in an effect. React error
+   boundaries do not catch its rejected initialization promise. SceneRoot now owns
+   and awaits createRoot/configure, catches rejection and handles context loss.
+   Each effect owns a fresh canvas so StrictMode cleanup cannot dispose a new root.
+4. Partial repeated configure calls in the installed Fiber version can reset
+   shadows/DPR. Runtime resizing/quality use RootState setSize/setDpr instead.
+5. Performance downgrade mutated a ref without rerendering. State now reduces
+   detail, grass, DPR and effects. Duplicate tone mapping was removed.
+6. Touch project navigation could overlap movement controls. Input passes through
+   empty gaps, with reserved control space in the walking layout.
+7. The floor collider extended beyond visible land. Shared perimeter geometry and
+   real Rapier boundary colliders now stop both walking and driving physically.
 
-A photorealistic AI-generated landscape appears on first paint with product
-hotspots. The larger earth/stone homestead includes modern windows, maker studio,
-meetup pergola, guest casitas, greenhouse, orchard, vegetable beds and bee boxes.
-No WebGL request is needed to browse products. `Enter the 3D farm` explicitly
-requests the procedural 3D experience. Capability preflight, bounded load timeout,
-error recovery and a cancel action leave the panorama usable if 3D fails. Readiness
-is a real mounted scene/frame signal, not loading-manager percentage.
+Day is the initial lighting; sunset/night remain controls. Readiness uses rendered
+frames, not a fictitious loading percentage. Startup failure has bounded recovery
+and a retry. Failed physics loading returns to orbit with an explanation.
 
-`/gather` explains the future maker/community/visitor vision. `/references` retains
-real photographic sources and clearly distinguishes generated interpretation.
-The generated asset, prompt summary, source credits and license are in ASSETS.md.
+## Evidence
 
-The panorama is a raster scene with HTML hotspots, NOT a photoreal 3D reconstruction.
-The optional procedural 3D world remains less realistic. Be explicit about that.
+- 19 tests passed, including actual Three scene-graph construction for every item,
+  finite expanded geometry/instancing, and real Rapier character/tractor collision
+  tests at the perimeter. Scene-graph tests use the official test renderer without
+  a GPU; they are **not** WebGL visual tests. Existing core yard: 276 meshes.
+- TypeScript, lint and direct `next build` passed. Existing HeroSection dependency
+  lint warning remains. Do not run tsc concurrently with Next regenerating types.
+- Final Vercel and GitGuardian checks passed; CodeRabbit completed neutral. Three
+  review findings were addressed. No new indexing/provider calls were run.
+- Actual production browser first showed “Opening the 3D farm” and project dock,
+  then logged GL_VENDOR/GL_RENDERER **Disabled**. SceneRoot caught that specific
+  failure and recovered to the accessible fallback without a stuck loader or
+  unhandled initialization rejection. Retry recovered too. ReelStyles and
+  TalkTheDoc dialogs opened correctly after recovery and Escape closed them.
 
-## Verification standards
+## Outstanding verification / blockers
 
-Use `.cursor/skills/principle-experience-first`, `principle-fix-root-causes` and
-`principle-prove-it-works`. Inspect the actual page and console. Never call this
-perfect or claim 3D visual proof from a browser that cannot create WebGL.
+**Do not claim finished visual 3D validation.** This cloud browser cannot create
+WebGL. Its GPU restriction is not evidence that the user's device cannot run 3D.
+GPU-capable visual review, in-browser camera/walk/tractor interaction and a real
+narrow/mobile viewport remain pending. Fix observed faults before claiming those.
 
-- Run `npm test`, `npx tsc --noEmit`, `npm run lint`, `npx next build`.
-- The existing lockfile needs `npm ci --legacy-peer-deps`.
-- Builds no longer invoke embeddings generation. Keep `npm run generate` manual; it rewrites the vector store.
-- Verify the generated image loads, no permanent loader appears, all four product
-  pins open the correct dialogs and close with Escape, Gather/The place navigation
-  works, future visiting language is clear, image/photo credits remain.
-- Test a narrow viewport for overlap/overflow and usable links.
-- Test unsupported-WebGL Enter 3D: stays on panorama with readable explanation.
-- Test real WebGL on a capable machine if available; otherwise leave limitation
-  explicit and avoid claims that the procedural world is visually verified.
-- Wait for Vercel checks before merge, verify production deployment and actual UI.
+The supported `sites-preview` CLI exists but its daemon mailbox is missing; no
+workaround server was started. The deployed Vercel preview requires sign-in; the
+secure sign-in request was declined. Do not retry auth or bypass protection.
+Earlier local-file responsive harness navigation was blocked; do not bypass it.
 
-## Iteration notes
+PR #11 (dialog focus return) remains open and separate; it is not in production.
+Read its review before continuing: helper-only focus tests do not establish both
+callers' integration. Avoid conflicting writes if another run updates this area.
 
-The previous session's Chromium downloads failed. The cloud browser works for
-actual UI tests but its GPU is disabled; it provides direct proof of the
-unsupported-WebGL case. The local environment lacks /proc RSS; a scratch-only
-Node memory-metrics shim permits `next build`, not part of production code.
+## Working procedure
 
-## Live verification after PR #7
-
-Production deployed commit 4a6d2df. Cloud browser directly observed the new
-panorama (not the old 4% loader), correct ReelStyles and TalkTheDoc dialogs,
-Escape dismissal, Gather navigation and the full future community page.
-Enter 3D on the GPU-disabled browser leaves the landscape and all project controls
-visible with an explanatory status. No new application errors occurred on the
-initial panorama render (old errors remain in the browser session log).
-
-Visual iteration caught a clipped right-edge MentorClone entrance. Move the
-entrance inward and use the mobile navigation layout up to 900 CSS px, so tall
-narrow crops don't strand project controls. The cloud browser has a fixed
-1363x936 viewport; browser zoom did not change it. A physical mobile viewport
-and GPU-capable procedural-3D test are still pending, and must not be claimed.
-
-The existing Help build dialog also linked its Granary offering to /spot/silo,
-while the actual product/plot ID is mentorclone. Resolve stable landmark aliases
-in findSpot so that existing sponsorship links open the correct product.
-
-## Review: 2026-10-30, evening
-
-No open PRs or concurrent remote changes were present; started from main d221647.
-A new live browser session rendered the panorama without application errors.
-Keyboard-only reproduction: Tab focused "Skip to the list of places", Enter
-changed the URL to #farm-links but left the same landscape visible, and Tab
-focused the Granary link in an invisible sr-only navigation block. The visible
-catalog at /list is the intended nonvisual alternative. Point the skip link to
-/list and mark the duplicate hidden index `hidden` so keyboard focus cannot be
-stranded in off-screen links. Product IDs and routes remain unchanged.
-
-The browser rejected a local-file responsive test harness under its URL policy.
-No alternate route or workaround was attempted. This review does not establish
-physical-mobile layout correctness. GPU-capable 3D is still unverified.
-
-The visible /list catalog was also inspected directly. It still called the
-workshop a barn and had no typographic hierarchy. Update the catalog copy,
-prioritize the four main project/maker entrances, remove duplicate place names,
-and add scoped paper/olive styling with clear headings and focus states. All
-existing product, sponsor, fund, journal and legal routes are preserved.
-
-Review validation: darken the small catalog labels to preserve 4.5:1 text
-contrast, and keep the contiguous visible phrase "Open on the farm" in every
-project link's accessible name for speech navigation. Decorative arrows are
-aria-hidden. Contrast and rendered accessible-name regressions cover these.
-
-## Verified catalog deployment and build isolation
-
-PR #9 deployed main 8c512323. The actual browser keyboard sequence Tab →
-Skip to the list → Enter opened /list, with visible project cards and accessible
-names. ReelStyles opened its correct project dialog from that catalog. The
-hidden duplicate navigation is absent from the accessibility tree. Fourteen
-checks passed before merge, including contrast and visible-name regressions.
-
-A deployment audit found that vercel.json invokes `npm run vercel-build`, whose
-package script still ran `npm run generate` before compiling. The generator calls
-`.delete().neq("id", 0)` on the documents collection. Local direct `next build`
-did not prevent that remote build chain. Separate both build scripts from
-indexing; leave `npm run generate` available as an explicit data operation.
-This avoids future visual deployments invoking database writes or embeddings
-provider calls. No indexing command was run during this correction.
-
-
-## Restoring the 3D world (2026-10-31)
-
-Branch codex/restore-atlas-world starts from main d250e240. PR #11 remains
-separate, with no concurrent source changes observed in the scene area.
-
-Root causes traced in source:
-- FarmExperience initialized sceneRequested=false, so healthy devices never
-  attempted 3D automatically. It now starts the renderer on arrival. The panorama
-  mounts only on a startup/runtime failure or explicit accessible-view action.
-- The entire scene was under one Suspense boundary waiting on HDRI, all 18 texture
-  maps and scanned props. Base geometry now renders immediately; optional assets
-  have isolated Suspense and error boundaries and cannot block the main world.
-- The installed Fiber Canvas invokes async configure from an effect without
-  handling its rejection. A React boundary alone does not catch that failure.
-  SceneRoot owns and awaits the documented createRoot/configure lifecycle,
-  catches setup rejection, observes resizing and handles context-loss events.
-  Each effect owns a fresh canvas so StrictMode cleanup cannot dispose a new root.
-- The performance downgrade mutated a ref without rerendering. It now changes
-  state, reducing DPR, shadow/effect workload, detail props and grass density.
-  Removed duplicate renderer/composer tone mapping. Day is the initial lighting;
-  sunset/night remain explicit controls. The global percent loader is gone.
-
-Expanded scene: 48 apple trees and 240 crop plants with four instanced draws,
-a larger modern earthen/stone homestead with glazed frontage and solar roof,
-future guest houses, a pergola/shared table, utility bee boxes, a symbolic maker
-at a desk, continuous rocky snowy ridge and muted fields informed by the local
-Ain Leuh photograph. Product and sponsor IDs, legal and fund routes remain stable.
-Added colliders for the new house, guest blocks and gathering table. Removed the
-hard-coded vertical character clamp so Rapier's computed ground movement applies.
-The procedural world remains an interpretation, not a surveyed real property.
-
-Verification: 18 tests, TypeScript and lint pass (existing HeroSection warning),
-and direct next build succeeds without indexing. Added @react-three/test-renderer
-as a dev dependency to mount the actual scene graph, validate finite geometry,
-instancing and every existing item model; these are NOT WebGL visual tests.
-Core existing yard has 276 meshes before optional scanned props.
-The supported sites-preview command is present but its daemon mailbox is absent,
-so it could not start a local browser preview. Do not start a workaround server.
-Next: deploy branch preview, inspect actual renderer startup, console and controls,
-then verify GPU rendering, camera/walking/tractor, labels, dialogs and narrow layout
-before claiming the whole world is finished. Vercel preview may require sign-in.
-
-Follow-up validation: avoid repeated partial root.configure calls with this
-installed Fiber version; their defaults can reset shadows and DPR. Configure the
-root once, then use the created RootState's setSize/setDpr setters. Keep an outer
-core Suspense boundary as a safety net, with optional downloads isolated inside.
-Physics download failures now return to orbit with a visible retry explanation
-rather than leaving Walk silently inactive. The actual deployed PR #12 preview
-redirected to Vercel sign-in after its successful build; browser QA is pending
-that access. No GPU visual result is claimed.
-
-Review corrections: project-nav gaps pass pointer input through, and walking
-layouts reserve space for the joystick/tractor controls. The renderer's async
-callbacks read committed props via a layout effect. Visible dry-stone perimeter
-and Rapier boundary colliders now share the same finite land footprint; the
-player and tractor stop physically at the perimeter instead of walking onto
-invisible ground. A real Rapier integration test verifies both bodies remain
-inside and supported. Nineteen tests, TypeScript and lint pass. The user renewed
-the instruction to continue and merge. The secure Vercel sign-in request was
-declined; do not retry or bypass it. GPU visual, narrow-layout and in-browser
-walking/tractor validation remain outstanding. Merge/deployment status must be
-reported separately from those limitations; do not call the scene perfect.
+Read Experience First, Fix Root Causes and Prove It Works under .cursor/skills.
+Use official R3F docs plus installed source for version-specific renderer behavior.
+Use a branch; run npm test, npx tsc --noEmit, npm run lint and npx next build, wait
+for CI, then merge verified work and confirm production. Preserve honest limits.
+The existing lockfile needs npm ci --legacy-peer-deps. This executor needs the
+scratch-only runtime-memory.cjs shim for Next's /proc RSS lookup; do not commit it.
