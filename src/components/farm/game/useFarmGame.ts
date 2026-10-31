@@ -69,15 +69,16 @@ export function useFarmGame({ ready, exploring, externalPaused, onExplore, onPro
   }, [ready, exploring, paused, onProduct]);
   useEffect(() => {
     const key = (event: KeyboardEvent) => {
-      if (event.repeat || event.ctrlKey || event.metaKey || event.altKey || externalPaused) return;
+      if (event.defaultPrevented || event.repeat || event.ctrlKey || event.metaKey || event.altKey || externalPaused) return;
       if (event.target instanceof HTMLElement && event.target.closest("input, textarea, select, [contenteditable='true'], [role='dialog']")) return;
       if (panel) return; // Radix owns Escape and focus while a panel is open.
       const k = event.key.toLowerCase();
       if (k === "m" || k === "j" || k === "escape") { event.preventDefault(); setPanel(k === "m" ? "map" : k === "j" ? "journal" : "pause"); }
       if (k === "e") { event.preventDefault(); act(); }
     };
-    window.addEventListener("keydown", key);
-    return () => window.removeEventListener("keydown", key);
+    // Inspect dialog state before Radix dismisses and detaches the key target.
+    window.addEventListener("keydown", key, true);
+    return () => window.removeEventListener("keydown", key, true);
   }, [act, panel, externalPaused]);
   function travel(id: DestinationId) {
     const target = destination(id);

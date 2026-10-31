@@ -87,3 +87,13 @@ TypeScript, lint and direct Next build pass. GitHub Farm checks now repeats them
 Compatible packages and Next 15.5.28 are updated. Audit retains 14 high/33 moderate
 findings requiring a separately verified legacy-stack migration (#21).
 Production browser evidence and full GPU/touch gate (#20) remain pending.
+
+### Shipped checkpoint · PR #22
+
+Merged at `1835e68`; GitHub Farm checks and Vercel production passed. Live map,
+journal, reset cancellation, pause/help, settings persistence and audio enable/mute
+controls were exercised at 1363×936. All four product dialogs retain their links.
+#17 is closed with state/persistence evidence. #16/#18/#19 retain final integration
+and visual checks; #20 remains open for GPU/touch; #21 retains security migrations.
+Live QA found overlapping map labels and product-Escape reopening Pause; follow-up
+uses numbered map markers/status and inspects shortcuts before dialog dismissal.
