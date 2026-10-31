@@ -37,11 +37,12 @@ see ASSETS.md. The village remains a distant approximation.
 - `npm ci --legacy-peer-deps` installs the existing lockfile; plain npm ci fails
   because of the pre-existing optional peer dependency lock resolution.
 - `npm test` runs movement regressions; `npx tsc --noEmit` and `npm run lint`
-  check the application. HeroSection has an existing hook-dependency warning.
+  check the application. Lint is clean after the game-v1 update.
 - Use `npx next build` for a build without rebuilding the live embeddings database.
 - Walk: WASD in a fixed frame, normalized diagonal speed. The camera stays behind
   the visitor along the fixed north/south axis. Tractor: F or the touch button;
   W/S drive and A/D steer. Blur, hidden tabs, pointer cancellation and dialogs
   clear or pause input. Test these on desktop and a touch device before promotion.
 
-The production portfolio remains on main until the regional preview is accepted.
+The regional world and game-v1 systems are merged on main. See FARM-HANDOFF.md
+for production evidence and the still-open GPU/touch visual release gate.

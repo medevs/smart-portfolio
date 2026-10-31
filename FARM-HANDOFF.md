@@ -1,192 +1,121 @@
 # Middle Atlas farm handoff
 
-## Current direction
+## Direction and constraints
 
-The user explicitly wants the animated, explorable **3D world as the main
-experience**. The panorama is a failure fallback only. Continue toward a larger,
-slightly modern Moroccan farm inspired by Ifrane, Azrou, Ain Leuh and Midelt:
-maker studio for @medevsmaker, agricultural land, orchard, a future gathering
-courtyard, future visitor spaces and a welcoming maker community.
-
-Keep product links, plot/sponsor IDs, fund and legal pages. Events and visits are
-future concepts: no invented dates, address, bookings or operating claims. The
-small maker figure is symbolic, not a portrait. Do not spend money, enable paid
-services or contact third parties. User authorized tested pushes and merges.
+The animated, explorable **3D world is primary**; panorama is failure recovery
+only. Continue the larger, slightly modern Moroccan farm inspired by Ifrane,
+Azrou, Ain Leuh and Midelt: maker studio for @medevsmaker, agriculture/orchard,
+future gathering courtyard and guest spaces, welcoming maker community.
+Keep product/sponsor/plot IDs, fund and legal pages. Visits/events are future
+concepts: no invented dates, address, bookings or operating claims. Both maker
+and visitor figures are symbolic, not inferred likenesses. No spending, paid
+services, external messages or embeddings generation. Tested pushes/merges are
+authorized. Avoid conflicting writes if another run/PR changes the same area.
 
 ## Shipped
 
-- PR #9: visible keyboard skip destination at /list; styled, accessible catalog.
-- PR #10: site build scripts run Next only. `npm run generate` is a separate,
-  explicit operation that rewrites the configured vector store. Do not run it.
-- PR #12 merged at **aa9a84e2e03313e9ba54d7d66ce0734562355404**.
-  Vercel production deployment succeeded on 2026-10-31.
+| PR | Result | Merge |
+| --- | --- | --- |
+| #9–#10 | Accessible catalog; build no longer invokes database indexer | See Git history |
+| #12 | Automatic 3D startup, isolated optional assets, larger orchard/home/future spaces and physical perimeter | aa9a84e |
+| #14–#15 | Actual GLSL defect and shader recovery classification | e9b57fa / cf33f40 |
+| #22 | Game v1 systems and compatible dependency updates | 1835e68 |
+| #23 | Live-QA map readability and product-Escape fixes | 74ba24b |
 
-PR #12 restores automatic 3D startup. It expands the procedural world with 48
-instanced apple trees, 240 crop plants, a larger earth/stone home with glazed
-frontage and solar roof, maker desk, future pergola/shared table and guest houses,
-bee boxes, continuous rocky snowy ridge and a stone perimeter. Future-place
-labels link to /gather. All existing product models remain at stable plots.
-The world is a regional interpretation, not a surveyed property or photogrammetry.
-Real photo sources/credits: MOROCCO-REFERENCES.md and src/data/morocco-references.json.
+PR #22 adds a generic animated visitor, normalized sprint, E/touch proximity
+actions, safe map travel consumed by Rapier, map/journal/pause/help/settings,
+five activities (studio → well → garden → orchard → shared table), inventory,
+validated versioned browser saves and deliberate reset. Shared world clock pauses
+ambient movement with panels, hidden tabs and reduced motion. Optional daylight,
+user-gesture-only synthesized wind, and watered/delivered scene props are included.
+Tractor mesh/collider heading is corrected; orchard geometry/colliders share data.
+UI position sampling is isolated from the Three scene. Tractor parking resets on
+reload; browser progress/preferences and safe walking position persist.
 
-## Root causes fixed
+Landscape remains a regional procedural interpretation, not photogrammetry or a
+surveyed property. Photo credits: MOROCCO-REFERENCES.md and
+src/data/morocco-references.json. Repeated planting stays instanced.
 
-1. `sceneRequested=false` prevented automatic 3D even on healthy devices.
-2. A global Suspense boundary waited for HDRI, all texture maps and scanned props.
-   Core geometry now renders first; optional downloads have isolated boundaries.
-3. The installed Fiber Canvas starts async configure in an effect. React error
-   boundaries do not catch its rejected initialization promise. SceneRoot now owns
-   and awaits createRoot/configure, catches rejection and handles context loss.
-   Each effect owns a fresh canvas so StrictMode cleanup cannot dispose a new root.
-4. Partial repeated configure calls in the installed Fiber version can reset
-   shadows/DPR. Runtime resizing/quality use RootState setSize/setDpr instead.
-5. Performance downgrade mutated a ref without rerendering. State now reduces
-   detail, grass, DPR and effects. Duplicate tone mapping was removed.
-6. Touch project navigation could overlap movement controls. Input passes through
-   empty gaps, with reserved control space in the walking layout.
-7. The floor collider extended beyond visible land. Shared perimeter geometry and
-   real Rapier boundary colliders now stop both walking and driving physically.
+## Root causes established
 
-Day is the initial lighting; sunset/night remain controls. Readiness uses rendered
-frames, not a fictitious loading percentage. Startup failure has bounded recovery
-and a retry. Failed physics loading returns to orbit with an explanation.
+- Startup was disabled and a global Suspense waited for decorative downloads.
+  Core geometry now starts automatically with isolated optional downloads.
+- Fiber async configure rejection escaped React boundaries. SceneRoot awaits it,
+  catches failures/context loss, owns each canvas and uses setSize/setDpr for updates.
+- A user's functioning-GPU log identified duplicate `float edge` in EffectMaterial.
+  glslang reproduced the exact redefinition. Rename it, correct reversed smoothstep
+  edges and omit the unused sketch pass in normal color. Compiler regression stays.
+- Only generated `SHADER_NAME EffectMaterial` failures drop postprocessing;
+  unknown/core shader failures use full scene recovery. Do not conflate these with
+  the cloud browser's disabled GPU.
+- Live product Escape dismissed Radix before the window shortcut inspected the key,
+  opening Pause. Capture-phase inspection now sees the original dialog state.
+- Live map labels overlapped. Numbered markers now match the destination selector,
+  with textual waypoint feedback. Both fixes were rechecked after deployment.
 
-## Evidence
+## Verification evidence · 2026-10-31
 
-- 19 tests passed, including actual Three scene-graph construction for every item,
-  finite expanded geometry/instancing, and real Rapier character/tractor collision
-  tests at the perimeter. Scene-graph tests use the official test renderer without
-  a GPU; they are **not** WebGL visual tests. Existing core yard: 276 meshes.
-- TypeScript, lint and direct `next build` passed. Existing HeroSection dependency
-  lint warning remains. Do not run tsc concurrently with Next regenerating types.
-- Final Vercel and GitGuardian checks passed; CodeRabbit completed neutral. Three
-  review findings were addressed. No new indexing/provider calls were run.
-- Actual production browser first showed “Opening the 3D farm” and project dock,
-  then logged GL_VENDOR/GL_RENDERER **Disabled**. SceneRoot caught that specific
-  failure and recovered to the accessible fallback without a stuck loader or
-  unhandled initialization rejection. Retry recovered too. ReelStyles and
-  TalkTheDoc dialogs opened correctly after recovery and Escape closed them.
+- **29 tests pass**: ordered activity/inventory/prerequisites/distance/duplicates,
+  corrupt/blocked storage and restore, safe destinations, normalized movement,
+  shared clock, actual Three avatar/world geometry, real Rapier perimeter collisions,
+  GLSL compilation and preserved routes. Scene tests are CPU graph checks, not GPU.
+- TypeScript, lint (no warnings) and direct Next build pass. CI `Farm checks`
+  passed npm ci/tests/types/lint/build for PR #22 run **41203964214**, job
+  **124545164170**, and PR #23 run **41204636574**, job **124547120413**.
+- Vercel production succeeded for merge **1835e68** and **74ba24b**.
+- Actual https://medevsmaker.vercel.app/ browser at **1363×936**: map selection,
+  orchard waypoint/status, accurate disabled travel, journal (no menu-awarded
+  progress), reset confirmation/cancellation, pause/help/resume, M/J/Escape,
+  game-panel return focus, and product Escape without reopening Pause all passed.
+- Graphics/reduced-motion preferences survived reload. Audio enable→Mute→off
+  controls worked and default off after reload; audible quality was not assessed.
+  Tested preferences were returned to Automatic/normal motion.
+- All four product dialogs opened with preserved /spot/about, /spot/reelstyles,
+  /spot/mentorclone, /spot/talkthedoc and external links. No sponsor form submitted.
+  Existing product focus-return PR #11 remains separate/open and untouched.
+- No horizontal page overflow; toolbar top **111px**, header bottom **99px** at
+  this viewport. Corrected-map screenshot was saved during the browser check.
+- Fresh console explicitly reports **GL_VENDOR=Disabled, GL_RENDERER=Disabled**;
+  startup recovers without a stuck loader. Browser-extension metadata errors are
+  separate. This browser did not and cannot prove successful 3D rendering.
 
-## Outstanding verification / blockers
+## Dependencies and security
 
-**Do not claim finished visual 3D validation.** This cloud browser cannot create
-WebGL. Its GPU restriction is not evidence that the user's device cannot run 3D.
-GPU-capable visual review, in-browser camera/walk/tractor interaction and a real
-narrow/mobile viewport remain pending. Fix observed faults before claiming those.
+Compatible updates include React/DOM **19.3.1**, Fiber **9.8.2**, Drei **10.7.9**,
+React postprocessing **3.2.2**, Next/eslint-config-next **15.5.28**, and other
+compatible packages. Rendering peer requirements checked; npm ls direct renderer
+packages succeeds. Three remains 0.170; breaking majors were not blindly adopted.
+Next's critical audit finding is gone. Audit still reports **14 high / 33 moderate /
+0 critical** across legacy AI/LangChain/OpenAI, tools and transitive/vendored
+packages (including Next PostCSS/sharp). #21 remains open for deliberate migrations
+and chatbot/API verification. Do not claim a clean audit or follow unsafe downgrade
+suggestions. No paid services or asset tools were installed.
 
-The supported `sites-preview` CLI exists but its daemon mailbox is missing; no
-workaround server was started. The deployed Vercel preview requires sign-in; the
-secure sign-in request was declined. Do not retry auth or bypass protection.
-Earlier local-file responsive harness navigation was blocked; do not bypass it.
+## Next steps and concrete blockers
 
-PR #11 (dialog focus return) remains open and separate; it is not in production.
-Read its review before continuing: helper-only focus tests do not establish both
-callers' integration. Avoid conflicting writes if another run updates this area.
+FARM-ROADMAP.md and issues #16–#21 track acceptance. #17 and #19 implementation
+checks are closed; #16/#18 retain integration/touch evidence, #20 release gate is
+open, and #21 retains dependency security migrations.
+
+1. Use a GPU-capable browser to play the full activity loop, camera/orbit/walk/
+   sprint/tractor/travel, pause/daylight/shader recovery; record visuals/performance.
+2. Verify a genuine narrow touch viewport: no overlapping HUD, usable pad/actions/
+   panels. This browser has no viewport-resize capability. Do not claim mobile QA.
+3. Migrate remaining vulnerable major dependencies deliberately, preserving routes.
+4. Review PR #11 separately; helper-only focus tests do not prove both callers.
+
+Supported local sites-preview mailbox is absent. Protected Vercel preview sign-in
+was declined; do not retry auth or bypass protection. A local-file responsive
+harness was blocked; do not bypass via other hosting/iframes. These are environment
+limits, not proof that the user's GPU cannot run the farm. **Do not mark the whole
+roadmap or visual release gate finished.**
 
 ## Working procedure
 
 Read Experience First, Fix Root Causes and Prove It Works under .cursor/skills.
-Use official R3F docs plus installed source for version-specific renderer behavior.
-Use a branch; run npm test, npx tsc --noEmit, npm run lint and npx next build, wait
-for CI, then merge verified work and confirm production. Preserve honest limits.
-The existing lockfile needs npm ci --legacy-peer-deps. This executor needs the
-scratch-only runtime-memory.cjs shim for Next's /proc RSS lookup; do not commit it.
-
-## Black-frame root cause (2026-10-31)
-
-The user reported a black screen and supplied browser console output. It proves
-EffectMaterial's fragment failed at `float edge = e2UMix * 1.2` with `edge:
-redefinition`, followed by repeated INVALID_OPERATION/useProgram errors. This is
-a real shader defect on a functioning GPU, separate from this cloud browser's
-GPU-disabled startup failure. Earlier scene-graph/build tests did not compile
-GLSL and missed it.
-
-Reproduced before editing with the glslang compiler: compilation failed on that
-same redefinition. Rename the reveal threshold, correct reversed smoothstep
-edges, and omit the unused sketch pass in normal color mode. The actual shader
-body now compiles in a regression test using @webgpu/glslang (ES 3.1 host wrapper
-for its SPIR-V target; this is compiler validation, not a WebGL screenshot).
-Runtime shader compile failures now disable optional postprocessing so the
-underlying 3D renderer can keep drawing, rather than staying black. Twenty tests,
-TypeScript and lint pass. Run direct next build and wait for CI/deployment.
-
-PR #14 merged at e9b57fafebcc7ea3cd924a7caed362966235096e and Vercel production
-succeeded. Review then identified that core-material shader failures must not use
-an effects-only recovery. Match Three r170's generated `SHADER_NAME EffectMaterial`
-prefix for that narrow recovery; unknown/core sources call full scene recovery.
-Twenty-one tests, TypeScript and lint pass, including routing coverage. Visual GPU
-validation is still not claimed; the user's supplied log establishes the original
-GPU error exactly and the compiler regression reproduces it independently.
-
-## Game v1 implementation · 2026-10-31
-
-Branch: `codex/atlas-game-v1`; roadmap and acceptance issues #16–#21 are in
-FARM-ROADMAP.md. Implementation adds a generic animated visitor (no owner likeness),
-sprint, E/touch proximity actions, safe map travel consumed by Rapier, map/journal/
-pause/help/settings panels, a five-part studio → well → garden → orchard → table
-loop, inventory, validated versioned browser saves and deliberate journal reset.
-The shared world clock freezes ambient movement while paused, hidden or reduced;
-optional daylight cycling and user-gesture-only synthesized wind are included.
-Completed watering/delivery changes actual scene geometry. Project/fund/legal and
-sponsor routes remain. No visits, bookings or events are represented as operating.
-
-Movement correction: tractor mesh yaw now follows the vehicle heading separately
-from the pedestrian facing, and its long collider axis matches the drive axis.
-Building/well/orchard-trunk clearance is validated before travel or save restoration.
-Orchard geometry and colliders share positions. UI samples position at 5 Hz in a
-child component; it does not rerender the whole Three scene on each sample.
-
-Dependencies: compatible updates installed, including React/DOM 19.3.1, Fiber
-9.8.2, Drei 10.7.9, React postprocessing 3.2.2, and Next/eslint-config-next 15.5.28.
-No paid tools or asset services installed. Next's critical audit finding is gone.
-`npm audit` still reports **47 findings: 14 high, 33 moderate, 0 critical** in the
-legacy AI/LangChain/OpenAI stack, tools and transitive/vendored dependencies
-(including Next's PostCSS/sharp). Major migration requires separate route/API
-checks; do not claim this dependency tree is free of vulnerabilities. #21 remains
-open for that work. A downgrade suggested by npm audit is not a safe migration.
-
-Local verification at this checkpoint: **29 tests pass**, including ordered
-activity/inventory transitions, corrupt/blocked storage, every destination's safe
-clearance, sprint, paused/hidden/reduced clock, real Rapier perimeter collisions,
-new Three avatar/activity geometry and actual GLSL compilation. TypeScript and
-lint pass without warnings; direct Next 15.5.28 build passed. Three test teardown
-needs a real global animation host (`self=globalThis`) to preserve Rapier's crypto
-host; a partial `self` mock caused a WASM panic and was corrected in the test host.
-New GitHub Farm checks runs tests, TypeScript, lint and direct Next build.
-
-Pending release evidence: production deployment, live UI/save/dialog/console QA,
-and the still-blocked GPU and narrow/touch playthrough in #20. Do not label the
-3D game visually verified based on this CPU scene graph or compilation evidence.
-
-### Production UI check · PR #22
-
-PR #22 merged at **1835e68add63e35ccbb2dec6a57818bfbc9a5e0f**;
-Vercel production succeeded. GitHub Farm checks run **41203964214** / job
-**124545164170** completed every install/test/type/lint/build step successfully.
-Live https://medevsmaker.vercel.app/ now exposes the new game controls.
-
-Observed in the production browser (1363×936): Map opens, destinations select,
-orchard waypoint appears, travel is disabled with an accurate no-WebGL explanation;
-Escape returns focus to Map. Settings graphics/reduced-motion preferences survive
-a reload. Explicit audio enable changes to Mute, mute returns to off; sound is off
-after reload. This verifies control/context behavior, not heard sound quality.
-No horizontal page overflow at this viewport. The first live map screenshot showed
-overlapping destination text; follow-up replaces it with numbered markers matching
-the selector and adds a textual waypoint status. GPU/touch release gate remains.
-
-Additional observed UI checks: journal lists all five activities without awarding
-progress from map/menu use; reset opens a separate confirmation and Keep my
-progress returns safely. Pause → Controls → resume works. ReelStyles dialog opens
-with its preserved reelstyles.com and /spot/reelstyles links. Escape exposed a
-real event-order fault: Radix dismissed a product before the window shortcut
-listener saw Escape, causing it to open Pause. Follow-up moves shortcut inspection
-to capture, checks defaultPrevented and retains the dialog/external-pause guard;
-production product Escape must be rechecked after that deployment. SpotCard/PR #11
-is untouched. This is an observed defect, not a successful product-dismiss check.
-
-All four live product dialogs were opened: studio /spot/about (existing X/GitHub),
-ReelStyles /spot/reelstyles + reelstyles.com, MentorClone /spot/mentorclone +
-mentorclone.ai and TalkTheDoc /spot/talkthedoc + talkthedoc.com. No sponsorship form
-was submitted. Close buttons work; original product focus-return issue #11 stays
-separate. Follow-up checks: 29 tests, TypeScript, lint (no warnings) and direct
-Next build pass after numbered-map/shortcut changes. No GPU visual claim.
+Use branches, npm ci --legacy-peer-deps, npm test, npx tsc --noEmit, npm run lint,
+and direct npx next build; wait for CI, merge verified work, confirm production and
+inspect actual browser/console. Never run npm run generate as part of deployment.
+This executor needs a scratch-only runtime-memory.cjs for its /proc RSS lookup;
+do not commit it. GPU-free Three tests need self=globalThis plus animation host
+methods: a partial self mock breaks Rapier's crypto host and causes a WASM panic.
