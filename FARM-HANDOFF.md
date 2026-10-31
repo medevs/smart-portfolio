@@ -259,3 +259,17 @@ will be recorded in the PR. CPU tests inspect
 real geometry/material/portrait UV wiring and camera transforms, not GPU pixels.
 The cloud browser still cannot prove 3D visual quality or physical touch gestures;
 keep #20 open and record live interface checks separately.
+
+
+## Exploration release follow-up
+
+PR #31 merged at 485a0c267656fc8908404799956cd725f74fe156. Farm checks run
+41239462142 and Vercel production Bk4wvYTMjMEV7totcWnCfgZbq9rz passed.
+Live no-WebGL UI check: field notebook 0/4 shows four hints, selecting the apiary
+sets the map waypoint without awarding a discovery; settings slider reaches 1.8
+and 16, and camera reset resumes. Desktop UI only, not GPU or physical pinch proof.
+
+Live check found notebook waypoint buttons changed the waypoint but showed no
+local confirmation (the map did show it). Add a status message inside the notebook
+so both sighted and screen-reader visitors receive immediate feedback. Verify the
+status after deployment, then record remaining product/console checks in the PR.
