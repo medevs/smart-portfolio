@@ -110,3 +110,16 @@ confirm deployment; user/GPU visual playthrough still must pass. See FARM-HANDOF
 - HUD follow-up: consolidate permanent navigation behind Menu; compact journal
   prompt, contextual actions and touch-only movement pad. Preserve project/fund
   access and future-only hosting language. Record release evidence in PR.
+
+
+## Exploration follow-up
+
+| Work | Acceptance |
+| --- | --- |
+| Zoom and turnable follow view | Wheel/pinch/keys/settings, bounded distance, pause cleanup, one camera owner and obstruction tests |
+| Portrait maker | Existing authorized portrait on curved face, source-matched hair/glasses/clothing, isolated loading, geometry/material checks |
+| Field notebook | Four physical discoveries, hints/waypoints, validated old/new saves, no duplicate or remote rewards |
+| Farm life | Shared-clock water/bees, tea tray, physical bench, instanced orchard variation |
+
+Actual GPU appearance, full playthrough and physical narrow/touch checks remain
+release gates; passing CPU geometry tests does not close them.

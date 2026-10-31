@@ -39,8 +39,8 @@ see ASSETS.md. The village remains a distant approximation.
 - `npm test` runs movement regressions; `npx tsc --noEmit` and `npm run lint`
   check the application. Lint is clean after the game-v1 update.
 - Use `npx next build` for a build without rebuilding the live embeddings database.
-- Walk: WASD in a fixed frame, normalized diagonal speed. The camera stays behind
-  the visitor along the fixed north/south axis. Tractor: F or the touch button;
+- Walk: WASD in a fixed frame, normalized diagonal speed. The follow view starts behind
+  the visitor; drag turns it, and wheel/pinch or +/− changes distance. Tractor: F or the touch button;
   W/S drive and A/D steer. Blur, hidden tabs, pointer cancellation and dialogs
   clear or pause input. Test these on desktop and a touch device before promotion.
 

@@ -19,6 +19,7 @@ export const YARD_BUILDINGS: { position: [number, number, number]; args: [number
   { position: [0, 1.8, -18], args: [5.2, 1.8, 2.4] },
   { position: [17, 1.24, -16.52], args: [2.16, 1.24, 1.04] },
   { position: [24, 1.24, -16.52], args: [2.16, 1.24, 1.04] },
+  { position: [-20, .35, -15.3], args: [1.4, .35, .45] },
   { position: [-3, .5, 19], args: [3, .5, .65] },
 ];
 

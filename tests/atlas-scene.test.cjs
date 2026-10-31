@@ -22,10 +22,11 @@ for (const extension of ['.ts', '.tsx']) Module._extensions[extension] = functio
 };
 // This renderer checks the actual Three scene graph without a GPU. HTML labels
 // are covered by browser checks, so omit their separate React DOM portals here.
+const portraitTexture = new THREE.Texture({src:"/images/profile.jpeg"});
 const originalLoad = Module._load;
 Module._load = function(request, ...rest) {
   const loaded = originalLoad.call(this, request, ...rest);
-  return request === '@react-three/drei' ? { ...loaded, Html: () => null } : loaded;
+  return request === '@react-three/drei' ? { ...loaded, Html: () => null, useTexture: () => portraitTexture } : loaded;
 };
 global.IS_REACT_ACT_ENVIRONMENT = true;
 const { AtlasLandscape } = require('../src/components/farm/scene/MiddleAtlas.tsx');
@@ -104,4 +105,37 @@ test('visitor and completed activity results construct actual finite Three geome
     for (const n of node.instance.geometry.attributes.position.array) assert.ok(Number.isFinite(n));
   }
   await renderer.advanceFrames(3,1/60);await renderer.unmount();
+});
+
+
+test('maker avatar maps the existing portrait onto finite curved face geometry',async()=>{
+  const renderer = await create(React.createElement(Visitor));
+  const face=renderer.scene.findByProps({name:'maker-portrait-face'}).instance;
+  assert.equal(face.material.map.image.src, '/images/profile.jpeg');
+  assert.equal(face.material.map.colorSpace, THREE.SRGBColorSpace);
+  assert.ok(face.geometry.attributes.position.count>300);
+  for(const value of face.geometry.attributes.uv.array) assert.ok(Number.isFinite(value)&&value>=0&&value<=1);
+  assert.ok(fs.statSync('public/images/profile.jpeg').size>0);
+  assert.ok(renderer.scene.findByProps({name:'maker-head'}).instance.children.length>20);
+  await renderer.unmount();
+});
+
+
+test('farm details animate from the shared clock and stay still when it is paused',async()=>{
+  const { FarmLife }=require('../src/components/farm/scene/FarmLife.tsx');
+  const { gameClock, advanceWorld }=require('../src/farm/game/clock.ts');
+  const saved={...gameClock};
+  Object.assign(gameClock,{seconds:0,paused:false,reduced:false});
+  const renderer=await create(React.createElement(FarmLife));
+  try {
+    await renderer.advanceFrames(1,1/60);
+    const water=renderer.scene.findByProps({name:'flowing-seguia'}).instance.children[0];
+    const bee=renderer.scene.findByProps({name:'orchard-bees'}).instance.children[0];
+    const initial=water.position.z;
+    advanceWorld(.05);await renderer.advanceFrames(1,1/60);
+    assert.notEqual(water.position.z,initial);
+    gameClock.paused=true;const still=bee.position.clone();
+    advanceWorld(1);await renderer.advanceFrames(1,1/60);assert.ok(bee.position.equals(still));
+    for(const node of renderer.scene.findAll(n=>n.instance.isMesh)) for(const value of node.instance.geometry.attributes.position.array) assert.ok(Number.isFinite(value));
+  } finally { await renderer.unmount();Object.assign(gameClock,saved); }
 });

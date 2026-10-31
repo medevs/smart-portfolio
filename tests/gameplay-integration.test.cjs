@@ -24,12 +24,15 @@ for(const ext of ['.ts','.tsx']) Module._extensions[ext]=function(module,filenam
 // Real camera-controls transforms; omit DOM event connection in this GPU-free test.
 const Orbit=React.forwardRef(function Orbit(props,ref){
   const {camera}=useThree();const [controls]=React.useState(()=>new CameraControls(camera));
+  controls.minDistance=props.minDistance;controls.maxDistance=props.maxDistance;
   React.useImperativeHandle(ref,()=>controls,[controls]);
   useFrame((_,dt)=>controls.update(dt),-1);
   return null;
 });
+// A CPU texture fixture checks material/UV wiring; it does not simulate GPU pixels.
+const portraitTexture = new THREE.Texture({src:'/images/profile.jpeg'});
 const originalLoad=Module._load;
-Module._load=function(request,...rest){return request==='@react-three/drei'?{CameraControls:Orbit}:originalLoad.call(this,request,...rest)};
+Module._load=function(request,...rest){return request==='@react-three/drei'?{CameraControls:Orbit,useTexture:()=>portraitTexture}:originalLoad.call(this,request,...rest)};
 const { CameraRig }=require('../src/components/farm/scene/CameraRig.tsx');
 const { PhysicsYard }=require('../src/components/farm/scene/explore.tsx');
 const { walk, resetWalkInput }=require('../src/components/farm/scene/walk-state.ts');
@@ -48,9 +51,9 @@ test('orbit yields camera ownership to walking; follow settles instead of being 
   await renderer.update(React.createElement(CameraRig,{...props,walking:true}));
   await frames(renderer,120,1/60);
   assert.ok(camera.position.distanceTo(new THREE.Vector3(0,3.2,14.2))<.01,'walking camera reaches the visitor');
-  walk.px=10;walk.pz=-6;
+  walk.px=30;walk.pz=30;
   await frames(renderer,120,1/60);
-  assert.ok(camera.position.distanceTo(new THREE.Vector3(10,3.2,.2))<.01,'follow is not pulled back to orbit');
+  assert.ok(camera.position.distanceTo(new THREE.Vector3(30,3.2,36.2))<.01,'follow is not pulled back to orbit');
   const before=camera.position.clone();
   await renderer.update(React.createElement(CameraRig,{...props,walking:true,paused:true}));
   walk.px=30;await frames(renderer,10,1/60);assert.ok(camera.position.equals(before));
@@ -121,4 +124,37 @@ test('real input stops on key release and pause; tractor and travel remain contr
   const visitor=renderer.scene.findByProps({name:'farm-visitor-body'}).instance;
   assert.ok(visitor.position.y>.65&&visitor.position.y<.73,'exit stays near ground instead of dropping from the air');
   await renderer.unmount();
+});
+
+
+test('walking zoom changes the actual camera distance without losing follow ownership',async()=>{
+  reset();walk.px=30;walk.pz=25;
+  const { cameraView, setCameraDistance, resetCameraView } = require('../src/components/farm/scene/camera-view.ts');
+  resetCameraView();
+  const camera=new THREE.PerspectiveCamera(45,1,.1,240);
+  const renderer=await create(React.createElement(CameraRig,{walking:true,paused:false,reducedMotion:false,focus:null}),{camera});
+  const target=new THREE.Vector3(30,1.1,25);
+  try {
+    await frames(renderer,2,1/60);
+    const normal=camera.position.distanceTo(target);
+    setCameraDistance(3.4);await frames(renderer,120,1/60);
+    assert.ok(camera.position.distanceTo(target)<normal*.6);
+    setCameraDistance(16);await frames(renderer,120,1/60);
+    assert.ok(camera.position.distanceTo(target)>normal*2.5);
+    cameraView.turn=Math.PI;await frames(renderer,120,1/60);
+    assert.ok(camera.position.z<25,'turning lets the visitor see the portrait from the front');
+  } finally { await renderer.unmount();resetCameraView(); }
+});
+
+
+test('orbit zoom also moves the real camera-controls rig within its limits',async()=>{
+  reset();const { setCameraDistance, resetCameraView }=require('../src/components/farm/scene/camera-view.ts');
+  resetCameraView();const camera=new THREE.PerspectiveCamera(45,1,.1,240);
+  const renderer=await create(React.createElement(CameraRig,{walking:false,paused:false,reducedMotion:true,focus:null}),{camera});
+  const target=new THREE.Vector3(0,1.2,0);
+  try {
+    await frames(renderer,2,1/60);const original=camera.position.distanceTo(target);
+    setCameraDistance(1.8);await frames(renderer,120,1/60);assert.ok(camera.position.distanceTo(target)<original*.35);
+    setCameraDistance(16);await frames(renderer,120,1/60);assert.ok(camera.position.distanceTo(target)<=85.01);assert.ok(camera.position.distanceTo(target)>original);
+  } finally { await renderer.unmount();resetCameraView(); }
 });
