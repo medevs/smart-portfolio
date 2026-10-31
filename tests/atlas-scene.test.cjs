@@ -139,3 +139,16 @@ test('farm details animate from the shared clock and stay still when it is pause
     for(const node of renderer.scene.findAll(n=>n.instance.isMesh)) for(const value of node.instance.geometry.attributes.position.array) assert.ok(Number.isFinite(value));
   } finally { await renderer.unmount();Object.assign(gameClock,saved); }
 });
+
+
+test('very close obstruction views hide the avatar instead of filling the camera with its torso',async()=>{
+  const {walk}=require('../src/components/farm/scene/walk-state.ts');
+  const saved={px:walk.px,pz:walk.pz,driving:walk.driving};
+  Object.assign(walk,{px:0,pz:8,driving:false});
+  const camera=new THREE.PerspectiveCamera(45,1,.1,240);camera.position.set(0,1.1,8.3);
+  const renderer=await create(React.createElement(Visitor),{camera});
+  try {
+    await renderer.advanceFrames(1,1/60);assert.equal(renderer.scene.findByProps({name:'maker-visitor'}).instance.visible,false);
+    camera.position.set(0,3.2,14.2);await renderer.advanceFrames(1,1/60);assert.equal(renderer.scene.findByProps({name:'maker-visitor'}).instance.visible,true);
+  } finally {await renderer.unmount();Object.assign(walk,saved);}
+});

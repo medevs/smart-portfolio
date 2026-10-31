@@ -54,6 +54,6 @@ export function FollowCamera({ paused }: { paused: boolean }) {
     // Clip the interpolated position too: smoothing must not sweep through a wall.
     keepCameraClear(target.current, camera.position);
     camera.lookAt(target.current);
-  });
+  }, -1);
   return null;
 }

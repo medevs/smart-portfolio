@@ -273,3 +273,21 @@ Live check found notebook waypoint buttons changed the waypoint but showed no
 local confirmation (the map did show it). Add a status message inside the notebook
 so both sighted and screen-reader visitors receive immediate feedback. Verify the
 status after deployment, then record remaining product/console checks in the PR.
+
+
+## Camera beneath a crown
+
+Final review identified a legitimate state omitted by the first obstruction test:
+the visitor's look target can be inside an orchard crown. Clipping before that
+sphere's far intersection then leaves the camera inside foliage. Compute the
+exit clearance for an enclosing crown before shortening against other obstacles;
+a regression uses a real orchard tree and a close view initially inside its crown.
+This is a CPU geometry correction; visual GPU acceptance remains open.
+Very short obstruction views can approach the visitor, so the avatar hides below
+0.75 units instead of letting the torso fill the camera. Camera sampling runs
+after physics and before avatar visibility. Normal user zoom starts at 1.8 units.
+
+A repeat local build failed restoring cached task data: block 23 header was
+truncated in .next/cache/turbopack/v16.4.3-29bbeab0/00000054.sst, referenced
+by 00000061.meta. Quarantined that generated database and rebuilt it from source;
+no build validation/configuration was disabled. Confirm clean CI before merge.

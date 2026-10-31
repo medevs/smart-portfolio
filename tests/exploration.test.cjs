@@ -63,3 +63,16 @@ test('real wheel, drag and pinch handlers zoom/turn and release captured gesture
   const pausedDistance=cameraView.distance;send(canvas,'wheel',{deltaY:100,deltaMode:0});assert.equal(cameraView.distance,pausedDistance);
   resetCameraView();
 });
+
+
+test('standing beneath an orchard crown keeps the close camera outside its leaves',()=>{
+  const {ORCHARD_TREES}=require('../src/farm/game/world.ts');
+  const tree=ORCHARD_TREES[0];
+  const target=new THREE.Vector3(tree.x+.8,1.1,tree.z);
+  const desired=new THREE.Vector3(tree.x-.9,1.7,tree.z);
+  const crown=new THREE.Sphere(new THREE.Vector3(tree.x,2.1,tree.z),1.35);
+  assert.equal(crown.containsPoint(target),true);
+  assert.equal(crown.containsPoint(desired),true);
+  keepCameraClear(target,desired);
+  assert.equal(crown.containsPoint(desired),false,'camera must exit the canopy, not stop inside it');
+});

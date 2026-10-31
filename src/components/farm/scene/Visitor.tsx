@@ -11,9 +11,10 @@ export function Visitor() {
   const root = useRef<THREE.Group>(null);
   const leftArm = useRef<THREE.Group>(null), rightArm = useRef<THREE.Group>(null);
   const leftLeg = useRef<THREE.Group>(null), rightLeg = useRef<THREE.Group>(null);
-  useFrame((_, dt) => {
+  const cameraTarget = useRef(new THREE.Vector3());
+  useFrame(({ camera }, dt) => {
     if (root.current) {
-      root.current.visible = !walk.driving;
+      root.current.visible = !walk.driving && camera.position.distanceToSquared(cameraTarget.current.set(walk.px, 1.1, walk.pz)) > .56;
       root.current.rotation.y = walk.yaw;
     }
     const stride = gameClock.paused || gameClock.reduced ? 0 : Math.sin(gameClock.seconds * (walk.sprinting ? 12 : 8)) * Math.min(walk.moving / 3.6, 1.4) * .55;
@@ -25,7 +26,7 @@ export function Visitor() {
   const limb = (ref: React.RefObject<THREE.Group | null>, x: number, y: number, length: number, color: string) => <group ref={ref} position={[x, y, 0]}>
     <mesh position={[0, -length / 2, 0]} castShadow><capsuleGeometry args={[.065, length - .13, 3, 7]} /><meshStandardMaterial color={color} roughness={.95} /></mesh>
   </group>;
-  return <group ref={root} position={[0, -.66, 0]}>
+  return <group name="maker-visitor" ref={root} position={[0, -.66, 0]}>
     <mesh position={[0, .95, 0]} castShadow><capsuleGeometry args={[.18, .32, 4, 9]} /><meshStandardMaterial color="#998886" roughness={.94} /></mesh>
     <MakerHead />
     {limb(leftArm, -.24, 1.13, .45, "#998886")}{limb(rightArm, .24, 1.13, .45, "#998886")}
