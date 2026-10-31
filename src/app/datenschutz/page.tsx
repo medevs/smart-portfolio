@@ -17,7 +17,7 @@ export default function DatenschutzPage() {
           <Link href="/">← Farm</Link>
         </p>
         <h1>Datenschutz</h1>
-        <p>Stand: 30. Oktober 2026</p>
+        <p>Stand: 31. Oktober 2026</p>
 
         <h2>Verantwortlicher</h2>
         <p>
@@ -43,8 +43,17 @@ export default function DatenschutzPage() {
 
         <h2>Lokal im Browser</h2>
         <p>
-          Tag und Nacht folgen der Uhr des Geräts. Diese Angabe wird nicht an den Server gesendet. Es werden keine
-          Tracking-Cookies und keine Analysewerkzeuge gesetzt.
+          Die Farm speichert den digitalen Spielstand lokal in diesem Browser: erledigte Aufgaben, Wasser und
+          Äpfel im Inventar, die letzte sichere Gehposition sowie den Einführungsstatus. Auch Grafik-, Bewegungs-,
+          Tageslicht- und Lautstärkeeinstellungen werden lokal gespeichert. Die Seite überträgt diesen lokalen
+          Spielstand nicht an den Server. Im Spieljournal lässt sich der Fortschritt nach einer Bestätigung
+          zurücksetzen; die Einstellungen bleiben dabei erhalten. Das Löschen der Website-Daten im Browser entfernt
+          auch diese Einstellungen.
+        </p>
+        <p>
+          Tageslicht kann manuell gewählt oder in einem optionalen virtuellen Zyklus verändert werden. Die
+          Geräuschkulisse beginnt nur nach einem Klick und ist bei jedem neuen Aufruf zunächst ausgeschaltet.
+          Es werden keine Tracking-Cookies und keine Analysewerkzeuge gesetzt.
         </p>
 
         <h2>Patenschaftsformular</h2>
