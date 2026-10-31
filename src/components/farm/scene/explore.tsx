@@ -5,20 +5,12 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { CapsuleCollider, CuboidCollider, Physics, RigidBody, useRapier } from "@react-three/rapier";
 import type { RapierRigidBody } from "@react-three/rapier";
 import * as THREE from "three";
-import { GROUND_HALF, YARD_WALLS } from "./yard-boundaries";
+import { ORCHARD_TREES } from "@/farm/game/world";
+import { Visitor } from "./Visitor";
+import { GROUND_HALF, YARD_WALLS, YARD_BUILDINGS, safeSpawn } from "./yard-boundaries";
 import { resetWalkInput, TRACTOR, walk, walkingMovement } from "./walk-state";
 
-const BLOCKS: { position: [number, number, number]; args: [number, number, number] }[] = [
-  { position: [1.1, 1.6, -2.2], args: [3.1, 1.6, 2.1] },
-  { position: [-11, 1.4, -2.2], args: [2.5, 1.4, 1.9] },
-  { position: [8.8, 2.1, -3.2], args: [1.2, 2.1, 1.2] },
-  { position: [14.3, 1.1, -2.2], args: [1.6, 1.1, 1.3] },
-  { position: [19.5, 2.2, -5.5], args: [1.3, 2.2, 1.3] },
-  { position: [0, 1.8, -18], args: [5.2, 1.8, 2.4] },
-  { position: [17, 1.24, -16.52], args: [2.16, 1.24, 1.04] },
-  { position: [24, 1.24, -16.52], args: [2.16, 1.24, 1.04] },
-  { position: [-3, .5, 19], args: [3, .5, .65] },
-];
+
 
 const keys = { w: false, a: false, s: false, d: false };
 function resetInput() {
@@ -30,16 +22,18 @@ function isEditing(target: EventTarget | null) {
   return target instanceof HTMLElement && Boolean(target.closest("input, textarea, select, [contenteditable]:not([contenteditable='false']), [role='dialog']"));
 }
 
-export function PhysicsYard() {
+export function PhysicsYard({ paused = false }: { paused?: boolean }) {
   useEffect(() => {
     const down = (event: KeyboardEvent) => {
       if (walk.paused || isEditing(event.target) || event.ctrlKey || event.metaKey || event.altKey) return;
       const key = event.key.toLowerCase();
       if (key === "w" || key === "a" || key === "s" || key === "d") keys[key] = true;
+      if (key === "shift") walk.sprinting = true;
       if (key === "f" && !event.repeat) walk.toggleDrive = true;
     };
     const up = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
+      if (key === "shift") walk.sprinting = false;
       if (key === "w" || key === "a" || key === "s" || key === "d") keys[key] = false;
     };
     const onVisibility = () => {
@@ -60,15 +54,17 @@ export function PhysicsYard() {
   }, []);
 
   return (
-    <Physics gravity={[0, -9.81, 0]} timeStep={1 / 60}>
+    <Physics paused={paused} gravity={[0, -9.81, 0]} timeStep={1 / 60}>
       <RigidBody type="fixed" colliders={false} position={[0, -0.3, 0]}>
         <CuboidCollider args={[GROUND_HALF, 0.3, GROUND_HALF]} />
       </RigidBody>
-      {[...BLOCKS, ...YARD_WALLS].map((block) => (
+      {[...YARD_BUILDINGS, ...YARD_WALLS].map((block) => (
         <RigidBody key={block.position.join(",")} type="fixed" colliders={false} position={block.position}>
           <CuboidCollider args={block.args} />
         </RigidBody>
       ))}
+      {ORCHARD_TREES.map(tree => <RigidBody key={`tree-${tree.x}-${tree.z}`} type="fixed" colliders={false} position={[tree.x, .9, tree.z]}><CapsuleCollider args={[.7, .12]} /></RigidBody>)}
+      <RigidBody type="fixed" colliders={false} position={[-12.5, .35, 3.4]}><CuboidCollider args={[.78, .35, .78]} /></RigidBody>
       <Player />
       <Tractor />
       <FollowCam />
@@ -88,7 +84,6 @@ function input() {
 
 function Player() {
   const body = useRef<RapierRigidBody>(null);
-  const mesh = useRef<THREE.Mesh>(null);
   const { world } = useRapier();
   const controller = useRef<ReturnType<typeof world.createCharacterController> | null>(null);
   const velocityY = useRef(0);
@@ -109,7 +104,22 @@ function Player() {
     const rigid = body.current;
     const character = controller.current;
     if (!rigid || !character) return;
+    if (walk.paused) { resetInput(); velocityY.current = 0; return; }
     let here = rigid.translation();
+    if (walk.travel && !walk.paused) {
+      const target = walk.travel;
+      walk.travel = null;
+      if (safeSpawn(target)) {
+        walk.driving = false;
+        rigid.setEnabled(true);
+        here = { x: target.x, y: 1.2, z: target.z };
+        rigid.setTranslation(here, true);
+        rigid.setNextKinematicTranslation(here);
+        walk.px = here.x; walk.pz = here.z;
+        velocityY.current = 0;
+        resetInput();
+      }
+    }
     const tractorX = TRACTOR.x + walk.tx;
     const tractorZ = TRACTOR.z + walk.tz;
     if (walk.toggleDrive && !walk.paused) {
@@ -118,19 +128,22 @@ function Player() {
       if (walk.driving || near) {
         walk.driving = !walk.driving;
         if (!walk.driving) {
-          here = { x: tractorX + 1.4, y: 1.2, z: tractorZ };
+          const sides = [1, -1].map(side => ({ x: tractorX + Math.cos(walk.vehicleYaw) * 1.7 * side, z: tractorZ - Math.sin(walk.vehicleYaw) * 1.7 * side }));
+          const exit = sides.find(safeSpawn);
+          if (!exit) { walk.driving = true; return; }
+          here = { ...exit, y: 1.2 };
           rigid.setTranslation(here, true);
           velocityY.current = 0;
         }
       }
     }
     rigid.setEnabled(!walk.driving);
-    if (mesh.current) mesh.current.visible = !walk.driving;
     if (walk.driving) return;
 
     const { forward, strafe } = input();
     dt = Math.min(dt, 0.05);
-    const { x: dx, z: dz } = walkingMovement(forward, strafe, dt);
+    const { x: dx, z: dz } = walkingMovement(forward, strafe, dt, walk.sprinting);
+    walk.moving = dt > 0 ? Math.hypot(dx, dz) / dt : 0;
     velocityY.current = Math.max(velocityY.current - 9.81 * dt, -20);
     const collider = rigid.collider(0);
     character.computeColliderMovement(collider, { x: dx, y: velocityY.current * dt, z: dz });
@@ -150,10 +163,7 @@ function Player() {
   return (
     <RigidBody ref={body} type="kinematicPosition" colliders={false} position={[walk.px, 1.2, walk.pz]} lockRotations>
       <CapsuleCollider args={[0.38, 0.28]} />
-      <mesh ref={mesh} castShadow>
-        <capsuleGeometry args={[0.28, 0.76, 4, 8]} />
-        <meshStandardMaterial color="#3c4a5c" roughness={0.7} />
-      </mesh>
+      <Visitor />
     </RigidBody>
   );
 }
@@ -178,7 +188,7 @@ function Tractor() {
     const position = rigid.translation();
     walk.tx = position.x - TRACTOR.x;
     walk.tz = position.z - TRACTOR.z;
-    walk.yaw = walk.driving ? yaw : walk.yaw;
+    walk.vehicleYaw = yaw;
     void dt;
   });
 
@@ -187,11 +197,12 @@ function Tractor() {
       ref={body}
       colliders={false}
       position={[TRACTOR.x + walk.tx, 0.45, TRACTOR.z + walk.tz]}
+      rotation={[0, walk.vehicleYaw, 0]}
       enabledRotations={[false, true, false]}
       linearDamping={0.6}
       angularDamping={1.2}
     >
-      <CuboidCollider args={[0.85, 0.4, 0.5]} />
+      <CuboidCollider args={[0.5, 0.4, 0.85]} />
     </RigidBody>
   );
 }
@@ -200,10 +211,11 @@ function FollowCam() {
   const { camera } = useThree();
   const look = useRef(new THREE.Vector3());
   useFrame((_, dt) => {
+    if (walk.paused) return;
     const x = walk.driving ? TRACTOR.x + walk.tx : walk.px;
     const z = walk.driving ? TRACTOR.z + walk.tz : walk.pz;
     // Keep the walking camera stable while strafing or backing up.
-    const yaw = walk.driving ? walk.yaw : Math.PI;
+    const yaw = walk.driving ? walk.vehicleYaw : Math.PI;
     const sin = Math.sin(yaw);
     const cos = Math.cos(yaw);
     look.current.set(x - sin * 6.2, walk.driving ? 3.8 : 3.2, z - cos * 6.2);

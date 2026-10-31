@@ -21,6 +21,10 @@ import { Surface, Textures } from "./materials";
 import { Horizon, MillWorks, Scenery } from "./scenery";
 import { AtlasLandscape } from "./MiddleAtlas";
 import { PhysicsYard } from "./explore";
+import { GameWorld, WorldClock } from "./GameWorld";
+import { gameClock } from "@/farm/game/clock";
+import type { Progress } from "@/farm/game/progress";
+import type { DestinationId } from "@/farm/game/world";
 import { walk } from "./walk-state";
 import { GROUND_HALF } from "./yard-boundaries";
 import { SceneRoot } from "./SceneRoot";
@@ -52,17 +56,23 @@ export type FarmCanvasProps = {
   plain: boolean;
   detail: boolean;
   explore: boolean;
+  adaptive: boolean;
+  paused: boolean;
+  progress: Progress;
+  waypoint: DestinationId | null;
+  cycle: boolean;
+  onLight: (mode: LightMode) => void;
 };
 
 export default function FarmCanvas(props: FarmCanvasProps) {
   const [degraded, setDegraded] = useState(false);
   const [effectsFailed, setEffectsFailed] = useState(false);
-  const effectiveQuality = degraded ? "low" : props.quality;
+  const effectiveQuality = degraded && props.adaptive ? "low" : props.quality;
   return (
     <SceneRoot low={effectiveQuality === "low"} onFailure={props.onFailure} onShaderFailure={() => setEffectsFailed(true)}>
       <Suspense fallback={null}>
       <AdaptiveDpr pixelated={false} />
-      <Scene {...props} quality={effectiveQuality} plain={props.plain || effectsFailed} onDecline={() => setDegraded(true)} />
+      <Scene {...props} quality={effectiveQuality} plain={props.plain || effectsFailed} onDecline={() => { if (props.adaptive) setDegraded(true); }} />
       <FirstFrame onReady={props.onReady} />
       </Suspense>
     </SceneRoot>
@@ -104,6 +114,8 @@ function Scene(props: FarmCanvasProps & { onDecline: () => void }) {
 
   return (
     <>
+      <WorldClock paused={props.paused} reduced={reducedMotion} cycle={props.cycle} onLight={props.onLight} />
+      <GameWorld progress={props.progress} waypoint={props.waypoint} />
       <PerformanceMonitor onDecline={props.onDecline} />
       {quality === "high" && <SoftShadows size={18} samples={12} focus={0.35} />}
       <color attach="background" args={[night ? "#07091c" : sunset ? "#e8885a" : "#8ec8ef"]} />
@@ -138,7 +150,7 @@ function Scene(props: FarmCanvasProps & { onDecline: () => void }) {
       <MillWorks />
       <OptionalAsset><Scenery detail={props.detail && props.quality === "high"} /></OptionalAsset>
       </Textures>
-      {props.explore && <OptionalAsset onFailure={props.onWalkFailure} fallback={<Html center><span className="world-place-label" role="status">Starting walking controls…</span></Html>}><PhysicsYard /></OptionalAsset>}
+      {props.explore && <OptionalAsset onFailure={props.onWalkFailure} fallback={<Html center><span className="world-place-label" role="status">Starting walking controls…</span></Html>}><PhysicsYard paused={props.paused} /></OptionalAsset>}
       <CameraControls
         ref={controls}
         makeDefault
@@ -147,7 +159,7 @@ function Scene(props: FarmCanvasProps & { onDecline: () => void }) {
         maxPolarAngle={Math.PI / 2.05}
         minPolarAngle={0.35}
         smoothTime={reducedMotion ? 0 : 0.45}
-        enabled={!props.explore}
+        enabled={!props.explore && !props.paused}
       />
       {props.plain ? null : (
         <OptionalAsset><Effects night={night} phase={props.phase} reduced={reducedMotion} quality={quality} onSketchDone={props.onSketchDone} focused={!!activeId} /></OptionalAsset>
@@ -465,9 +477,9 @@ function Grass({ placed, grid, count }: { placed: Placed[]; grid: FarmData["grid
     mesh.geometry.setAttribute("aPhase", new THREE.InstancedBufferAttribute(phases, 1));
   }, [count, grid, placed]);
 
-  useFrame(({ clock }) => {
+  useFrame(() => {
     const shader = material.userData.shader as { uniforms: { uTime: { value: number } } } | undefined;
-    if (shader) shader.uniforms.uTime.value = clock.elapsedTime;
+    if (shader) shader.uniforms.uTime.value = gameClock.seconds;
   });
 
   return <instancedMesh ref={ref} args={[geom, material, count]} frustumCulled={false} />;
@@ -490,8 +502,8 @@ function Clouds({ night }: { night: boolean }) {
     texture.colorSpace = THREE.SRGBColorSpace;
     return texture;
   }, []);
-  useFrame(({ clock }) => {
-    if (ref.current) ref.current.position.x = Math.sin(clock.elapsedTime * 0.05) * 1.5;
+  useFrame(() => {
+    if (ref.current) ref.current.position.x = Math.sin(gameClock.seconds * 0.05) * 1.5;
   });
   if (!tex) return null;
   const puffs = [
@@ -516,8 +528,8 @@ function Clouds({ night }: { night: boolean }) {
 
 function Birds() {
   const ref = useRef<THREE.Group>(null);
-  useFrame(({ clock }) => {
-    const t = clock.elapsedTime;
+  useFrame(() => {
+    const t = gameClock.seconds;
     if (!ref.current) return;
     ref.current.position.set(Math.sin(t * 0.25) * 8, 7.5 + Math.sin(t * 0.8) * 0.4, Math.cos(t * 0.2) * 6 - 2);
     ref.current.rotation.y = t * 0.25;
@@ -553,16 +565,16 @@ function PlacedModel({
   const group = useRef<THREE.Group>(null);
   const [x, , z] = plotPosition(entry.plot, farm.grid);
   const roam = ["cow", "sheep", "donkey", "chicken", "hen", "dog", "cat"].includes(entry.item.sprite);
-  useFrame(({ clock }) => {
+  useFrame(() => {
     const node = group.current;
     if (!node) return;
     if (entry.item.sprite === "tractor") {
       node.position.set(x + walk.tx, 0, z + walk.tz);
-      if (walk.driving) node.rotation.y = Math.PI / 2 - walk.yaw;
+      node.rotation.y = walk.vehicleYaw - Math.PI / 2;
       return;
     }
     if (!roam) return;
-    const t = clock.elapsedTime * 0.35 + (entry.plot.animDelay ?? 0);
+    const t = gameClock.seconds * 0.35 + (entry.plot.animDelay ?? 0);
     node.position.set(x + Math.sin(t) * 0.45, 0, z + Math.cos(t * 0.8) * 0.28);
   });
   const plate = plateFor(entry, farm);
@@ -613,13 +625,13 @@ function PlacedModel({
             <ringGeometry args={[1.15, 1.32, 40]} />
             <meshBasicMaterial color="#ffd27a" transparent opacity={0.9} />
           </mesh>
-          <Html position={[0, labelY, 0]} center distanceFactor={14} zIndexRange={[30, 0]} style={{ pointerEvents: "none" }}>
+          <Html position={[0, labelY, 0]} center distanceFactor={14} zIndexRange={[3, 0]} style={{ pointerEvents: "none" }}>
             <div className="float-label">{entry.item.label}</div>
           </Html>
         </>
       )}
       {plate?.name && (
-        <Html position={[0, labelY - 0.4, 0]} center distanceFactor={12} zIndexRange={[28, 0]}>
+        <Html position={[0, labelY - 0.4, 0]} center distanceFactor={12} zIndexRange={[3, 0]}>
           <a
             className="float-name"
             href={plate.href || undefined}
@@ -631,7 +643,7 @@ function PlacedModel({
         </Html>
       )}
       {plate?.message && (
-        <Html position={[0.8, 1.4, 0]} center distanceFactor={12} zIndexRange={[28, 0]} style={{ pointerEvents: "none" }}>
+        <Html position={[0.8, 1.4, 0]} center distanceFactor={12} zIndexRange={[3, 0]} style={{ pointerEvents: "none" }}>
           <div className="float-note">{plate.message}</div>
         </Html>
       )}

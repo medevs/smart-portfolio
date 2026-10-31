@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef } from "react";
+import { gameClock, animationDelta } from "@/farm/game/clock";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
@@ -157,7 +158,8 @@ export function MillWorks() {
 
 function MillWheel() {
   const ref = useRef<THREE.Group>(null);
-  useFrame((_, dt) => {
+  useFrame((_, frameDelta) => {
+    const dt = animationDelta(frameDelta);
     if (ref.current) ref.current.rotation.x -= dt * 0.55;
   });
   return (
@@ -180,7 +182,8 @@ function MillWheel() {
 
 function Well() {
   const crank = useRef<THREE.Group>(null);
-  useFrame((_, dt) => {
+  useFrame((_, frameDelta) => {
+    const dt = animationDelta(frameDelta);
     if (crank.current) crank.current.rotation.x += dt * 0.9;
   });
   return (
@@ -210,8 +213,8 @@ function Well() {
 function Gate() {
   const left = useRef<THREE.Group>(null);
   const right = useRef<THREE.Group>(null);
-  useFrame(({ clock }) => {
-    const swing = Math.sin(clock.elapsedTime * 0.35) * 0.2;
+  useFrame(() => {
+    const swing = Math.sin(gameClock.seconds * 0.35) * 0.2;
     if (left.current) left.current.rotation.y = swing;
     if (right.current) right.current.rotation.y = -swing;
   });

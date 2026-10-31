@@ -3,6 +3,7 @@
 import { useLayoutEffect, useMemo, useRef } from "react";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
+import { ORCHARD_TREES } from "@/farm/game/world";
 import { YARD_WALLS } from "./yard-boundaries";
 import { Surface } from "./materials";
 import type { ModelProps } from "./models";
@@ -132,8 +133,8 @@ function Repeated({ instances, shape, color }: { instances: Instance[]; shape: "
 
 /** Rows and crop beds use instancing, keeping the expanded land to a few draws. */
 function Orchard() {
-  const trees = useMemo<Instance[]>(() => Array.from({ length: 48 }, (_, i) => ({
-    position: [-31 + (i % 6) * 3, 0.9, 8 + Math.floor(i / 6) * 3], rotation: i * 2.4,
+  const trees = useMemo<Instance[]>(() => ORCHARD_TREES.map((tree, i) => ({
+    position: [tree.x, 0.9, tree.z], rotation: i * 2.4,
   })), []);
   const crowns = useMemo<Instance[]>(() => trees.map((tree, i) => ({ ...tree, position: [tree.position[0], 2.1, tree.position[2]], scale: [1, 0.82 + i % 3 * 0.05, 1] })), [trees]);
   const apples = useMemo<Instance[]>(() => trees.flatMap(tree => Array.from({ length: 5 }, (_, i) => ({ position: [tree.position[0] + Math.sin(i * 2.4) * .95, 1.85 + i % 3 * .3, tree.position[2] + Math.cos(i * 2.4) * .95] }))), [trees]);
@@ -191,11 +192,11 @@ function FutureSpaces({ night }: { night: boolean }) {
       {Array.from({ length: 13 }, (_, i) => <Block key={i} position={[-4 + i * .67, 3.15, 0]} size={[.1, .14, 5.6]} color="#766144" />)}
       <Block position={[0, .9, 0]} size={[6, .12, 1.3]} color="#8e7250" />
       {[-1.1, 1.1].map(z => <Block key={z} position={[0, .5, z]} size={[6, .13, .4]} color="#8e7250" />)}
-      <Html position={[0, 3.8, 0]} center distanceFactor={28}><a className="world-place-label" href="/gather#meetups">Future gathering courtyard ↗</a></Html>
+      <Html zIndexRange={[3, 0]} position={[0, 3.8, 0]} center distanceFactor={28}><a className="world-place-label" href="/gather#meetups">Future gathering courtyard ↗</a></Html>
     </group>
     {[0, 1].map(i => <group key={i} position={[17 + i * 7, 0, -16]} scale={.8}>
       <CourtyardHouse night={night} />
-      <Html position={[0, 4.4, 0]} center distanceFactor={28}><a className="world-place-label" href="/gather#visiting">Future guest space ↗</a></Html>
+      <Html zIndexRange={[3, 0]} position={[0, 4.4, 0]} center distanceFactor={28}><a className="world-place-label" href="/gather#visiting">Future guest space ↗</a></Html>
     </group>)}
     {/* Greenhouse and utility structures remain behind the productive beds. */}
     {[0, 1, 2].map(i => <group key={i} position={[23 + i * 1.7, 0, 15]}>

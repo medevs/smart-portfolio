@@ -1,0 +1,98 @@
+"use client";
+import * as Dialog from "@radix-ui/react-dialog";
+import { useEffect, useRef, useState } from "react";
+import { ACTIVITIES, nextActivity } from "@/farm/game/progress";
+import { DESTINATIONS, destination, distance, nearestPlace, type DestinationId, type Point } from "@/farm/game/world";
+import { TRACTOR, walk } from "../scene/walk-state";
+import type { LightMode } from "../scene/FarmCanvas";
+import type { FarmGame, Panel } from "./useFarmGame";
+import { useAmbience } from "./useAmbience";
+import "./game.css";
+
+function usePosition() {
+  const [point, setPoint] = useState<Point>({ x: 0, z: 8 });
+  useEffect(() => {
+    const timer = window.setInterval(() => setPoint(walk.driving ? { x: TRACTOR.x + walk.tx, z: TRACTOR.z + walk.tz } : { x: walk.px, z: walk.pz }), 200);
+    return () => clearInterval(timer);
+  }, []);
+  return point;
+}
+function FarmMap({ point, waypoint, compact = false }: { point: Point; waypoint: DestinationId | null; compact?: boolean }) {
+  return <svg className={`game-map${compact ? " compact" : ""}`} viewBox="-46 -46 92 92" role="img" aria-label="Farm map: north is up, visitor position and destination markers">
+    <rect x="-44" y="-44" width="88" height="88" rx="3" fill="#d4d4ac" stroke="#817e5c" />
+    <path d="M-5 44V8Q-5 3 0 3H32M-40 6H-5M-5 3V-13H28" fill="none" stroke="#c2aa7c" strokeWidth="4" />
+    <path d="M-38-40Q-36-10-35 8T-37 40" fill="none" stroke="#70a2a0" strokeWidth="1.2" />
+    <rect x="-34" y="7" width="22" height="25" fill="#90a36b" rx="2" /><rect x="7" y="12" width="25" height="20" fill="#a2b27b" rx="2" />
+    {DESTINATIONS.map(place => <g key={place.id}>
+      {waypoint === place.id && <circle cx={place.x} cy={place.z} r="3" fill="none" stroke="#b77732" strokeWidth=".7" />}
+      <circle cx={place.x} cy={place.z} r={compact ? 1.4 : 1.8} fill={waypoint === place.id ? "#a15c26" : "#596749"} />
+      {!compact && <text x={place.x + 2.5} y={place.z + .8} fontSize="2" fill="#293426">{place.name}</text>}
+    </g>)}
+    <circle cx={point.x} cy={point.z} r="2" fill="#faf9ec" stroke="#283e53" strokeWidth=".9" /><text x="38" y="-37" fontSize="4" fill="#344b37">N ↑</text>
+  </svg>;
+}
+const TITLES: Record<Exclude<Panel, null>, string> = { welcome: "A visit to the Atlas farm", map: "Find your way", journal: "Your farm journal", settings: "Make yourself comfortable", pause: "A moment of quiet", controls: "How to explore", reset: "Begin a new visit?" };
+export function GameOverlay({ game, ready, exploring, onExplore, light, onLight }: {
+  game: FarmGame; ready: boolean; exploring: boolean; onExplore: () => void; light: LightMode; onLight: (mode: LightMode) => void;
+}) {
+  useEffect(() => {
+    const header = document.querySelector<HTMLElement>(".farm-root .hud");
+    if (!header) return;
+    const update = () => header.parentElement?.style.setProperty("--game-top", `${header.getBoundingClientRect().bottom + 12}px`);
+    update(); const observer = new ResizeObserver(update); observer.observe(header);
+    return () => observer.disconnect();
+  }, []);
+  const point = usePosition();
+  const nearest = nearestPlace(point), next = nextActivity(game.profile.progress);
+  const [selected, setSelected] = useState<DestinationId>("studio");
+  const selectedPlace = destination(selected)!;
+  const opener = useRef<HTMLElement | null>(null), fallback = useRef<HTMLButtonElement>(null);
+  const audio = useAmbience(game.paused, game.profile.preferences.volume);
+  function open(panel: Panel) { opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null; game.setPanel(panel); }
+  const prefs = game.profile.preferences;
+  const canAct = ready && exploring && !game.paused && !walk.driving && distance(point, nearest) <= 3.2;
+  const target = game.waypoint ? destination(game.waypoint) : null;
+  return <>
+    <nav className="game-toolbar" aria-label="Game tools">
+      <button ref={fallback} onClick={() => open("map")}>Map <kbd>M</kbd></button>
+      <button onClick={() => open("journal")}>Journal <span>{game.profile.progress.completed.length}/5</span></button>
+      <button onClick={() => open("settings")}>Settings</button>
+      <button onClick={() => open("pause")}>Pause</button>
+    </nav>
+    {!game.panel && ready && <>
+      <aside className="game-objective" aria-label="Current farm activity"><small>YOUR VISIT · {game.profile.progress.completed.length}/5</small><strong>{next?.task ?? "The table is set. Stay and explore."}</strong>
+        <button onClick={() => { if (next) game.setWaypoint(next.id); else open("journal"); }}>{next ? "Show the way" : "Read your journal"}</button>
+        <span>Water {game.profile.progress.water}/3 · Apples {game.profile.progress.apples}/3</span>
+        {target && <span>◇ {target.name} · {Math.round(distance(point, target))} m <button aria-label="Clear waypoint" onClick={() => game.setWaypoint(null)}>×</button></span>}
+      </aside>
+      <button className="game-minimap" onClick={() => open("map")} aria-label="Open farm map"><FarmMap point={point} waypoint={game.waypoint} compact /></button>
+      {exploring && !game.paused && <div className="game-context">
+        <button disabled={!canAct} onClick={game.act}>{canAct ? `E · ${next?.id === nearest.id ? next.task : nearest.name}` : walk.driving ? "Park and exit to interact" : "Walk near a place to interact"}</button>
+        <button className="game-sprint" aria-pressed={walk.sprinting} onClick={() => { walk.sprinting = !walk.sprinting; }}>Sprint</button>
+      </div>}
+    </>}
+    <div className="game-feedback" role="status" aria-live="polite">{game.message}</div>
+    {!game.storageAvailable && <p className="game-save-note" role="status">Saving is unavailable in this browser. You can still play this visit.</p>}
+    <Dialog.Root open={game.panel !== null} onOpenChange={value => { if (!value) game.close(); }}>
+      <Dialog.Portal><Dialog.Overlay className="game-overlay" /><Dialog.Content className="game-dialog" onCloseAutoFocus={event => { event.preventDefault(); (opener.current?.isConnected ? opener.current : fallback.current)?.focus(); }}>
+        <Dialog.Title>{game.panel ? TITLES[game.panel] : "Farm"}</Dialog.Title>
+        <Dialog.Description>{game.panel === "welcome" ? "A small playable world inspired by Morocco’s Middle Atlas. Walk, make and bring something to the shared table." : "Your digital farm visit. Guest spaces and gatherings are a future vision, with no bookings or scheduled events."}</Dialog.Description>
+        <Dialog.Close className="game-close" aria-label="Close game panel">×</Dialog.Close>
+        {game.panel === "welcome" && <><p>Begin at the maker’s studio. Collect water, care for the garden and pick apples to share. Your journal saves on this browser.</p><div className="game-buttons"><button onClick={() => { game.close(); if (ready) onExplore(); }}>{ready ? "Start walking" : "Explore the map while 3D loads"}</button><button onClick={() => game.setPanel("controls")}>Learn the controls</button></div><p className="game-muted">3D is the main experience. If your browser cannot start it, the map, projects and accessible view remain available.</p></>}
+        {game.panel === "map" && <div className="game-map-layout"><FarmMap point={point} waypoint={game.waypoint} /><div><label htmlFor="game-destination">Destination</label><select id="game-destination" value={selected} onChange={e => setSelected(e.target.value as DestinationId)}>{DESTINATIONS.map(place => <option key={place.id} value={place.id}>{place.name}</option>)}</select><p>{selectedPlace.note}</p><div className="game-buttons"><button onClick={() => game.setWaypoint(selected)}>Set waypoint</button><button disabled={!ready} onClick={() => game.travel(selected)}>Travel here</button></div>{!ready && <p className="game-muted">Travel needs the running 3D world. Setting a waypoint is available now.</p>}<p className="game-muted">Travel moves your visitor; activities still need an interaction at the destination.</p></div></div>}
+        {game.panel === "journal" && <><p>Water {game.profile.progress.water}/3 · Apples {game.profile.progress.apples}/3 · Saved on this browser</p><ol className="game-tasks">{ACTIVITIES.map(activity => <li key={activity.id}><span aria-label={game.profile.progress.completed.includes(activity.id) ? "Completed" : "Not completed"}>{game.profile.progress.completed.includes(activity.id) ? "✓" : "○"}</span><div><strong>{activity.title}</strong><p>{activity.detail}</p></div><button onClick={() => game.setWaypoint(activity.id)}>Waypoint</button></li>)}</ol><button onClick={() => game.setPanel("reset")}>Start a new journal…</button></>}
+        {game.panel === "settings" && <div className="game-settings">
+          <label>Graphics<select value={prefs.quality} onChange={e => game.preferences({ quality: e.target.value as typeof prefs.quality })}><option value="auto">Automatic</option><option value="low">Low · fewer effects</option><option value="high">High · more detail</option></select></label>
+          <label><input type="checkbox" checked={prefs.reducedMotion} onChange={e => game.preferences({ reducedMotion: e.target.checked })} /> Reduce ambient motion</label>
+          <label><input type="checkbox" checked={prefs.daylight} onChange={e => game.preferences({ daylight: e.target.checked })} /> Automatic daylight cycle</label>
+          <label>Time of day<select value={light} onChange={e => { game.preferences({ daylight: false }); onLight(e.target.value as LightMode); }}><option value="day">Day</option><option value="sunset">Sunset</option><option value="night">Night</option></select></label>
+          <div><button onClick={() => void audio.toggle()}>{audio.enabled ? "Mute ambience" : "Enable quiet wind ambience"}</button><p className="game-muted">Synthesized wind, off at the start of every visit.</p>{audio.error && <p role="status">{audio.error}</p>}</div>
+          <label>Sound volume<input type="range" min="0" max="1" step="0.05" value={prefs.volume} onChange={e => game.preferences({ volume: Number(e.target.value) })} /></label>
+        </div>}
+        {game.panel === "pause" && <><p>The farm’s movement and physics pause while a panel is open.</p><div className="game-buttons"><button onClick={game.close}>Resume visit</button><button onClick={() => game.setPanel("map")}>Map</button><button onClick={() => game.setPanel("journal")}>Journal</button><button onClick={() => game.setPanel("controls")}>Controls</button><button onClick={() => game.setPanel("settings")}>Settings</button></div></>}
+        {game.panel === "controls" && <><dl className="game-controls"><dt>W A S D / movement pad</dt><dd>Walk. Shift or Sprint moves faster.</dd><dt>E / action button</dt><dd>Interact with a nearby place. Follow the journal in order.</dd><dt>F / tractor button</dt><dd>Enter the tractor when nearby, or exit safely. W/S drive; A/D steer.</dd><dt>M / J / Escape</dt><dd>Map, journal, pause. Close a panel with Escape.</dd><dt>Orbit / Walk</dt><dd>Switch between a view of the whole farm and following your visitor. Drag in orbit to look around.</dd></dl><p>Settings can reduce detail and ambient motion. Your journal, preferences and last safe walking position save locally. Tractor parking resets when you reload.</p><button onClick={game.close}>Ready to explore</button></>}
+        {game.panel === "reset" && <><p>This clears the five activities and inventory in this browser. Your graphics and sound-volume preferences stay.</p><div className="game-buttons"><button onClick={game.reset}>Reset my farm journal</button><button onClick={() => game.setPanel("journal")}>Keep my progress</button></div></>}
+      </Dialog.Content></Dialog.Portal>
+    </Dialog.Root>
+  </>;
+}

@@ -10,6 +10,8 @@ import { FarmPanorama } from "./FarmPanorama";
 import { ShopDialog, SpotCard } from "./SpotCard";
 import type { LightMode } from "./scene/FarmCanvas";
 import { resetWalkInput, walk } from "./scene/walk-state";
+import { useFarmGame } from "./game/useFarmGame";
+import { GameOverlay } from "./game/GameOverlay";
 import "./farm.css";
 
 const FarmCanvas = dynamic(() => import("./scene/FarmCanvas"), { ssr: false });
@@ -43,6 +45,12 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
   const [ready, setReady] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [quality, setQuality] = useState<"low" | "high">("high");
+  const [hidden, setHidden] = useState(false);
+  useEffect(() => {
+    const visibility = () => setHidden(document.hidden);
+    visibility(); document.addEventListener("visibilitychange", visibility);
+    return () => document.removeEventListener("visibilitychange", visibility);
+  }, []);
   const [plain, setPlain] = useState(false);
   const [hint, setHint] = useState(true);
   const [explore, setExplore] = useState(false);
@@ -104,7 +112,15 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
     return () => window.removeEventListener("keydown", onKey);
   }, [phase]);
 
-  const controlsPaused = !explore || shopOpen || Boolean(active);
+  const game = useFarmGame({ ready: ready && !sceneFailed, exploring: explore, externalPaused: hidden || shopOpen || Boolean(active), onExplore: () => { setWalkFailed(false); setExplore(true); }, onProduct: setActiveId });
+  const effectiveReduced = reducedMotion || game.profile.preferences.reducedMotion;
+  const effectiveQuality = game.profile.preferences.quality === "auto" ? quality : game.profile.preferences.quality;
+  const controlsPaused = !explore || game.paused;
+  const updateLight = useCallback((next: LightMode) => {
+    setLight(next);
+    document.documentElement.dataset.farmLight = next;
+    document.documentElement.dataset.farmNight = next === "night" ? "1" : "0";
+  }, []);
   useEffect(() => {
     walk.paused = controlsPaused;
     resetWalkInput();
@@ -116,9 +132,8 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
 
   function cycleLight() {
     const next: LightMode = light === "day" ? "sunset" : light === "sunset" ? "night" : "day";
-    setLight(next);
-    document.documentElement.dataset.farmLight = next;
-    document.documentElement.dataset.farmNight = next === "night" ? "1" : "0";
+    game.preferences({ daylight: false });
+    updateLight(next);
   }
 
   return (
@@ -167,8 +182,14 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
           farm={farm}
           light={light}
           phase={phase}
-          reducedMotion={reducedMotion}
-          quality={quality}
+          reducedMotion={effectiveReduced}
+          quality={effectiveQuality}
+          adaptive={game.profile.preferences.quality === "auto"}
+          paused={game.paused}
+          progress={game.profile.progress}
+          waypoint={game.waypoint}
+          cycle={game.profile.preferences.daylight}
+          onLight={updateLight}
           activeId={activeId}
           hoveredId={hoveredId}
           onHover={setHoveredId}
@@ -223,9 +244,10 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
           <Link href="/gather">Future gatherings & visits ↗</Link>
         </nav>}
       </div>
+      <GameOverlay game={game} ready={ready && !sceneFailed} exploring={explore} onExplore={() => setExplore(true)} light={light} onLight={updateLight} />
       {walkFailed && <p className="hint" role="status">Walking couldn’t start. You can still orbit and open projects; press Walk to retry.</p>}
       {explore && phase === "color" && (
-        <p className="hint">WASD or the pad to move. Use F or the tractor button beside the tractor to enter or exit.</p>
+        <p className="hint">WASD / pad · Shift sprint · E interact · F tractor · M map · J journal</p>
       )}
       {hint && !walkFailed && ready && !sceneFailed && !explore && phase === "color" && <p className="hint">Drag to look around. Click a building.</p>}
       <nav id="farm-links" hidden aria-label="Places on the farm">
