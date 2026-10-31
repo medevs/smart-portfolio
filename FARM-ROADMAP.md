@@ -106,3 +106,7 @@ release. Reproduced and corrected camera-controller contention, rerender body
 teleports and render-rate-dependent movement; 37 tests (including real Rapier/R3F
 and camera-controls integration), types/lint/build pass. Ship only after CI, then
 confirm deployment; user/GPU visual playthrough still must pass. See FARM-HANDOFF.md.
+
+- HUD follow-up: consolidate permanent navigation behind Menu; compact journal
+  prompt, contextual actions and touch-only movement pad. Preserve project/fund
+  access and future-only hosting language. Record release evidence in PR.

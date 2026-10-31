@@ -137,12 +137,6 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
     };
   }, [controlsPaused]);
 
-  function cycleLight() {
-    const next: LightMode = light === "day" ? "sunset" : light === "sunset" ? "night" : "day";
-    game.preferences({ daylight: false });
-    updateLight(next);
-  }
-
   return (
     <div className={`farm-root is-${phase}${sceneFailed ? " is-panorama" : " is-world"}${explore ? " is-walking" : ""}`}>
       <script dangerouslySetInnerHTML={{ __html: BOOT }} />
@@ -153,30 +147,6 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
         <div>
           <h1 className="wordmark">medevsmaker</h1>
           <p className="tagline">Middle Atlas · Morocco{featured ? ` · gate: ${featured.name}` : ""}</p>
-        </div>
-        <div className="hud-actions">
-          {sceneRequested && !sceneFailed && phase !== "color" && (
-            <button type="button" className="hud-btn skip-btn" onClick={() => setPhase("color")}>
-              Skip
-            </button>
-          )}
-          <a className="hud-btn fund-link" href="/open">
-            Dream Home Fund <strong>{formatMoney(raised)}</strong>
-          </a>
-          <button type="button" className="hud-btn" onClick={() => setShopOpen(true)}>
-            Help build
-          </button>
-          {ready && !sceneFailed && <button type="button" className="hud-btn" onClick={() => { setWalkFailed(false); setExplore((value) => !value); }} aria-pressed={explore}>
-            {explore ? "Orbit" : "Walk"}
-          </button>}
-          {ready && !sceneFailed && <button type="button" className="hud-btn" onClick={cycleLight} aria-pressed={light !== "day"}>
-            {light === "night" ? "Night" : light === "sunset" ? "Sunset" : "Day"}
-          </button>}
-          <Link className="hud-btn" href="/gather">Gather</Link>
-          <Link className="hud-btn" href="/references">The place</Link>
-          <a className="hud-btn" href="/list">
-            List
-          </a>
         </div>
       </header>
       {sceneRequested && phase === "intro" && <div className="intro-bar" aria-hidden="true" />}
@@ -237,25 +207,12 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
               onPointerCancel={resetWalkInput}
               onLostPointerCapture={resetWalkInput}
             />
-            <button type="button" className="hud-btn tractor-action" onClick={() => { walk.toggleDrive = true; }}>
-              Enter / exit tractor
-            </button>
           </>
         )}
         {sceneRequested && !ready && !sceneFailed && <div className="scene-loading" role="status"><span className="scene-loading-dot" /> Opening the 3D farm… <button onClick={failScene}>Use the accessible view</button></div>}
-        {!sceneFailed && <nav className="world-projects" aria-label="Farm projects">
-          <button onClick={() => setActiveId("about")}>Maker’s studio</button>
-          <button onClick={() => setActiveId("reelstyles")}>ReelStyles</button>
-          <button onClick={() => setActiveId("mentorclone")}>MentorClone</button>
-          <button onClick={() => setActiveId("talkthedoc")}>TalkTheDoc</button>
-          <Link href="/gather">Future gatherings & visits ↗</Link>
-        </nav>}
       </div>
-      <GameOverlay game={game} ready={ready && !sceneFailed} exploring={explore} onExplore={() => setExplore(true)} light={light} onLight={updateLight} />
-      {walkFailed && <p className="hint" role="status">Walking couldn’t start. You can still orbit and open projects; press Walk to retry.</p>}
-      {explore && phase === "color" && (
-        <p className="hint">WASD / pad · Shift sprint · E interact · F tractor · M map · J journal</p>
-      )}
+      <GameOverlay game={game} ready={ready && !sceneFailed} exploring={explore} onExplore={() => setExplore(true)} light={light} onLight={updateLight} onToggleExplore={() => { setWalkFailed(false); setExplore(value => !value); }} onProduct={setActiveId} onHelp={() => setShopOpen(true)} raised={formatMoney(raised)} />
+      {walkFailed && <p className="hint" role="status">Walking couldn’t start. You can still orbit and open projects; choose Walk in the Menu to retry.</p>}
       {hint && !walkFailed && ready && !sceneFailed && !explore && phase === "color" && <p className="hint">Drag to look around. Click a building.</p>}
       <nav id="farm-links" hidden aria-label="Places on the farm">
         <ul>

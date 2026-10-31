@@ -15,6 +15,11 @@ export function useFarmGame({ ready, exploring, externalPaused, onExplore, onPro
   const [panel, setPanel] = useState<Panel>(null);
   const [waypoint, setWaypoint] = useState<DestinationId | null>(null);
   const [message, setMessage] = useState("");
+  useEffect(() => {
+    if (!message) return;
+    const timer = window.setTimeout(() => setMessage(""), 4000);
+    return () => window.clearTimeout(timer);
+  }, [message]);
   const [storageAvailable, setStorageAvailable] = useState(true);
   const current = useRef(profile);
   useLayoutEffect(() => { current.current = profile; }, [profile]);
