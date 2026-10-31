@@ -12,6 +12,14 @@ and visitor figures are symbolic, not inferred likenesses. No spending, paid
 services, external messages or embeddings generation. Tested pushes/merges are
 authorized. Avoid conflicting writes if another run/PR changes the same area.
 
+## Current gameplay blocker
+
+The user reports repeated bumping and loss of control in the working 3D world.
+Treat the gameplay release as failed until the correction is confirmed in play.
+Issue #28 / branch `codex/fix-physics-control` addresses three reproduced faults:
+competing camera owners, rerender-driven body teleports, and render/physics timing.
+This work takes priority over cosmetic polish and the remaining development audit.
+
 ## Shipped
 
 | PR | Result | Merge |
@@ -174,3 +182,29 @@ browser storage removal, optional virtual daylight and click-only/default-off so
 Existing contact, legal-basis, sponsor and payment sections are preserved. Verify
 the deployed wording after the follow-up PR; this is an implementation disclosure,
 not a legal compliance assessment.
+
+## Bumping/control correction · #28
+
+Actual camera-controls math reproduces the camera fight: `enabled=false` disables
+input, not its per-frame camera write. After two seconds the old orbit+follow loop
+is still 42.527 units off the intended follow position. CameraRig now mounts either
+orbit OR follow, and switches ownership on mode changes. Entry/travel makes a
+camera cut rather than flying across the farm.
+
+Actual Rapier/R3F integration tests against the old deployed explore.tsx fail on
+settled-body rerender height and frame-rate-dependent movement (~1.83 instead of
+3.6 units in one second at 120fps). Only body names were added to observe old
+objects; old movement code was otherwise unchanged. The corrected implementation
+captures initial position/rotation once, uses grounded visitor spawn/exit/travel,
+applies input in useBeforePhysicsStep at 60Hz and samples poses after each step.
+Physics runs before camera/visual updates. Global input reset now clears held keys
+as well as pad/sprint/drive requests; pause cannot resume a stale held movement.
+
+37 tests pass, including real camera ownership/handoff, stable visitor/tractor
+height across rerenders, equal movement at 30/60/120fps, real keyboard release and
+pause/resume, safe travel, tractor enter/drive/brake/exit. TypeScript, lint and direct
+Next build pass. Tests step one frame at a time: the test renderer's multi-frame
+advance batches each subscriber, which does not preserve real callback ordering.
+These are real transform/physics integration tests without GPU pixels, not a
+successful visual browser playthrough. Keep #20 and user confirmation in #28 open.
+Wait for CI, merge, confirm production and record deployment in #28.

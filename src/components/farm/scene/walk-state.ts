@@ -2,6 +2,8 @@ import type { Point } from "@/farm/game/world";
 
 /** Shared by the walk controls, the physics bodies, and the tractor mesh. */
 export const walk = {
+  keys: { w: false, a: false, s: false, d: false },
+  cameraCut: true,
   driving: false,
   paused: false,
   toggleDrive: false,
@@ -22,6 +24,7 @@ export const TRACTOR = { x: 0, z: 5.5 };
 
 /** Clear transient input without moving the visitor or parked tractor. */
 export function resetWalkInput() {
+  walk.keys.w = walk.keys.a = walk.keys.s = walk.keys.d = false;
   walk.stickX = 0;
   walk.stickY = 0;
   walk.toggleDrive = false;

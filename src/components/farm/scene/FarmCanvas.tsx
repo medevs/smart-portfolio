@@ -4,7 +4,6 @@ import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from 
 import { useFrame } from "@react-three/fiber";
 import {
   AdaptiveDpr,
-  CameraControls,
   Environment,
   Html,
   PerformanceMonitor,
@@ -20,6 +19,7 @@ import { MODELS, type ModelProps } from "./models";
 import { Surface, Textures } from "./materials";
 import { Horizon, MillWorks, Scenery } from "./scenery";
 import { AtlasLandscape } from "./MiddleAtlas";
+import { CameraRig } from "./CameraRig";
 import { PhysicsYard } from "./explore";
 import { GameWorld, WorldClock } from "./GameWorld";
 import { gameClock } from "@/farm/game/clock";
@@ -92,22 +92,8 @@ function Scene(props: FarmCanvasProps & { onDecline: () => void }) {
   const { placed, farm, light, quality, activeId, reducedMotion } = props;
   const night = light === "night";
   const sunset = light === "sunset";
-  const controls = useRef<CameraControls>(null);
-
-  useEffect(() => {
-    const controlsApi = controls.current;
-    if (!controlsApi) return;
-    controlsApi.setLookAt(34, 25, 39, 0, 1.2, 0, false);
-  }, []);
-
-  useEffect(() => {
-    const controlsApi = controls.current;
-    if (!controlsApi || !activeId) return;
-    const entry = placed.find((item) => item.plot.id === activeId || item.item.id === activeId);
-    if (!entry) return;
-    const [x, , z] = plotPosition(entry.plot, farm.grid);
-    controlsApi.setLookAt(x + 6.2, 4.8, z + 7.4, x, 1.7, z, !reducedMotion);
-  }, [activeId, farm.grid, placed, reducedMotion]);
+  const focused = activeId ? placed.find(entry => entry.plot.id === activeId || entry.item.id === activeId) : null;
+  const focusPosition = focused ? plotPosition(focused.plot, farm.grid) : null;
 
   const fog = night ? "#12162a" : sunset ? "#e8b48a" : "#b9d4ee";
   const hdri = night ? "/farm/hdri/night.hdr" : sunset ? "/farm/hdri/sunset.hdr" : "/farm/hdri/day.hdr";
@@ -151,16 +137,8 @@ function Scene(props: FarmCanvasProps & { onDecline: () => void }) {
       <OptionalAsset><Scenery detail={props.detail && props.quality === "high"} /></OptionalAsset>
       </Textures>
       {props.explore && <OptionalAsset onFailure={props.onWalkFailure} fallback={<Html center><span className="world-place-label" role="status">Starting walking controls…</span></Html>}><PhysicsYard paused={props.paused} /></OptionalAsset>}
-      <CameraControls
-        ref={controls}
-        makeDefault
-        minDistance={5}
-        maxDistance={85}
-        maxPolarAngle={Math.PI / 2.05}
-        minPolarAngle={0.35}
-        smoothTime={reducedMotion ? 0 : 0.45}
-        enabled={!props.explore && !props.paused}
-      />
+      <CameraRig walking={props.explore} paused={props.paused} reducedMotion={reducedMotion}
+        focus={focusPosition ? [focusPosition[0], focusPosition[2]] : null} />
       {props.plain ? null : (
         <OptionalAsset><Effects night={night} phase={props.phase} reduced={reducedMotion} quality={quality} onSketchDone={props.onSketchDone} focused={!!activeId} /></OptionalAsset>
       )}
