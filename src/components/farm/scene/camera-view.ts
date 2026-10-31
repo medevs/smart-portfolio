@@ -22,11 +22,16 @@ export function keepCameraClear(target: THREE.Vector3, desired: THREE.Vector3) {
   direction.subVectors(desired, target);
   let length = direction.length();
   ray.set(target, direction.normalize());
+  // A visitor can legitimately stand beneath a crown. Exit that volume instead
+  // of pulling the camera just inside its far surface.
+  for (const sphere of crowns) {
+    if (sphere.containsPoint(target) && ray.intersectSphere(sphere, hit)) length = Math.max(length, target.distanceTo(hit) + .22);
+  }
   for (const box of obstacles) {
-    if (ray.intersectBox(box, hit)) length = Math.min(length, Math.max(.45, target.distanceTo(hit) - .22));
+    if (ray.intersectBox(box, hit)) length = Math.min(length, Math.max(.05, target.distanceTo(hit) - .22));
   }
   for (const sphere of crowns) {
-    if (ray.intersectSphere(sphere, hit)) length = Math.min(length, Math.max(.45, target.distanceTo(hit) - .22));
+    if (!sphere.containsPoint(target) && ray.intersectSphere(sphere, hit)) length = Math.min(length, Math.max(.05, target.distanceTo(hit) - .22));
   }
   return desired.copy(target).addScaledVector(direction, length);
 }
