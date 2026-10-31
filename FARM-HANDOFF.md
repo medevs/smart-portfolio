@@ -112,13 +112,13 @@ cloned/disposed texture sampler ownership, committed-profile refs, derived welco
 state and timer/hydration cleanup. Three's imperative GPU uniform update and three
 external-browser hydration syncs have narrowly documented lint exceptions; compiler
 rules are not disabled globally. TypeScript, lint and direct build pass. Local Node
-is 24; GitHub CI on 22 and Vercel deployment must pass before promotion.
+is 24; clean-install GitHub CI on 22 passed in run **41213510811**, job
+**124573192102**. PR #26 merged at **c7a1ed8** and Vercel production succeeded.
 
 A repeat build failed opening the local Turbopack cache: a stray nonnumeric
 `.00000031.sst.zfEpw2` file caused `invalid digit found in string`. Quarantining that
 single temporary cache artifact restored a cached build. No product config change
-or embeddings operation was involved. Record actual CI/deployment/live evidence in
-#21 after promotion; GPU/touch checks remain unverified.
+or embeddings operation was involved. Production evidence is recorded below and in #21; GPU/touch checks remain unverified.
 
 Migration references reviewed: https://nextjs.org/docs/app/guides/upgrading/version-16,
 https://ai-sdk.dev/docs/ai-sdk-ui/stream-protocol,
@@ -130,13 +130,13 @@ Installed Next docs: node_modules/next/dist/docs/01-app/02-guides/upgrading/vers
 
 FARM-ROADMAP.md and issues #16–#21 track acceptance. #17 and #19 implementation
 checks are closed; #16/#18 retain integration/touch evidence, #20 release gate is
-open, and #21 tracks the dependency migration deployment checks.
+open, and #21 is complete after migration/deployment checks; #25 tracks development lint findings.
 
 1. Use a GPU-capable browser to play the full activity loop, camera/orbit/walk/
    sprint/tractor/travel, pause/daylight/shader recovery; record visuals/performance.
 2. Verify a genuine narrow touch viewport: no overlapping HUD, usable pad/actions/
    panels. This browser has no viewport-resize capability. Do not claim mobile QA.
-3. Finish #21 deployment checks; track development-only minimatch findings separately.
+3. Track the development-only minimatch findings in #25; production audit is clean at this checkpoint.
 4. Review PR #11 separately; helper-only focus tests do not prove both callers.
 
 Supported local sites-preview mailbox is absent. Protected Vercel preview sign-in
@@ -154,3 +154,23 @@ inspect actual browser/console. Never run npm run generate as part of deployment
 This executor needs a scratch-only runtime-memory.cjs for its /proc RSS lookup;
 do not commit it. GPU-free Three tests need self=globalThis plus animation host
 methods: a partial self mock breaks Rapier's crypto host and causes a WASM panic.
+
+## Post-migration production check
+
+After PR #26 deployment, actual browser checks at 1363×936 passed map selection
+and waypoint/status, accurate disabled travel on no-WebGL, game-panel Escape/focus,
+graphics/reduced-motion save + reload (then restored defaults), catalog navigation,
+direct /spot/reelstyles SSR dialog + external link, product Escape (zero dialogs,
+no surprise Pause), /open, /impressum and /datenschutz. No form/payment/model call
+was made. Product screenshot captured after deployment. No horizontal overflow.
+Fresh Next16 chunk console still reports GL_VENDOR/GL_RENDERER Disabled; recovery
+works. Successful GPU scene, touch playthrough and audible sound quality remain
+unverified; do not close #20.
+
+Review found the privacy page still described device-clock daylight and omitted
+the game save. Its local-browser section now factually describes inventory/tasks,
+safe digital position, introduction/preferences, journal reset retaining settings,
+browser storage removal, optional virtual daylight and click-only/default-off sound.
+Existing contact, legal-basis, sponsor and payment sections are preserved. Verify
+the deployed wording after the follow-up PR; this is an implementation disclosure,
+not a legal compliance assessment.
