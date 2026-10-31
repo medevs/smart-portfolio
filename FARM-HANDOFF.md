@@ -208,3 +208,21 @@ advance batches each subscriber, which does not preserve real callback ordering.
 These are real transform/physics integration tests without GPU pixels, not a
 successful visual browser playthrough. Keep #20 and user confirmation in #28 open.
 Wait for CI, merge, confirm production and record deployment in #28.
+
+## Quiet HUD · screenshot feedback
+
+User reports the scene looks better, but the permanent controls obscure it. This
+is not confirmation of the full walking/driving gate (#20/#28 remain open).
+Replace the seven header actions, four-button toolbar and project strip with one
+Menu. Keep fund, support, all four projects, catalog, regional references and future
+visits available there. The objective becomes a small journal button; inventory
+stays in the journal. Interaction buttons require a relevant nearby activity or
+project; tractor entry requires proximity. Touch pad/Sprint use coarse-pointer
+media queries, and feedback expires after four seconds. No camera/physics changes.
+
+38 tests pass, including quiet gate actions and tractor exit availability.
+TypeScript, lint and direct Next build pass. Deployment/UI verification follows
+in the PR record.
+Browser has no WebGL, so menu/fallback checks do not establish GPU gameplay or
+physical mobile-device verification. Next: actual GPU walking/driving playthrough
+and touch/narrow layout check; continue #20 without claiming those gates passed.

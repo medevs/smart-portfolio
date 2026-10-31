@@ -1072,14 +1072,6 @@ table.ledger td {
   touch-action: none;
 }
 
-.tractor-action {
-  position: absolute;
-  right: 16px;
-  bottom: 76px;
-  z-index: 5;
-  min-height: 48px;
-}
-
 .farm-fallback {
   position: absolute;
   inset: 0;
@@ -1191,9 +1183,8 @@ table.ledger td {
 .farm-root.is-world .hud-btn { background: #f7f1e4ec; color: #293b30; border: 1px solid #35453440; min-height: 42px; }
 .farm-root.is-world .wordmark { color: #263a2c; text-shadow: 0 1px 8px #fff8; }
 .farm-root.is-world .tagline { color: #293b30; text-shadow: 0 1px 6px #fff; }
-.world-projects { position: absolute; z-index: 5; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; gap: 7px; flex-wrap: wrap; justify-content: center; width: min(760px, calc(100% - 32px)); pointer-events: none; }
-.world-projects > * { pointer-events: auto; }
-.world-projects button, .world-projects a, .world-place-label { border: 1px solid #4d5a434d; border-radius: 6px; background: #f9f4e8ed; color: #2b3d30; padding: 10px 13px; font: inherit; font-size: 12px; text-decoration: none; cursor: pointer; box-shadow: 0 3px 12px #2538271a; }
+.world-place-label { border:1px solid #4d5a434d; border-radius:6px; background:#f9f4e8ed; color:#2b3d30; }
+.world-place-label { border: 1px solid #4d5a434d; border-radius: 6px; background: #f9f4e8ed; color: #2b3d30; padding: 10px 13px; font: inherit; font-size: 12px; text-decoration: none; cursor: pointer; box-shadow: 0 3px 12px #2538271a; }
 .world-projects button:hover, .world-projects a:hover { background: #fffdf5; }
 .world-projects :focus-visible { outline: 3px solid #83612d; outline-offset: 3px; }
 .world-place-label { white-space: nowrap; font-size: 11px; padding: 7px 10px; }
@@ -1203,15 +1194,10 @@ table.ledger td {
   .farm-root.is-world .hud { padding: 14px; flex-direction: column; }
   .farm-root.is-world .hud-actions { justify-content: flex-start; gap: 5px; }
   .farm-root.is-world .hud-btn { padding: 7px 10px; min-height: 36px; font-size: 11px; }
-  .world-projects { bottom: 12px; gap: 5px; }
-  .world-projects button, .world-projects a { font-size: 11px; padding: 9px 10px; }
   .farm-root.is-world .hint { bottom: 105px; font-size: 10px; max-width: calc(100% - 30px); }
 }
 
-.farm-root.is-world.is-walking .world-projects { width: min(760px, calc(100% - 400px)); }
-@media(max-width:900px) {
-  .farm-root.is-world.is-walking .world-projects { width: calc(100% - 32px); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .farm-root.is-world.is-walking .world-projects a { grid-column: 1 / -1; text-align: center; }
-  .farm-root.is-world.is-walking .joystick, .farm-root.is-world.is-walking .tractor-action { bottom: 152px; }
-  .farm-root.is-world.is-walking .hint { bottom: 124px; }
-}
+/* Movement pads belong to touch input, not the desktop view. */
+.joystick{display:none}
+@media(pointer:coarse){.farm-root.is-world.is-walking .joystick{display:block;bottom:88px}}
+@media(max-width:600px){.farm-root .wordmark{font-size:22px}.farm-root .tagline{font-size:9px;letter-spacing:.1em}.farm-root.is-panorama .hud{padding:14px}.farm-root .hud{max-width:calc(100% - 90px)}}

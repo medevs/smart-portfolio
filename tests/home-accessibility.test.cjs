@@ -24,7 +24,9 @@ test('keyboard skip opens the real catalog and duplicate off-screen links are no
   const html = renderToStaticMarkup(React.createElement(FarmExperience, { farm: await loadFarm() }));
   assert.match(html, /class="skip-link" href="\/list"/);
   assert.match(html, /<nav id="farm-links" hidden=""/);
-  assert.ok(html.includes('Farm projects'));
+  assert.match(html, /aria-label="Farm menu"/);
+  assert.match(html, /aria-haspopup="dialog">Menu<\/button>/);
+  assert.doesNotMatch(html, /world-projects|hud-actions|Walk near a place to interact/);
   assert.ok(html.includes('Opening the 3D farm'));
   assert.doesNotMatch(html, /atlas-homestead.webp/);
 });
@@ -63,4 +65,25 @@ test('small catalog text has at least 4.5:1 contrast against its actual backgrou
     const ratio = (luminance(background) + .05) / (luminance(colorIn(selector)) + .05);
     assert.ok(ratio >= 4.5, `${selector}: ${ratio.toFixed(2)}:1`);
   }
+});
+
+
+test('quiet walking HUD offers only useful actions and keeps tractor exit available', () => {
+  const { GameOverlay } = require('../src/components/farm/game/GameOverlay.tsx');
+  const { freshProfile } = require('../src/farm/game/save.ts');
+  const { walk } = require('../src/components/farm/scene/walk-state.ts');
+  const noop = () => {};
+  const game = { profile: freshProfile(), panel: null, paused: false, storageAvailable: true, message: '', waypoint: null, setPanel: noop, close: noop, act: noop };
+  const render = () => renderToStaticMarkup(React.createElement(GameOverlay, { game, ready: true, exploring: true, onExplore: noop, light: 'day', onLight: noop, onToggleExplore: noop, onProduct: noop, onHelp: noop, raised: '$0' }));
+  const idle = render();
+  assert.match(idle, /Open journal: 0 of 5 activities completed/);
+  assert.doesNotMatch(idle, /Drive tractor|Exit tractor|Walk near a place|game-minimap/);
+  assert.match(idle, /aria-haspopup="dialog">Menu/);
+  const wasDriving = walk.driving;
+  try {
+    walk.driving = true;
+    const driving = render();
+    assert.match(driving, /Exit tractor/);
+    assert.doesNotMatch(driving, /game-touch-action/);
+  } finally { walk.driving = wasDriving; }
 });
