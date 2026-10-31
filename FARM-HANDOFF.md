@@ -157,3 +157,36 @@ New GitHub Farm checks runs tests, TypeScript, lint and direct Next build.
 Pending release evidence: production deployment, live UI/save/dialog/console QA,
 and the still-blocked GPU and narrow/touch playthrough in #20. Do not label the
 3D game visually verified based on this CPU scene graph or compilation evidence.
+
+### Production UI check · PR #22
+
+PR #22 merged at **1835e68add63e35ccbb2dec6a57818bfbc9a5e0f**;
+Vercel production succeeded. GitHub Farm checks run **41203964214** / job
+**124545164170** completed every install/test/type/lint/build step successfully.
+Live https://medevsmaker.vercel.app/ now exposes the new game controls.
+
+Observed in the production browser (1363×936): Map opens, destinations select,
+orchard waypoint appears, travel is disabled with an accurate no-WebGL explanation;
+Escape returns focus to Map. Settings graphics/reduced-motion preferences survive
+a reload. Explicit audio enable changes to Mute, mute returns to off; sound is off
+after reload. This verifies control/context behavior, not heard sound quality.
+No horizontal page overflow at this viewport. The first live map screenshot showed
+overlapping destination text; follow-up replaces it with numbered markers matching
+the selector and adds a textual waypoint status. GPU/touch release gate remains.
+
+Additional observed UI checks: journal lists all five activities without awarding
+progress from map/menu use; reset opens a separate confirmation and Keep my
+progress returns safely. Pause → Controls → resume works. ReelStyles dialog opens
+with its preserved reelstyles.com and /spot/reelstyles links. Escape exposed a
+real event-order fault: Radix dismissed a product before the window shortcut
+listener saw Escape, causing it to open Pause. Follow-up moves shortcut inspection
+to capture, checks defaultPrevented and retains the dialog/external-pause guard;
+production product Escape must be rechecked after that deployment. SpotCard/PR #11
+is untouched. This is an observed defect, not a successful product-dismiss check.
+
+All four live product dialogs were opened: studio /spot/about (existing X/GitHub),
+ReelStyles /spot/reelstyles + reelstyles.com, MentorClone /spot/mentorclone +
+mentorclone.ai and TalkTheDoc /spot/talkthedoc + talkthedoc.com. No sponsorship form
+was submitted. Close buttons work; original product focus-return issue #11 stays
+separate. Follow-up checks: 29 tests, TypeScript, lint (no warnings) and direct
+Next build pass after numbered-map/shortcut changes. No GPU visual claim.
