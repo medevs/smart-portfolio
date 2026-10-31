@@ -20,15 +20,15 @@ class SceneBoundary extends Component<{ children: ReactNode; onFailure: () => vo
  * React error boundaries alone cannot catch a rejection in Canvas's async effect.
  * https://r3f.docs.pmnd.rs/api/canvas#custom-canvas
  */
-export function SceneRoot({ children, low, onFailure }: { children: ReactNode; low: boolean; onFailure: () => void }) {
+export function SceneRoot({ children, low, onFailure, onShaderFailure }: { children: ReactNode; low: boolean; onFailure: () => void; onShaderFailure: () => void }) {
   const host = useRef<HTMLDivElement>(null);
   const root = useRef<ReturnType<typeof createRoot<HTMLCanvasElement>> | null>(null);
   const configured = useRef(false);
   const state = useRef<RootState | null>(null);
-  const current = useRef({ children, low, onFailure });
+  const current = useRef({ children, low, onFailure, onShaderFailure });
   useLayoutEffect(() => {
-    current.current = { children, low, onFailure };
-  }, [children, low, onFailure]);
+    current.current = { children, low, onFailure, onShaderFailure };
+  }, [children, low, onFailure, onShaderFailure]);
 
   useEffect(() => {
     const container = host.current;
@@ -64,6 +64,10 @@ export function SceneRoot({ children, low, onFailure }: { children: ReactNode; l
         onCreated: created => {
           if (disposed) return;
           state.current = created;
+          created.gl.debug.onShaderError = (gl, program, vertex, fragment) => {
+            console.error("Farm shader compilation failed:", gl.getProgramInfoLog(program), gl.getShaderInfoLog(vertex), gl.getShaderInfoLog(fragment));
+            current.current.onShaderFailure();
+          };
           created.events.connect?.(element);
           const bounds = container.getBoundingClientRect();
           created.setSize(bounds.width, bounds.height, bounds.top, bounds.left);
@@ -99,7 +103,7 @@ export function SceneRoot({ children, low, onFailure }: { children: ReactNode; l
     if (!configured.current || !root.current) return;
     root.current.render(<SceneBoundary onFailure={onFailure}>{children}</SceneBoundary>);
     state.current?.setDpr(low ? [1, 1.2] : [1, 1.5]);
-  }, [children, low, onFailure]);
+  }, [children, low, onFailure, onShaderFailure]);
 
   return <div ref={host} className="world-renderer" />;
 }

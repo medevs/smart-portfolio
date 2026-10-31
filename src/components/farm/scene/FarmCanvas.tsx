@@ -56,12 +56,13 @@ export type FarmCanvasProps = {
 
 export default function FarmCanvas(props: FarmCanvasProps) {
   const [degraded, setDegraded] = useState(false);
+  const [effectsFailed, setEffectsFailed] = useState(false);
   const effectiveQuality = degraded ? "low" : props.quality;
   return (
-    <SceneRoot low={effectiveQuality === "low"} onFailure={props.onFailure}>
+    <SceneRoot low={effectiveQuality === "low"} onFailure={props.onFailure} onShaderFailure={() => setEffectsFailed(true)}>
       <Suspense fallback={null}>
       <AdaptiveDpr pixelated={false} />
-      <Scene {...props} quality={effectiveQuality} onDecline={() => setDegraded(true)} />
+      <Scene {...props} quality={effectiveQuality} plain={props.plain || effectsFailed} onDecline={() => setDegraded(true)} />
       <FirstFrame onReady={props.onReady} />
       </Suspense>
     </SceneRoot>
@@ -700,7 +701,6 @@ function Effects({
   const passes = [
     <HueSaturation key="sat" saturation={quality === "high" ? 0.16 : 0.06} />,
     <BrightnessContrast key="grade" brightness={0.01} contrast={quality === "high" ? 0.08 : 0.03} />,
-    <SketchPass key="sketch" />,
     <Bloom
       key="bloom"
       intensity={night ? 0.7 : 0.08}
@@ -710,6 +710,7 @@ function Effects({
     />,
     <Vignette key="vignette" eskil={false} offset={0.16} darkness={night ? 0.65 : 0.35} />,
   ];
+  if (phase !== "color" && !reduced) passes.unshift(<SketchPass key="sketch" />);
   if (quality === "high") {
     passes.splice(4, 0, <N8AO key="ao" halfRes aoRadius={0.5} intensity={0.85} distanceFalloff={1} />);
     if (focused) {

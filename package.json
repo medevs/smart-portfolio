@@ -57,6 +57,7 @@
   },
   "devDependencies": {
     "@react-three/test-renderer": "^9.1.0",
+    "@webgpu/glslang": "^0.0.15",
     "depcheck": "^1.4.7",
     "eslint": "^8",
     "eslint-config-next": "15.5.12",
