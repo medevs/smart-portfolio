@@ -32,3 +32,23 @@ void main() { mainImage(texture(inputBuffer, vUv), vUv, fragColor); }
   assert.ok(binary.length > 0);
   assert.equal(binary[0], 0x07230203, 'compiler produced valid SPIR-V magic');
 });
+
+
+test('only identified compositor shader failures use plain 3D recovery', () => {
+  const routingPath = path.resolve('src/components/farm/scene/shader-failure.ts');
+  const routing = new Module(routingPath, module);
+  routing._compile(ts.transpileModule(fs.readFileSync(routingPath, 'utf8'), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS }
+  }).outputText, routingPath);
+  const { routeShaderFailure } = routing.exports;
+  const results = [];
+  const handlers = { effects: () => results.push('effects'), scene: () => results.push('scene') };
+  for (const source of [
+    '#version 300 es\n#define SHADER_NAME EffectMaterial\nvoid main() {}',
+    '#define SHADER_NAME ShaderMaterial\nvoid main() {}',
+    '#define SHADER_NAME MeshStandardMaterial',
+    '// EffectMaterial appears in a comment, not the generated material identity',
+    null,
+  ]) routeShaderFailure(source, handlers);
+  assert.deepEqual(results, ['effects', 'scene', 'scene', 'scene', 'scene']);
+});

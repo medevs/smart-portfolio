@@ -3,6 +3,7 @@
 import { Component, useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 import { createRoot, events, extend, type RootState } from "@react-three/fiber";
 import * as THREE from "three";
+import { routeShaderFailure } from "./shader-failure";
 
 extend(THREE as unknown as Parameters<typeof extend>[0]);
 
@@ -66,7 +67,10 @@ export function SceneRoot({ children, low, onFailure, onShaderFailure }: { child
           state.current = created;
           created.gl.debug.onShaderError = (gl, program, vertex, fragment) => {
             console.error("Farm shader compilation failed:", gl.getProgramInfoLog(program), gl.getShaderInfoLog(vertex), gl.getShaderInfoLog(fragment));
-            current.current.onShaderFailure();
+            routeShaderFailure(gl.getShaderSource(fragment), {
+              effects: () => current.current.onShaderFailure(),
+              scene: () => current.current.onFailure(),
+            });
           };
           created.events.connect?.(element);
           const bounds = container.getBoundingClientRect();
