@@ -35,7 +35,7 @@ export function SceneRoot({ children, low, onFailure, onShaderFailure }: { child
     const container = host.current;
     if (!container) return;
     const element = document.createElement("canvas");
-    element.setAttribute("aria-label", "Interactive 3D Middle Atlas farm. Drag to orbit, or use Walk to explore.");
+    element.setAttribute("aria-label", "Interactive 3D Middle Atlas farm. Wheel or pinch to zoom; drag to look around. Choose Walk in Menu to explore.");
     container.appendChild(element);
     let disposed = false;
     let starting = false;

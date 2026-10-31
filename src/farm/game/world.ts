@@ -10,6 +10,7 @@ export const DESTINATIONS = [
   { id: "home", name: "The homestead", x: 0, z: -12.8, note: "Stone, earth, shade and a solar roof." },
   { id: "guests", name: "Future guest spaces", x: 20, z: -12.4, note: "A future vision; visits are not bookable." },
   { id: "cedars", name: "Cedar edge", x: -20, z: -13, note: "The forest country that inspires this place." },
+  { id: "apiary", name: "Orchard beehives", x: 24, z: 17.6, note: "Wooden hives beside the growing beds." },
   { id: "gate", name: "Farm gate", x: 0, z: 8, note: "A familiar place to begin again." },
 ] as const;
 export type DestinationId = typeof DESTINATIONS[number]["id"];

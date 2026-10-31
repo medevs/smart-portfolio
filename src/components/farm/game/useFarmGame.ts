@@ -1,12 +1,14 @@
 "use client";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { freshProfile, readProfile, writeProfile, type Preferences, type Profile } from "@/farm/game/save";
+import { discover } from "@/farm/game/discoveries";
+import { zoomCamera } from "../scene/camera-view";
 import { interact } from "@/farm/game/progress";
 import { destination, nearestPlace, SPAWN, type DestinationId } from "@/farm/game/world";
 import { safeSpawn } from "../scene/yard-boundaries";
 import { resetWalkInput, walk } from "../scene/walk-state";
 
-export type Panel = "welcome" | "map" | "journal" | "settings" | "pause" | "controls" | "reset" | null;
+export type Panel = "welcome" | "map" | "journal" | "settings" | "pause" | "controls" | "notes" | "reset" | null;
 export function useFarmGame({ ready, exploring, externalPaused, onExplore, onProduct }: {
   ready: boolean; exploring: boolean; externalPaused: boolean; onExplore: () => void; onProduct: (id: string) => void;
 }) {
@@ -63,6 +65,12 @@ export function useFarmGame({ ready, exploring, externalPaused, onExplore, onPro
     if (!ready || !exploring || paused || walk.driving) return;
     const point = { x: walk.px, z: walk.pz };
     const place = nearestPlace(point);
+    const observation = discover(current.current.discoveries, place.id, point, true);
+    if (observation.note) {
+      if (observation.changed) setProfile(value => ({ ...value, discoveries: observation.found }));
+      setPanel("notes");
+      return;
+    }
     const result = interact(current.current.progress, place.id, point, true);
     setMessage(result.message);
     if (result.changed) setProfile(value => ({ ...value, progress: result.progress }));
@@ -75,12 +83,13 @@ export function useFarmGame({ ready, exploring, externalPaused, onExplore, onPro
       if (visiblePanel) return; // Radix owns Escape and focus while a panel is open.
       const k = event.key.toLowerCase();
       if (k === "m" || k === "j" || k === "escape") { event.preventDefault(); setPanel(k === "m" ? "map" : k === "j" ? "journal" : "pause"); }
+      if (ready && (k === "+" || k === "=" || k === "-" || k === "_")) { event.preventDefault(); zoomCamera(k === "+" || k === "=" ? -.15 : .15); }
       if (k === "e") { event.preventDefault(); act(); }
     };
     // Inspect dialog state before Radix dismisses and detaches the key target.
     window.addEventListener("keydown", key, true);
     return () => window.removeEventListener("keydown", key, true);
-  }, [act, visiblePanel, externalPaused]);
+  }, [act, visiblePanel, externalPaused, ready]);
   function travel(id: DestinationId) {
     const target = destination(id);
     if (!ready || !target || !safeSpawn(target)) return;

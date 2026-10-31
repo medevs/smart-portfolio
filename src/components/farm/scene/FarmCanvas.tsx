@@ -21,6 +21,7 @@ import { Horizon, MillWorks, Scenery } from "./scenery";
 import { AtlasLandscape } from "./MiddleAtlas";
 import { CameraRig } from "./CameraRig";
 import { PhysicsYard } from "./explore";
+import { FarmLife } from "./FarmLife";
 import { GameWorld, WorldClock } from "./GameWorld";
 import { gameClock } from "@/farm/game/clock";
 import type { Progress } from "@/farm/game/progress";
@@ -113,6 +114,7 @@ function Scene(props: FarmCanvasProps & { onDecline: () => void }) {
       <Textures>
       <Horizon />
       <AtlasLandscape night={night} />
+      <FarmLife />
       <Ground />
       <Lane />
       <HayBales />

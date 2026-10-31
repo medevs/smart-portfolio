@@ -1,12 +1,13 @@
+import { FIELD_NOTES, type DiscoveryId } from "./discoveries";
 import { safeSpawn } from "@/components/farm/scene/yard-boundaries";
 import { ACTIVITIES, freshProgress, type ActivityId, type Progress } from "./progress";
 import { SPAWN, type Point } from "./world";
 
 export const SAVE_KEY = "medevsmaker.atlas-game.v1";
 export type Preferences = { quality: "auto" | "low" | "high"; reducedMotion: boolean; daylight: boolean; volume: number };
-export type Profile = { version: 1; progress: Progress; position: Point; preferences: Preferences; introduced: boolean };
+export type Profile = { version: 1; discoveries: DiscoveryId[]; progress: Progress; position: Point; preferences: Preferences; introduced: boolean };
 export function freshProfile(): Profile {
-  return { version: 1, progress: freshProgress(), position: { ...SPAWN }, preferences: { quality: "auto", reducedMotion: false, daylight: false, volume: .35 }, introduced: false };
+  return { version: 1, discoveries: [], progress: freshProgress(), position: { ...SPAWN }, preferences: { quality: "auto", reducedMotion: false, daylight: false, volume: .35 }, introduced: false };
 }
 const record = (value: unknown): value is Record<string, unknown> => !!value && typeof value === "object" && !Array.isArray(value);
 const bounded = (value: unknown, min: number, max: number): value is number => typeof value === "number" && Number.isFinite(value) && value >= min && value <= max;
@@ -29,6 +30,7 @@ export function parseProfile(raw: string | null): Profile {
     const count = completed.length;
     if (p.water !== (count < 2 ? 0 : count === 2 ? 3 : 2) || p.apples !== (count === 4 ? 3 : 0)) return fresh;
     fresh.progress = { completed, water: p.water, apples: p.apples };
+    if (Array.isArray(value.discoveries)) fresh.discoveries = FIELD_NOTES.filter(note => (value.discoveries as unknown[]).includes(note.id)).map(note => note.id);
     const prefs = value.preferences;
     if (prefs.quality === "auto" || prefs.quality === "low" || prefs.quality === "high") fresh.preferences.quality = prefs.quality;
     fresh.preferences.reducedMotion = prefs.reducedMotion === true;

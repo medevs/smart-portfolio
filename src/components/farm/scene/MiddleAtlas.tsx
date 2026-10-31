@@ -3,6 +3,7 @@
 import { useLayoutEffect, useMemo, useRef } from "react";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
+import { MakerHead } from "./MakerAvatar";
 import { ORCHARD_TREES } from "@/farm/game/world";
 import { YARD_WALLS } from "./yard-boundaries";
 import { Surface } from "./materials";
@@ -122,11 +123,15 @@ function Repeated({ instances, shape, color }: { instances: Instance[]; shape: "
       object.updateMatrix();
       mesh.current!.setMatrixAt(i, object.matrix);
     });
+    if (shape === "canopy" || shape === "crop") {
+      instances.forEach((_, i) => mesh.current!.setColorAt(i, new THREE.Color("white").multiplyScalar(.82 + (i % 5) * .045)));
+      if (mesh.current.instanceColor) mesh.current.instanceColor.needsUpdate = true;
+    }
     mesh.current.instanceMatrix.needsUpdate = true;
     mesh.current.computeBoundingSphere();
-  }, [instances]);
+  }, [instances, shape]);
   return <instancedMesh ref={mesh} args={[undefined, undefined, instances.length]} castShadow receiveShadow>
-    {shape === "wall" ? <boxGeometry args={[1, 1, 1]} /> : shape === "trunk" ? <cylinderGeometry args={[0.08, 0.15, 1.8, 7]} /> : shape === "apple" ? <sphereGeometry args={[0.1, 6, 5]} /> : shape === "crop" ? <sphereGeometry args={[0.18, 7, 5]} /> : <icosahedronGeometry args={[1.15, 2]} />}
+    {shape === "wall" ? <boxGeometry args={[1, 1, 1]} /> : shape === "trunk" ? <cylinderGeometry args={[0.08, 0.15, 1.8, 7]} /> : shape === "apple" ? <sphereGeometry args={[0.1, 6, 5]} /> : shape === "crop" ? <sphereGeometry args={[0.18, 7, 5]} /> : <sphereGeometry args={[1.15, 14, 10]} />}
     {shape === "wall" ? <Surface name="rock" color={color} repeat={[12, 1]} roughness={1} metalness={0} /> : <meshStandardMaterial color={color} roughness={0.93} />}
   </instancedMesh>;
 }
@@ -176,15 +181,15 @@ function MakerAtWork() {
     <Block position={[0, .85, 0]} size={[1.65, .1, .65]} color="#725c42" />
     {[-.65, .65].map(x => <Block key={x} position={[x, .4, 0]} size={[.07, .8, .07]} color="#38423d" />)}
     <Block position={[0, 1.17, -.16]} size={[.55, .37, .04]} color="#293f45" />
-    <mesh position={[0, 1.05, .55]} castShadow><capsuleGeometry args={[.18, .38, 4, 8]} /><meshStandardMaterial color="#4c6655" /></mesh>
-    <mesh position={[0, 1.51, .55]} castShadow><sphereGeometry args={[.14, 10, 8]} /><meshStandardMaterial color="#665649" /></mesh>
+    <mesh position={[0, 1.05, .55]} castShadow><capsuleGeometry args={[.18, .38, 4, 8]} /><meshStandardMaterial color="#998886" /></mesh>
+    <group position={[0,.08,.55]} rotation={[0,Math.PI,0]}><MakerHead /></group>
     <Block position={[0, .65, .65]} size={[.45, .1, .45]} color="#584635" />
   </group>;
 }
 
 function FutureSpaces({ night }: { night: boolean }) {
   return <group>
-    {/* The distant maker is symbolic; no personal likeness is inferred. */}
+    {/* The maker uses the existing portrait with the owner’s explicit permission. */}
     <group position={[-11, 0, .3]}><MakerAtWork /></group>
     <group position={[-3, 0, 19]}>
       <Block position={[0, .1, 0]} size={[9, .2, 6]} stone color="#b9ab8d" />

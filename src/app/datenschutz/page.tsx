@@ -43,7 +43,7 @@ export default function DatenschutzPage() {
 
         <h2>Lokal im Browser</h2>
         <p>
-          Die Farm speichert den digitalen Spielstand lokal in diesem Browser: erledigte Aufgaben, Wasser und
+          Die Farm speichert den digitalen Spielstand lokal in diesem Browser: erledigte Aufgaben, entdeckte Orte im Feldnotizbuch, Wasser und
           Äpfel im Inventar, die letzte sichere Gehposition sowie den Einführungsstatus. Auch Grafik-, Bewegungs-,
           Tageslicht- und Lautstärkeeinstellungen werden lokal gespeichert. Die Seite überträgt diesen lokalen
           Spielstand nicht an den Server. Im Spieljournal lässt sich der Fortschritt nach einer Bestätigung

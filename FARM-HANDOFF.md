@@ -7,8 +7,8 @@ only. Continue the larger, slightly modern Moroccan farm inspired by Ifrane,
 Azrou, Ain Leuh and Midelt: maker studio for @medevsmaker, agriculture/orchard,
 future gathering courtyard and guest spaces, welcoming maker community.
 Keep product/sponsor/plot IDs, fund and legal pages. Visits/events are future
-concepts: no invented dates, address, bookings or operating claims. Both maker
-and visitor figures are symbolic, not inferred likenesses. No spending, paid
+concepts: no invented dates, address, bookings or operating claims. The user explicitly authorized the existing portfolio portrait as the maker
+and visitor avatar reference. Use only visible details from that photo. No spending, paid
 services, external messages or embeddings generation. Tested pushes/merges are
 authorized. Avoid conflicting writes if another run/PR changes the same area.
 
@@ -226,3 +226,36 @@ in the PR record.
 Browser has no WebGL, so menu/fallback checks do not establish GPU gameplay or
 physical mobile-device verification. Next: actual GPU walking/driving playthrough
 and touch/narrow layout check; continue #20 without claiming those gates passed.
+
+
+## Exploration, zoom and portrait avatar · next batch
+
+User requested zoom, richer exploration/visuals and explicitly asked to draw the
+existing portfolio image on the character. MakerHead maps the existing
+`public/images/profile.jpeg` onto a curved face with matching hair, round rims and
+shirt color; both the walking avatar and studio maker use it. Optional portrait
+loading is isolated so a failed image cannot suspend physics. The original image
+is unchanged; this is a stylized procedural model, not a scanned human.
+
+Walking camera now supports canvas-only wheel/pinch zoom and horizontal drag,
+plus +/− shortcuts and a Settings distance slider/reset. Orbit keeps native
+wheel/pinch and consumes the same explicit zoom requests. Building footprints
+and orchard crowns shorten the follow camera before geometry; both desired and
+interpolated positions are checked. Exactly one camera owner remains mounted.
+WASD stays in its established fixed compass frame; turning the view does not
+change movement directions. Zoom/orientation are session-only.
+
+Four independent physical discoveries unlock saved field notes: cedars,
+homestead, future guest-space concept and beehives. Map travel never awards notes;
+E within 3.2 units does. Old saves default to an empty notebook. Reset clears it.
+No-WebGL visitors can read hints and set waypoints, not fabricate discoveries.
+New details: a collidable cedar bench, shared tea tray, bees and flowing seguia
+using the shared paused/reduced-motion clock; softer varied orchard crowns remain
+instanced. No new dependency, network service or operating/booking claim.
+
+45 tests, standalone TypeScript, lint and direct Next build pass. Final focus-loss
+gesture cleanup is included in the same checks/CI before merge; deployment evidence
+will be recorded in the PR. CPU tests inspect
+real geometry/material/portrait UV wiring and camera transforms, not GPU pixels.
+The cloud browser still cannot prove 3D visual quality or physical touch gestures;
+keep #20 open and record live interface checks separately.
