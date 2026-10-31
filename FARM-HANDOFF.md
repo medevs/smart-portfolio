@@ -117,3 +117,43 @@ prefix for that narrow recovery; unknown/core sources call full scene recovery.
 Twenty-one tests, TypeScript and lint pass, including routing coverage. Visual GPU
 validation is still not claimed; the user's supplied log establishes the original
 GPU error exactly and the compiler regression reproduces it independently.
+
+## Game v1 implementation · 2026-10-31
+
+Branch: `codex/atlas-game-v1`; roadmap and acceptance issues #16–#21 are in
+FARM-ROADMAP.md. Implementation adds a generic animated visitor (no owner likeness),
+sprint, E/touch proximity actions, safe map travel consumed by Rapier, map/journal/
+pause/help/settings panels, a five-part studio → well → garden → orchard → table
+loop, inventory, validated versioned browser saves and deliberate journal reset.
+The shared world clock freezes ambient movement while paused, hidden or reduced;
+optional daylight cycling and user-gesture-only synthesized wind are included.
+Completed watering/delivery changes actual scene geometry. Project/fund/legal and
+sponsor routes remain. No visits, bookings or events are represented as operating.
+
+Movement correction: tractor mesh yaw now follows the vehicle heading separately
+from the pedestrian facing, and its long collider axis matches the drive axis.
+Building/well/orchard-trunk clearance is validated before travel or save restoration.
+Orchard geometry and colliders share positions. UI samples position at 5 Hz in a
+child component; it does not rerender the whole Three scene on each sample.
+
+Dependencies: compatible updates installed, including React/DOM 19.3.1, Fiber
+9.8.2, Drei 10.7.9, React postprocessing 3.2.2, and Next/eslint-config-next 15.5.28.
+No paid tools or asset services installed. Next's critical audit finding is gone.
+`npm audit` still reports **47 findings: 14 high, 33 moderate, 0 critical** in the
+legacy AI/LangChain/OpenAI stack, tools and transitive/vendored dependencies
+(including Next's PostCSS/sharp). Major migration requires separate route/API
+checks; do not claim this dependency tree is free of vulnerabilities. #21 remains
+open for that work. A downgrade suggested by npm audit is not a safe migration.
+
+Local verification at this checkpoint: **29 tests pass**, including ordered
+activity/inventory transitions, corrupt/blocked storage, every destination's safe
+clearance, sprint, paused/hidden/reduced clock, real Rapier perimeter collisions,
+new Three avatar/activity geometry and actual GLSL compilation. TypeScript and
+lint pass without warnings; direct Next 15.5.28 build passed. Three test teardown
+needs a real global animation host (`self=globalThis`) to preserve Rapier's crypto
+host; a partial `self` mock caused a WASM panic and was corrected in the test host.
+New GitHub Farm checks runs tests, TypeScript, lint and direct Next build.
+
+Pending release evidence: production deployment, live UI/save/dialog/console QA,
+and the still-blocked GPU and narrow/touch playthrough in #20. Do not label the
+3D game visually verified based on this CPU scene graph or compilation evidence.

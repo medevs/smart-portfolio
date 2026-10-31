@@ -1,6 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useMemo, useRef, type ReactElement } from "react";
+import { gameClock, animationDelta } from "@/farm/game/clock";
 import { useFrame } from "@react-three/fiber";
 import { RoundedBox } from "@react-three/drei";
 import * as THREE from "three";
@@ -226,7 +227,8 @@ function WindowFrame({ night, w, h }: { night: boolean; w: number; h: number }) 
 
 function Weathervane() {
   const ref = useRef<THREE.Group>(null);
-  useFrame((_, dt) => {
+  useFrame((_, frameDelta) => {
+    const dt = animationDelta(frameDelta);
     if (ref.current) ref.current.rotation.y += dt * 0.35;
   });
   return (
@@ -258,11 +260,11 @@ function Smoke({ position }: { position: [number, number, number] }) {
     }
     return arr;
   }, []);
-  useFrame(({ clock }) => {
+  useFrame(() => {
     const pts = ref.current;
     if (!pts) return;
     const pos = pts.geometry.attributes.position as THREE.BufferAttribute;
-    const t = clock.elapsedTime;
+    const t = gameClock.seconds;
     for (let i = 0; i < 18; i++) {
       const life = (t * 0.25 + seeds[i * 3 + 1]) % 1;
       pos.setXYZ(i, seeds[i * 3] + Math.sin(t + i) * 0.08, life * 1.4, seeds[i * 3 + 2]);
@@ -361,7 +363,8 @@ export function Windmill({ night, golden }: ModelProps) {
   const big = useRef<THREE.Group>(null);
   const small = useRef<THREE.Group>(null);
   const rod = useRef<THREE.Mesh>(null);
-  useFrame((_, dt) => {
+  useFrame((_, frameDelta) => {
+    const dt = animationDelta(frameDelta);
     const step = dt * 0.8;
     if (blades.current) blades.current.rotation.z -= step;
     if (big.current) big.current.rotation.z -= step * 0.5;
@@ -483,8 +486,8 @@ export function Pond() {
 
 export function Tree({ golden }: ModelProps) {
   const ref = useRef<THREE.Group>(null);
-  useFrame(({ clock }) => {
-    if (ref.current) ref.current.rotation.z = Math.sin(clock.elapsedTime * 0.8) * 0.015;
+  useFrame(() => {
+    if (ref.current) ref.current.rotation.z = Math.sin(gameClock.seconds * 0.8) * 0.015;
   });
   return (
     <group ref={ref}>
@@ -609,9 +612,9 @@ export function Scarecrow() {
 
 function BirdBody({ color, comb }: { color: string; comb: string }) {
   const head = useRef<THREE.Group>(null);
-  useFrame(({ clock }) => {
+  useFrame(() => {
     if (!head.current) return;
-    const t = clock.elapsedTime;
+    const t = gameClock.seconds;
     head.current.rotation.x = Math.sin(t * 3.2) > 0.65 ? 0.5 : 0;
   });
   return (
@@ -660,8 +663,8 @@ function Hoof({
 
 export function Cow() {
   const tail = useRef<THREE.Group>(null);
-  useFrame(({ clock }) => {
-    if (tail.current) tail.current.rotation.z = Math.sin(clock.elapsedTime * 2.2) * 0.35;
+  useFrame(() => {
+    if (tail.current) tail.current.rotation.z = Math.sin(gameClock.seconds * 2.2) * 0.35;
   });
   return (
     <group>
@@ -732,8 +735,8 @@ export function Sheep() {
 
 export function Cat() {
   const tail = useRef<THREE.Group>(null);
-  useFrame(({ clock }) => {
-    if (tail.current) tail.current.rotation.z = Math.sin(clock.elapsedTime * 2.4) * 0.5;
+  useFrame(() => {
+    if (tail.current) tail.current.rotation.z = Math.sin(gameClock.seconds * 2.4) * 0.5;
   });
   return (
     <group>
@@ -757,8 +760,8 @@ export function Cat() {
 
 export function Dog() {
   const tail = useRef<THREE.Group>(null);
-  useFrame(({ clock }) => {
-    if (tail.current) tail.current.rotation.z = Math.sin(clock.elapsedTime * 6) * 0.45;
+  useFrame(() => {
+    if (tail.current) tail.current.rotation.z = Math.sin(gameClock.seconds * 6) * 0.45;
   });
   return (
     <group>
@@ -786,7 +789,8 @@ export function Dog() {
 
 export function Tractor() {
   const wheel = useRef<THREE.Mesh>(null);
-  useFrame((_, dt) => {
+  useFrame((_, frameDelta) => {
+    const dt = animationDelta(frameDelta);
     if (wheel.current) wheel.current.rotation.x -= dt * 0.8;
   });
   return (
@@ -813,8 +817,8 @@ export function Tractor() {
 
 export function Mailbox() {
   const flag = useRef<THREE.Group>(null);
-  useFrame(({ clock }) => {
-    if (flag.current) flag.current.rotation.z = Math.sin(clock.elapsedTime * 1.6) * 0.15;
+  useFrame(() => {
+    if (flag.current) flag.current.rotation.z = Math.sin(gameClock.seconds * 1.6) * 0.15;
   });
   return (
     <group>

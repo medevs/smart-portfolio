@@ -5,6 +5,10 @@ const path = require('node:path');
 const Module = require('node:module');
 const ts = require('typescript');
 const React = require('react');
+// Three's renderer teardown requires the browser animation host even in the GPU-free test renderer.
+global.requestAnimationFrame = callback => setTimeout(callback, 16);
+global.cancelAnimationFrame = clearTimeout;
+global.self = globalThis;
 const THREE = require('three');
 const { create } = require('@react-three/test-renderer');
 const originalResolve = Module._resolveFilename;
@@ -25,6 +29,8 @@ Module._load = function(request, ...rest) {
 };
 global.IS_REACT_ACT_ENVIRONMENT = true;
 const { AtlasLandscape } = require('../src/components/farm/scene/MiddleAtlas.tsx');
+const { Visitor } = require('../src/components/farm/scene/Visitor.tsx');
+const { GameWorld } = require('../src/components/farm/scene/GameWorld.tsx');
 const { MODELS } = require('../src/components/farm/scene/models.tsx');
 const { loadFarm, placePlots } = require('../src/farm/loadFarm.ts');
 const { plotPosition } = require('../src/farm/world.ts');
@@ -79,12 +85,23 @@ test('real Rapier collisions keep walking and driving inside the visible land', 
   assert.ok(person.translation().x < YARD_LIMIT && person.translation().x > YARD_LIMIT - .5);
   assert.ok(person.translation().y > .6, 'character remains supported by the ground');
   const tractor = world.createRigidBody(RAPIER.RigidBodyDesc.dynamic().setTranslation(0, .5, YARD_LIMIT - 2).lockRotations());
-  world.createCollider(RAPIER.ColliderDesc.cuboid(.85, .4, .5), tractor);
+  world.createCollider(RAPIER.ColliderDesc.cuboid(.5, .4, .85), tractor);
   for (let i = 0; i < 120; i++) {
     tractor.setLinvel({ x: 0, y: tractor.linvel().y, z: 7 }, true);
     world.step();
   }
-  assert.ok(tractor.translation().z < YARD_LIMIT && tractor.translation().z > YARD_LIMIT - 1);
+  assert.ok(tractor.translation().z < YARD_LIMIT && tractor.translation().z > YARD_LIMIT - 1.4);
   assert.ok(tractor.translation().y > .3);
   world.free();
+});
+
+
+test('visitor and completed activity results construct actual finite Three geometry', async () => {
+  const renderer = await create(React.createElement('group', null,
+    React.createElement(Visitor), React.createElement(GameWorld, {progress:{completed:['studio','well','garden','orchard','table'],water:2,apples:0},waypoint:'garden'})));
+  for (const name of ['watering-can','watered-garden','shared-apples']) assert.ok(renderer.scene.findByProps({name}).instance.children.length);
+  for (const node of renderer.scene.findAll(node=>node.instance.isMesh)) {
+    for (const n of node.instance.geometry.attributes.position.array) assert.ok(Number.isFinite(n));
+  }
+  await renderer.advanceFrames(3,1/60);await renderer.unmount();
 });

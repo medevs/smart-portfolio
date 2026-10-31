@@ -21,17 +21,19 @@ const iconMap: Record<string, LucideIcon> = {
   Twitter: Twitter,
 };
 
-export default function HeroSection() {
-  const [roleIndex, setRoleIndex] = useState(0);
-  const [displayText, setDisplayText] = useState("");
-  const [isTyping, setIsTyping] = useState(true);
-
-  const roles = [
+const roles = [
     "Full Stack Developer",
     "Agentic Coder",
     "AI Engineer",
     "Problem Solver",
   ];
+
+
+export default function HeroSection() {
+  const [roleIndex, setRoleIndex] = useState(0);
+  const [displayText, setDisplayText] = useState("");
+  const [isTyping, setIsTyping] = useState(true);
+
 
   useEffect(() => {
     const currentRole = roles[roleIndex];
@@ -59,7 +61,7 @@ export default function HeroSection() {
         setIsTyping(true);
       }
     }
-  }, [displayText, isTyping, roleIndex, roles]);
+  }, [displayText, isTyping, roleIndex]);
 
   return (
     <div className="h-full bento-card p-3 md:p-3.5 lg:p-4 xl:p-5 flex flex-col relative overflow-hidden">
