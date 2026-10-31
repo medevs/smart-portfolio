@@ -5,6 +5,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { CapsuleCollider, CuboidCollider, Physics, RigidBody, useRapier } from "@react-three/rapier";
 import type { RapierRigidBody } from "@react-three/rapier";
 import * as THREE from "three";
+import { GROUND_HALF, YARD_WALLS } from "./yard-boundaries";
 import { resetWalkInput, TRACTOR, walk, walkingMovement } from "./walk-state";
 
 const BLOCKS: { position: [number, number, number]; args: [number, number, number] }[] = [
@@ -61,9 +62,9 @@ export function PhysicsYard() {
   return (
     <Physics gravity={[0, -9.81, 0]} timeStep={1 / 60}>
       <RigidBody type="fixed" colliders={false} position={[0, -0.3, 0]}>
-        <CuboidCollider args={[70, 0.3, 70]} />
+        <CuboidCollider args={[GROUND_HALF, 0.3, GROUND_HALF]} />
       </RigidBody>
-      {BLOCKS.map((block) => (
+      {[...BLOCKS, ...YARD_WALLS].map((block) => (
         <RigidBody key={block.position.join(",")} type="fixed" colliders={false} position={block.position}>
           <CuboidCollider args={block.args} />
         </RigidBody>

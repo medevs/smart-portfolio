@@ -122,7 +122,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
   }
 
   return (
-    <div className={`farm-root is-${phase}${sceneFailed ? " is-panorama" : " is-world"}`}>
+    <div className={`farm-root is-${phase}${sceneFailed ? " is-panorama" : " is-world"}${explore ? " is-walking" : ""}`}>
       <script dangerouslySetInnerHTML={{ __html: BOOT }} />
       <a className="skip-link" href="/list">
         Skip to the list of places

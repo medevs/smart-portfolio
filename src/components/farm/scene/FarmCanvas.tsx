@@ -22,6 +22,7 @@ import { Horizon, MillWorks, Scenery } from "./scenery";
 import { AtlasLandscape } from "./MiddleAtlas";
 import { PhysicsYard } from "./explore";
 import { walk } from "./walk-state";
+import { GROUND_HALF } from "./yard-boundaries";
 import { SceneRoot } from "./SceneRoot";
 import { OptionalAsset } from "./OptionalAsset";
 import { SketchEffect, sketchState } from "./SketchEffect";
@@ -274,7 +275,7 @@ function Sky({ night, sunset }: { night: boolean; sunset: boolean }) {
 
 function Ground() {
   const geom = useMemo(() => {
-    const g = new THREE.PlaneGeometry(90, 90, 70, 70);
+    const g = new THREE.PlaneGeometry(GROUND_HALF * 2, GROUND_HALF * 2, 70, 70);
     g.rotateX(-Math.PI / 2);
     const pos = g.attributes.position;
     for (let i = 0; i < pos.count; i++) {

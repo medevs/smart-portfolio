@@ -183,3 +183,15 @@ Physics download failures now return to orbit with a visible retry explanation
 rather than leaving Walk silently inactive. The actual deployed PR #12 preview
 redirected to Vercel sign-in after its successful build; browser QA is pending
 that access. No GPU visual result is claimed.
+
+Review corrections: project-nav gaps pass pointer input through, and walking
+layouts reserve space for the joystick/tractor controls. The renderer's async
+callbacks read committed props via a layout effect. Visible dry-stone perimeter
+and Rapier boundary colliders now share the same finite land footprint; the
+player and tractor stop physically at the perimeter instead of walking onto
+invisible ground. A real Rapier integration test verifies both bodies remain
+inside and supported. Nineteen tests, TypeScript and lint pass. The user renewed
+the instruction to continue and merge. The secure Vercel sign-in request was
+declined; do not retry or bypass it. GPU visual, narrow-layout and in-browser
+walking/tractor validation remain outstanding. Merge/deployment status must be
+reported separately from those limitations; do not call the scene perfect.

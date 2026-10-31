@@ -32,7 +32,7 @@ const { plotPosition } = require('../src/farm/world.ts');
 test('expanded agricultural world constructs finite geometry with instanced planting', async () => {
   const renderer = await create(React.createElement(AtlasLandscape, { night: false }));
   const instances = renderer.scene.findAll(node => node.instance.isInstancedMesh);
-  assert.deepEqual(instances.map(node => node.instance.count).sort((a, b) => a - b), [48, 48, 240, 240]);
+  assert.deepEqual(instances.map(node => node.instance.count).sort((a, b) => a - b), [4, 48, 48, 240, 240]);
   const bounds = new THREE.Box3().setFromObject(renderer.scene.instance);
   assert.ok(bounds.min.x < -30 && bounds.max.z > 29, 'orchard extends beyond the original yard');
   const meshes = renderer.scene.findAll(node => node.instance.isMesh);
@@ -58,4 +58,33 @@ test('every existing farm item still mounts a 3D model at its stable plot', asyn
   t.diagnostic(`Core yard mesh count: ${renderer.scene.findAll(node => node.instance.isMesh).length}`);
   await renderer.advanceFrames(3, 1 / 60);
   await renderer.unmount();
+});
+
+test('real Rapier collisions keep walking and driving inside the visible land', async () => {
+  const RAPIER = require('@dimforge/rapier3d-compat');
+  await RAPIER.init();
+  const { GROUND_HALF, YARD_LIMIT, YARD_WALLS } = require('../src/components/farm/scene/yard-boundaries.ts');
+  const world = new RAPIER.World({ x: 0, y: -9.81, z: 0 });
+  world.createCollider(RAPIER.ColliderDesc.cuboid(GROUND_HALF, .3, GROUND_HALF).setTranslation(0, -.3, 0));
+  for (const wall of YARD_WALLS) world.createCollider(RAPIER.ColliderDesc.cuboid(...wall.args).setTranslation(...wall.position));
+  const person = world.createRigidBody(RAPIER.RigidBodyDesc.kinematicPositionBased().setTranslation(YARD_LIMIT - 1, 1, 0));
+  const capsule = world.createCollider(RAPIER.ColliderDesc.capsule(.38, .28), person);
+  const controller = world.createCharacterController(.04);
+  for (let i = 0; i < 90; i++) {
+    controller.computeColliderMovement(capsule, { x: .1, y: -.03, z: 0 });
+    const move = controller.computedMovement(), here = person.translation();
+    person.setNextKinematicTranslation({ x: here.x + move.x, y: here.y + move.y, z: here.z + move.z });
+    world.step();
+  }
+  assert.ok(person.translation().x < YARD_LIMIT && person.translation().x > YARD_LIMIT - .5);
+  assert.ok(person.translation().y > .6, 'character remains supported by the ground');
+  const tractor = world.createRigidBody(RAPIER.RigidBodyDesc.dynamic().setTranslation(0, .5, YARD_LIMIT - 2).lockRotations());
+  world.createCollider(RAPIER.ColliderDesc.cuboid(.85, .4, .5), tractor);
+  for (let i = 0; i < 120; i++) {
+    tractor.setLinvel({ x: 0, y: tractor.linvel().y, z: 7 }, true);
+    world.step();
+  }
+  assert.ok(tractor.translation().z < YARD_LIMIT && tractor.translation().z > YARD_LIMIT - 1);
+  assert.ok(tractor.translation().y > .3);
+  world.free();
 });

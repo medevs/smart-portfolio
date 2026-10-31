@@ -1,6 +1,6 @@
 "use client";
 
-import { Component, useEffect, useRef, type ReactNode } from "react";
+import { Component, useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 import { createRoot, events, extend, type RootState } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -26,7 +26,9 @@ export function SceneRoot({ children, low, onFailure }: { children: ReactNode; l
   const configured = useRef(false);
   const state = useRef<RootState | null>(null);
   const current = useRef({ children, low, onFailure });
-  current.current = { children, low, onFailure };
+  useLayoutEffect(() => {
+    current.current = { children, low, onFailure };
+  }, [children, low, onFailure]);
 
   useEffect(() => {
     const container = host.current;

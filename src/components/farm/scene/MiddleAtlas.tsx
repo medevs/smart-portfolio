@@ -3,6 +3,7 @@
 import { useLayoutEffect, useMemo, useRef } from "react";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
+import { YARD_WALLS } from "./yard-boundaries";
 import { Surface } from "./materials";
 import type { ModelProps } from "./models";
 
@@ -77,6 +78,7 @@ export function AtlasLandscape({ night = false }: { night?: boolean }) {
   return <group>
     {/* An orchard in rows, with a narrow stone-lined seguia beside it. */}
     <Orchard />
+    <FarmPerimeter />
     <FutureSpaces night={night} />
     <group position={[0, 0, -17]}><ModernHomestead night={night} /></group>
     {[-0.36, 0.36].map(x => <Block key={x} position={[-10.4 + x, 0.12, 9.5]} size={[0.16, 0.24, 14]} stone color="#ae9c7f" />)}
@@ -107,7 +109,7 @@ function SolarRoof() {
 }
 
 type Instance = { position: [number, number, number]; scale?: [number, number, number]; rotation?: number };
-function Repeated({ instances, shape, color }: { instances: Instance[]; shape: "trunk" | "canopy" | "apple" | "crop"; color: string }) {
+function Repeated({ instances, shape, color }: { instances: Instance[]; shape: "trunk" | "canopy" | "apple" | "crop" | "wall"; color: string }) {
   const mesh = useRef<THREE.InstancedMesh>(null);
   useLayoutEffect(() => {
     if (!mesh.current) return;
@@ -123,8 +125,8 @@ function Repeated({ instances, shape, color }: { instances: Instance[]; shape: "
     mesh.current.computeBoundingSphere();
   }, [instances]);
   return <instancedMesh ref={mesh} args={[undefined, undefined, instances.length]} castShadow receiveShadow>
-    {shape === "trunk" ? <cylinderGeometry args={[0.08, 0.15, 1.8, 7]} /> : shape === "apple" ? <sphereGeometry args={[0.1, 6, 5]} /> : shape === "crop" ? <sphereGeometry args={[0.18, 7, 5]} /> : <icosahedronGeometry args={[1.15, 2]} />}
-    <meshStandardMaterial color={color} roughness={0.93} />
+    {shape === "wall" ? <boxGeometry args={[1, 1, 1]} /> : shape === "trunk" ? <cylinderGeometry args={[0.08, 0.15, 1.8, 7]} /> : shape === "apple" ? <sphereGeometry args={[0.1, 6, 5]} /> : shape === "crop" ? <sphereGeometry args={[0.18, 7, 5]} /> : <icosahedronGeometry args={[1.15, 2]} />}
+    {shape === "wall" ? <Surface name="rock" color={color} repeat={[12, 1]} roughness={1} metalness={0} /> : <meshStandardMaterial color={color} roughness={0.93} />}
   </instancedMesh>;
 }
 
@@ -220,4 +222,13 @@ function ModernHomestead({ night }: { night: boolean }) {
     <Block position={[-3.8, .45, 3.2]} size={[1.4, .6, .7]} stone color="#b29c7b" />
     <Block position={[3.8, .45, 3.2]} size={[1.4, .6, .7]} stone color="#b29c7b" />
   </group>;
+}
+
+
+function FarmPerimeter() {
+  const sections = useMemo<Instance[]>(() => YARD_WALLS.map(wall => ({
+    position: [wall.position[0], .45, wall.position[2]],
+    scale: [wall.args[0] * 2, .9, wall.args[2] * 2],
+  })), []);
+  return <Repeated instances={sections} shape="wall" color="#9b9078" />;
 }
