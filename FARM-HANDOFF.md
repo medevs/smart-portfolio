@@ -79,29 +79,64 @@ src/data/morocco-references.json. Repeated planting stays instanced.
   startup recovers without a stuck loader. Browser-extension metadata errors are
   separate. This browser did not and cannot prove successful 3D rendering.
 
-## Dependencies and security
+## Dependencies and security · migration checkpoint
 
-Compatible updates include React/DOM **19.3.1**, Fiber **9.8.2**, Drei **10.7.9**,
-React postprocessing **3.2.2**, Next/eslint-config-next **15.5.28**, and other
-compatible packages. Rendering peer requirements checked; npm ls direct renderer
-packages succeeds. Three remains 0.170; breaking majors were not blindly adopted.
-Next's critical audit finding is gone. Audit still reports **14 high / 33 moderate /
-0 critical** across legacy AI/LangChain/OpenAI, tools and transitive/vendored
-packages (including Next PostCSS/sharp). #21 remains open for deliberate migrations
-and chatbot/API verification. Do not claim a clean audit or follow unsafe downgrade
-suggestions. No paid services or asset tools were installed.
+Branch `codex/dependency-security-migration` upgrades Next/eslint-config-next to
+**16.4.3**, ESLint **10.14.0**, AI SDK **7.0.159** / React adapter **4.0.163**,
+LangChain core **1.3.2**, OpenAI integration **1.8.0**, community **1.1.29**,
+text splitters **1.0.2**, syntax highlighter **16.1.2** and patched Zod. Runtime/CI
+is Node **22.x**. Remove unused direct OpenAI/uuid/meta-LangChain and unused
+analysis tools; import document/splitter packages directly in the explicit indexer.
+React/Fiber/Drei/Three remain at the verified game-batch versions above.
+
+Audit now reports **0 production findings** (`npm audit --omit=dev`) and
+**16 moderate / 0 high / 0 critical** overall, all remaining findings propagated
+from minimatch in development lint dependencies (follow-up #25). Do not force minimatch 11 over
+legacy callable APIs or claim the whole tree is clean. A scoped same-major parser
+patch fixes typography's vulnerable transitive selector parser. Earlier numbers
+(14 high/33 moderate) are superseded by this migration.
+
+The chatbot uses the current TextStreamChatTransport while retaining the existing
+plain-text /api/chat contract. A bounded parser rejects malformed/non-text/oversized
+requests before model/retrieval calls and avoids returning internal error details.
+Missing retrieval configuration can now use the existing fallback context.
+**33 tests pass**, including actual SDK text-stream decoding (split UTF-8), errors,
+real LangChain prompt/model/output-parser integration, Supabase RPC shape and
+indexing adapter/document-splitter behavior with in-memory fetch fixtures. Tests
+reject any unexpected network target. No paid API, real database write, embeddings
+generation or live model response was used to validate this migration.
+
+Next 16 uses direct Turbopack build and ESLint flat config/CLI. Type errors are no
+longer ignored during build. New lint checks prompted deterministic smoke seeds,
+cloned/disposed texture sampler ownership, committed-profile refs, derived welcome
+state and timer/hydration cleanup. Three's imperative GPU uniform update and three
+external-browser hydration syncs have narrowly documented lint exceptions; compiler
+rules are not disabled globally. TypeScript, lint and direct build pass. Local Node
+is 24; GitHub CI on 22 and Vercel deployment must pass before promotion.
+
+A repeat build failed opening the local Turbopack cache: a stray nonnumeric
+`.00000031.sst.zfEpw2` file caused `invalid digit found in string`. Quarantining that
+single temporary cache artifact restored a cached build. No product config change
+or embeddings operation was involved. Record actual CI/deployment/live evidence in
+#21 after promotion; GPU/touch checks remain unverified.
+
+Migration references reviewed: https://nextjs.org/docs/app/guides/upgrading/version-16,
+https://ai-sdk.dev/docs/ai-sdk-ui/stream-protocol,
+https://ai-sdk.dev/docs/ai-sdk-ui/transport and
+https://docs.langchain.com/oss/javascript/migrate/langchain-v1.
+Installed Next docs: node_modules/next/dist/docs/01-app/02-guides/upgrading/version-16.md.
 
 ## Next steps and concrete blockers
 
 FARM-ROADMAP.md and issues #16–#21 track acceptance. #17 and #19 implementation
 checks are closed; #16/#18 retain integration/touch evidence, #20 release gate is
-open, and #21 retains dependency security migrations.
+open, and #21 tracks the dependency migration deployment checks.
 
 1. Use a GPU-capable browser to play the full activity loop, camera/orbit/walk/
    sprint/tractor/travel, pause/daylight/shader recovery; record visuals/performance.
 2. Verify a genuine narrow touch viewport: no overlapping HUD, usable pad/actions/
    panels. This browser has no viewport-resize capability. Do not claim mobile QA.
-3. Migrate remaining vulnerable major dependencies deliberately, preserving routes.
+3. Finish #21 deployment checks; track development-only minimatch findings separately.
 4. Review PR #11 separately; helper-only focus tests do not prove both callers.
 
 Supported local sites-preview mailbox is absent. Protected Vercel preview sign-in

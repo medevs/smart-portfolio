@@ -254,9 +254,9 @@ function Smoke({ position }: { position: [number, number, number] }) {
   const seeds = useMemo(() => {
     const arr = new Float32Array(18 * 3);
     for (let i = 0; i < 18; i++) {
-      arr[i * 3] = (Math.random() - 0.5) * 0.2;
-      arr[i * 3 + 1] = Math.random();
-      arr[i * 3 + 2] = (Math.random() - 0.5) * 0.2;
+      arr[i * 3] = Math.sin(i * 3.71) * 0.1;
+      arr[i * 3 + 1] = ((i * 0.61803398875) % 1);
+      arr[i * 3 + 2] = Math.cos(i * 5.13) * 0.1;
     }
     return arr;
   }, []);
@@ -550,8 +550,8 @@ function Field({ color, cols, rows, height }: { color: string; cols: number; row
   const count = rowCount * perRow;
   const geom = useMemo(() => new THREE.BoxGeometry(0.08, height, 0.08), [height]);
   const ref = useRef<THREE.InstancedMesh>(null);
-  const dummy = useMemo(() => new THREE.Object3D(), []);
   useLayoutEffect(() => {
+    const dummy = new THREE.Object3D();
     const mesh = ref.current;
     if (!mesh) return;
     let n = 0;
@@ -569,7 +569,7 @@ function Field({ color, cols, rows, height }: { color: string; cols: number; row
     }
     mesh.count = n;
     mesh.instanceMatrix.needsUpdate = true;
-  }, [count, d, dummy, height, perRow, rowCount, w]);
+  }, [count, d, height, perRow, rowCount, w]);
   return (
     <group>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>

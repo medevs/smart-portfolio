@@ -35,9 +35,9 @@ function LoadedTextures({ children }: { children: ReactNode }) {
     const out = {} as Record<SurfaceName, Set>;
     let index = 0;
     for (const name of Object.keys(FILES) as SurfaceName[]) {
-      const diff = loaded[index++];
-      const nor = loaded[index++];
-      const arm = loaded[index++];
+      const diff = loaded[index++].clone();
+      const nor = loaded[index++].clone();
+      const arm = loaded[index++].clone();
       for (const tex of [diff, nor, arm]) {
         tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
         tex.anisotropy = 8;
@@ -49,6 +49,9 @@ function LoadedTextures({ children }: { children: ReactNode }) {
     }
     return out;
   }, [loaded]);
+  useEffect(() => () => {
+    for (const set of Object.values(lib)) for (const texture of Object.values(set)) texture.dispose();
+  }, [lib]);
   return <Ctx.Provider value={lib}>{children}</Ctx.Provider>;
 }
 

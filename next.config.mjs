@@ -9,12 +9,6 @@ const nextConfig = {
     ],
   },
   transpilePackages: ["three", "@react-three/fiber", "@react-three/drei", "@react-three/postprocessing", "@react-three/rapier"],
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
 };
 
 export default nextConfig;

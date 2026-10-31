@@ -53,12 +53,11 @@ export default function HeroSection() {
     } else {
       if (displayText.length > 0) {
         const timeout = setTimeout(() => {
-          setDisplayText(displayText.slice(0, -1));
+          const remaining = displayText.slice(0, -1);
+          setDisplayText(remaining);
+          if (!remaining) { setRoleIndex(prev => (prev + 1) % roles.length); setIsTyping(true); }
         }, 40);
         return () => clearTimeout(timeout);
-      } else {
-        setRoleIndex((prev) => (prev + 1) % roles.length);
-        setIsTyping(true);
       }
     }
   }, [displayText, isTyping, roleIndex]);

@@ -21,7 +21,6 @@ export default function TypingText({
   onComplete,
 }: TypingTextProps) {
   const [displayedText, setDisplayedText] = useState("");
-  const [isComplete, setIsComplete] = useState(false);
   const [started, setStarted] = useState(false);
 
   useEffect(() => {
@@ -42,7 +41,6 @@ export default function TypingText({
 
       return () => clearTimeout(timeout);
     } else {
-      setIsComplete(true);
       onComplete?.();
     }
   }, [displayedText, text, speed, started, onComplete]);
@@ -50,12 +48,7 @@ export default function TypingText({
   return (
     <span className={cn("font-mono", className)}>
       {displayedText}
-      {showCursor && !isComplete && (
-        <span className="inline-block w-2 h-4 ml-0.5 bg-terminal-green animate-cursor-blink" />
-      )}
-      {showCursor && isComplete && (
-        <span className="inline-block w-2 h-4 ml-0.5 bg-terminal-green animate-cursor-blink" />
-      )}
+      {showCursor && <span className="inline-block w-2 h-4 ml-0.5 bg-terminal-green animate-cursor-blink" />}
     </span>
   );
 }

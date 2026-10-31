@@ -84,9 +84,17 @@ product Escape reopening Pause, then rechecked both on production.
 | #18 | Desktop production UI verified; narrow/touch gate remains |
 | #19 | Closed: scene/clock tests and live settings/audio controls verified; GPU visuals remain #20 |
 | #20 | Open: cloud GPU disabled and no narrow viewport control; no visual GPU or touch claim |
-| #21 | Compatible updates shipped; 14 high/33 moderate security findings need deliberate migrations |
+| #21 | Next 16 / AI SDK 7 / LangChain 1 migration implemented; 33 tests, types/lint/build pass; 0 production findings, 16 development-only moderate findings tracked in #25; CI/deployment checks pending |
 
 The 3D game is primary. No claim of photorealism or complete visual/gameplay QA is
 made. Keep #20 open until a GPU-capable full playthrough and touch review pass.
 PR #11 remains separate. Do not bypass missing local preview infrastructure,
 blocked local-file harness navigation or declined protected-preview sign-in.
+
+### Dependency migration checkpoint
+
+Current branch removes unused legacy packages, migrates the active chatbot/indexer,
+updates Next 16/Turbopack/ESLint and bounds the existing plain-text chat API.
+The real SDK + LangChain/Supabase adapters are tested with in-memory fetch fixtures;
+no paid APIs or real database writes were used. See FARM-HANDOFF.md and #21 for
+promotion evidence. GPU/touch release gate #20 remains unchanged.

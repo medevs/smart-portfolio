@@ -3,8 +3,8 @@ import dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 dotenv.config({ path: ".env" });
 
-import { Document } from "langchain/document";
-import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import { Document } from "@langchain/core/documents";
+import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { getEmbeddingsCollection, getVectorStore } from "../src/lib/supabase";
 import fs from "fs";
 import path from "path";

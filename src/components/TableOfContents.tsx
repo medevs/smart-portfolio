@@ -43,6 +43,8 @@ export default function TableOfContents({ className }: TableOfContentsProps) {
       };
     });
 
+    // Synchronize headings discovered in the committed article DOM; unavailable during SSR.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setHeadings(items);
 
     // Set up intersection observer to highlight active heading

@@ -478,7 +478,9 @@ function Grass({ placed, grid, count }: { placed: Placed[]; grid: FarmData["grid
   }, [count, grid, placed]);
 
   useFrame(() => {
-    const shader = material.userData.shader as { uniforms: { uTime: { value: number } } } | undefined;
+    const shader = (ref.current?.material as THREE.Material | undefined)?.userData.shader as { uniforms: { uTime: { value: number } } } | undefined;
+    // Three owns this GPU uniform; useFrame updates it without React rerenders.
+    // eslint-disable-next-line react-hooks/immutability
     if (shader) shader.uniforms.uTime.value = gameClock.seconds;
   });
 

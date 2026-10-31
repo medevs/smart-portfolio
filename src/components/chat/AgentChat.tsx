@@ -1,9 +1,10 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Message, useChat } from "ai/react";
+import { useChat } from "@ai-sdk/react";
+import { createChatTransport, messageText } from "./transport";
 import { Bot, X, Sparkles } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import AgentMessage from "./AgentMessage";
 import AgentInput from "./AgentInput";
 import QuickActions from "./QuickActions";
@@ -14,35 +15,10 @@ interface AgentChatProps {
 }
 
 export default function AgentChat({ open, onClose }: AgentChatProps) {
-  const {
-    messages,
-    input,
-    handleInputChange,
-    handleSubmit: originalHandleSubmit,
-    setMessages,
-    setInput,
-    isLoading,
-    error,
-    append,
-  } = useChat({
-    api: "/api/chat",
-    streamProtocol: "text",
-    onResponse: (response) => {
-      if (!response.ok) {
-        console.error("Response error:", response.statusText);
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-    },
-    onError: (error) => {
-      console.error("Chat error:", error);
-      const errorMessage: Message = {
-        id: Date.now().toString(),
-        role: "assistant",
-        content: `\`\`\`\nError: ${error?.message || "Something went wrong"}\n\`\`\`\n\nPlease try again or refresh the page.`,
-      };
-      setMessages([...messages, errorMessage]);
-    },
-  });
+  const [input, setInput] = useState("");
+  const transport = useMemo(() => createChatTransport(), []);
+  const { messages, sendMessage, setMessages, status, error } = useChat({ transport });
+  const isLoading = status === "submitted" || status === "streaming";
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -58,7 +34,9 @@ export default function AgentChat({ open, onClose }: AgentChatProps) {
     if (!input.trim() || isLoading) return;
 
     try {
-      await originalHandleSubmit(e);
+      const text = input.trim();
+      setInput("");
+      await sendMessage({ text });
     } catch (err: any) {
       console.error("Failed to send message:", err);
     }
@@ -66,10 +44,7 @@ export default function AgentChat({ open, onClose }: AgentChatProps) {
 
   const handleCommand = async (command: string) => {
     if (isLoading) return;
-    await append({
-      role: "user",
-      content: command,
-    });
+    await sendMessage({ text: command });
   };
 
   const lastMessageIsUser = messages[messages.length - 1]?.role === "user";
@@ -175,7 +150,7 @@ export default function AgentChat({ open, onClose }: AgentChatProps) {
                 <AgentMessage
                   key={message.id}
                   role={message.role as "user" | "assistant"}
-                  content={message.content}
+                  content={messageText(message)}
                 />
               ))}
 
@@ -216,7 +191,7 @@ export default function AgentChat({ open, onClose }: AgentChatProps) {
         {/* Input Area */}
         <AgentInput
           value={input}
-          onChange={handleInputChange}
+          onChange={event => setInput(event.target.value)}
           onSubmit={handleSubmit}
           onClear={() => setMessages([])}
           isLoading={isLoading}
