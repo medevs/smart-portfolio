@@ -98,3 +98,11 @@ updates Next 16/Turbopack/ESLint and bounds the existing plain-text chat API.
 The real SDK + LangChain/Supabase adapters are tested with in-memory fetch fixtures;
 no paid APIs or real database writes were used. See FARM-HANDOFF.md and #21 for
 promotion evidence. PR #26 merged at c7a1ed8; production map/save/product/catalog/fund/legal checks passed. Privacy storage wording was corrected after live review. GPU/touch release gate #20 remains unchanged.
+
+### Urgent gameplay regression · #28
+
+User reports repeated bumping and loss of control. Suspend claims of playable
+release. Reproduced and corrected camera-controller contention, rerender body
+teleports and render-rate-dependent movement; 37 tests (including real Rapier/R3F
+and camera-controls integration), types/lint/build pass. Ship only after CI, then
+confirm deployment; user/GPU visual playthrough still must pass. See FARM-HANDOFF.md.
