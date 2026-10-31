@@ -2,6 +2,7 @@
  * Enhanced RAG-based Chat API with Agent Personality
  * Features: Improved RAG, concise responses, slash commands, personality
  */
+import { readChatMessages } from "@/lib/chat-request";
 import { getVectorStore } from "@/lib/supabase";
 import { ChatOpenAI } from "@langchain/openai";
 import { StringOutputParser } from "@langchain/core/output_parsers";
@@ -121,15 +122,9 @@ function generateFollowUp(query: string): string {
  */
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const messages = body.messages;
-
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      return Response.json(
-        { error: "Invalid request: messages array is required" },
-        { status: 400 }
-      );
-    }
+    const parsed = await readChatMessages(req);
+    if (parsed.error !== undefined) return Response.json({ error: parsed.error }, { status: parsed.status });
+    const { messages } = parsed;
 
     let currentMessageContent = messages[messages.length - 1].content.trim();
 
@@ -163,10 +158,10 @@ export async function POST(req: Request) {
     });
 
     // Initialize vector store and perform similarity search
-    const vectorStore = await getVectorStore();
     let resumeContext = "";
 
     try {
+      const vectorStore = await getVectorStore();
       // Get more documents for re-ranking
       const relevantDocs = await vectorStore.similaritySearch(
         currentMessageContent,
@@ -289,7 +284,6 @@ Respond concisely and helpfully:`);
     return Response.json(
       {
         error: "Chat processing failed",
-        details: error?.message || "Unknown error occurred",
       },
       { status: 500 }
     );

@@ -82,16 +82,23 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
 
   const active = activeId ? findSpot(placed, activeId) : null;
   const raised = fundRaised(farm.fund);
+  const [now, setNow] = useState(Date.now);
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 60000);
+    return () => clearInterval(timer);
+  }, []);
   const featured =
     farm.sponsors.featuredGate &&
     !Number.isNaN(Date.parse(farm.sponsors.featuredGate.until)) &&
-    Date.parse(farm.sponsors.featuredGate.until) > Date.now()
+    Date.parse(farm.sponsors.featuredGate.until) > now
       ? farm.sponsors.featuredGate
       : null;
 
   useEffect(() => {
     const mode = document.documentElement.dataset.farmPhase;
     const nextPhase = mode === "sketch" ? "sketch" : mode === "intro" ? "intro" : "color";
+    // Hydrate the server-inserted browser bootstrap and query state after mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPhase(nextPhase);
     const stored = document.documentElement.dataset.farmLight;
     setLight(stored === "night" || stored === "sunset" || stored === "day" ? stored : "day");

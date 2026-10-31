@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { freshProfile, readProfile, writeProfile, type Preferences, type Profile } from "@/farm/game/save";
 import { interact } from "@/farm/game/progress";
 import { destination, nearestPlace, SPAWN, type DestinationId } from "@/farm/game/world";
@@ -17,13 +17,15 @@ export function useFarmGame({ ready, exploring, externalPaused, onExplore, onPro
   const [message, setMessage] = useState("");
   const [storageAvailable, setStorageAvailable] = useState(true);
   const current = useRef(profile);
-  current.current = profile;
+  useLayoutEffect(() => { current.current = profile; }, [profile]);
   const restored = useRef(false);
-  const greeted = useRef(false);
-  const paused = externalPaused || panel !== null;
+  const visiblePanel: Panel = panel ?? (loaded && ready && !externalPaused && !profile.introduced ? "welcome" : null);
+  const paused = externalPaused || visiblePanel !== null;
   useEffect(() => {
     try {
       const saved = readProfile(window.localStorage);
+      // Load browser storage after hydration; the server cannot read this external state.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setProfile(saved.profile); setStorageAvailable(saved.available);
 
     } catch { setStorageAvailable(false); }
@@ -35,12 +37,6 @@ export function useFarmGame({ ready, exploring, externalPaused, onExplore, onPro
     walk.px = profile.position.x; walk.pz = profile.position.z;
     walk.travel = { ...profile.position };
   }, [loaded, ready, profile.position]);
-  useEffect(() => {
-    if (loaded && ready && !externalPaused && !greeted.current) {
-      greeted.current = true;
-      if (!profile.introduced) setPanel("welcome");
-    }
-  }, [loaded, ready, externalPaused, profile.introduced]);
   const save = useCallback(() => {
     const point = { x: walk.px, z: walk.pz };
     const next = { ...current.current, position: !restored.current ? current.current.position : !walk.driving && safeSpawn(point) ? point : SPAWN };
@@ -71,7 +67,7 @@ export function useFarmGame({ ready, exploring, externalPaused, onExplore, onPro
     const key = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.repeat || event.ctrlKey || event.metaKey || event.altKey || externalPaused) return;
       if (event.target instanceof HTMLElement && event.target.closest("input, textarea, select, [contenteditable='true'], [role='dialog']")) return;
-      if (panel) return; // Radix owns Escape and focus while a panel is open.
+      if (visiblePanel) return; // Radix owns Escape and focus while a panel is open.
       const k = event.key.toLowerCase();
       if (k === "m" || k === "j" || k === "escape") { event.preventDefault(); setPanel(k === "m" ? "map" : k === "j" ? "journal" : "pause"); }
       if (k === "e") { event.preventDefault(); act(); }
@@ -79,7 +75,7 @@ export function useFarmGame({ ready, exploring, externalPaused, onExplore, onPro
     // Inspect dialog state before Radix dismisses and detaches the key target.
     window.addEventListener("keydown", key, true);
     return () => window.removeEventListener("keydown", key, true);
-  }, [act, panel, externalPaused]);
+  }, [act, visiblePanel, externalPaused]);
   function travel(id: DestinationId) {
     const target = destination(id);
     if (!ready || !target || !safeSpawn(target)) return;
@@ -94,6 +90,6 @@ export function useFarmGame({ ready, exploring, externalPaused, onExplore, onPro
     setWaypoint(null); setMessage("A fresh journal. Your settings are kept.");
     walk.travel = { ...SPAWN }; close();
   }
-  return { profile, panel, setPanel, close, waypoint, setWaypoint, message, storageAvailable, paused, act, travel, preferences, reset };
+  return { profile, panel: visiblePanel, setPanel, close, waypoint, setWaypoint, message, storageAvailable, paused, act, travel, preferences, reset };
 }
 export type FarmGame = ReturnType<typeof useFarmGame>;
