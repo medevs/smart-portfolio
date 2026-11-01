@@ -138,3 +138,12 @@ test('unsupported WebGL recovers before constructing Three without hiding other 
   assert.equal(farmContext({getContext(){return null}},false),null);
   assert.equal(farmContext({getContext(){throw Error('unsupported')}},false),null);
 });
+
+
+test('chapter sharing handles successful, denied, throwing and indefinitely pending clipboard writes',async()=>{
+  const {copyChapterLink}=require('../src/farm/game/share-link.ts');
+  assert.equal(await copyChapterLink(async()=>{}),true);
+  assert.equal(await copyChapterLink(async()=>{throw Error('denied')}),false);
+  assert.equal(await copyChapterLink(()=>{throw Error('missing API')}),false);
+  assert.equal(await copyChapterLink(()=>new Promise(()=>{}),10),false);
+});

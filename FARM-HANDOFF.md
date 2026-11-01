@@ -345,3 +345,26 @@ uv_resident_set_memory ENOENT; require clean Node22 CI and Vercel before merge.
 After promotion check all chapters, sharing/waypoint feedback, Escape/focus,
 projects, support and console on production. Keep GPU/touch gates #20/#28 and
 separate product-focus PR #11 open; do not infer visual GPU success from CPU tests.
+
+### Tour production QA and sharing follow-up
+
+PR #35 merged as 6fbe72be135a358cc284a599af1007f952ca1a8e after Node22
+Farm checks 41338264893 and preview HqMQyPTfRTWWGQsvcc1oW8MmFGmb passed.
+Merge CI 41338383279 and production 7huAr4ZEr7A1HZg2rRXmBsGbVkXu passed.
+Actual production browser at 1363x936: ?tour=gate opens chapter 1; Next traverses
+all five chapters with correct copy/image/links; orchard waypoint confirms in
+place and is Apple orchard in the journal; activity and discovery counts stay
+0/5 and 0/4; Help build and all four project dialogs open; product Escape closes
+without surprise Pause. No form submitted. Tour layout visually inspected.
+Fresh tour console: no site application errors/warnings. Two extension metadata
+errors belong to chrome-extension://, not the site. WebGL is disabled here; the
+new capability path recovers without Three error logs. No GPU/FPS/touch claim.
+
+Live QA caught a pending clipboard permission request: Copy chapter link had no
+immediate feedback and could wait indefinitely. Follow-up adds immediate copying
+status, a 1.8s timeout with a usable manual-link fallback, request invalidation
+when chapters/waypoints change or the tour unmounts, and success/failure/throwing/
+pending clipboard regression checks. Make the story card opaque to avoid faint
+background labels showing through; correct the cedar reference alt to describe
+the monkeys actually visible in its photo. 58 local tests, types/lint pass.
+Require Node22 CI/Vercel and live fallback/reload/console checks after promotion.
