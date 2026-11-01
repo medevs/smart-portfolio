@@ -123,3 +123,13 @@ confirm deployment; user/GPU visual playthrough still must pass. See FARM-HANDOF
 
 Actual GPU appearance, full playthrough and physical narrow/touch checks remain
 release gates; passing CPU geometry tests does not close them.
+
+### Weather and performance follow-up · 2026-11-01
+
+Saved clear/breeze/rain settings, overcast light, shared-clock rain and sheltered
+bees; compass direction in waypoint HUD. Reduce ambient motion freezes weather.
+Two instanced water/bee draws, no composer in Low color mode, hidden-tab render
+suspension and unchanged-position UI sampling reduce work. 52 CPU/GLSL tests,
+types/lint pass locally; local Turbopack build hit sandbox host memory syscall
+failure. Require clean Node22 CI/Vercel before merge; GPU FPS/visual/touch gates
+remain unverified. No claim of a measured speedup or photorealistic rendering.

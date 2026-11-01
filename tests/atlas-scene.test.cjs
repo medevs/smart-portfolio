@@ -129,13 +129,16 @@ test('farm details animate from the shared clock and stay still when it is pause
   const renderer=await create(React.createElement(FarmLife));
   try {
     await renderer.advanceFrames(1,1/60);
-    const water=renderer.scene.findByProps({name:'flowing-seguia'}).instance.children[0];
-    const bee=renderer.scene.findByProps({name:'orchard-bees'}).instance.children[0];
-    const initial=water.position.z;
+    const water=renderer.scene.findByProps({name:'flowing-seguia'}).instance;
+    const bee=renderer.scene.findByProps({name:'orchard-bees'}).instance;
+    const matrix=new THREE.Matrix4(); water.getMatrixAt(0,matrix);
+    const initial=matrix.elements[14];
+    assert.equal(water.count,18); assert.equal(bee.count,8);
+    assert.equal(water.children.length,0,'water uses one instanced draw instead of 18 meshes');
     advanceWorld(.05);await renderer.advanceFrames(1,1/60);
-    assert.notEqual(water.position.z,initial);
-    gameClock.paused=true;const still=bee.position.clone();
-    advanceWorld(1);await renderer.advanceFrames(1,1/60);assert.ok(bee.position.equals(still));
+    water.getMatrixAt(0,matrix); assert.notEqual(matrix.elements[14],initial);
+    gameClock.paused=true;bee.getMatrixAt(0,matrix);const still=matrix.clone();
+    advanceWorld(1);await renderer.advanceFrames(1,1/60);bee.getMatrixAt(0,matrix);assert.ok(matrix.equals(still));
     for(const node of renderer.scene.findAll(n=>n.instance.isMesh)) for(const value of node.instance.geometry.attributes.position.array) assert.ok(Number.isFinite(value));
   } finally { await renderer.unmount();Object.assign(gameClock,saved); }
 });
@@ -151,4 +154,28 @@ test('very close obstruction views hide the avatar instead of filling the camera
     await renderer.advanceFrames(1,1/60);assert.equal(renderer.scene.findByProps({name:'maker-visitor'}).instance.visible,false);
     camera.position.set(0,3.2,14.2);await renderer.advanceFrames(1,1/60);assert.equal(renderer.scene.findByProps({name:'maker-visitor'}).instance.visible,true);
   } finally {await renderer.unmount();Object.assign(walk,saved);}
+});
+
+
+test('rain is bounded, quality-scaled, paused with the shared clock and shelters bees',async()=>{
+  const {Rain}=require('../src/components/farm/scene/Weather.tsx');
+  const {FarmLife}=require('../src/components/farm/scene/FarmLife.tsx');
+  const {gameClock,advanceWorld}=require('../src/farm/game/clock.ts');
+  const saved={...gameClock};Object.assign(gameClock,{seconds:0,paused:false,reduced:false});
+  const renderer=await create(React.createElement('group',null,React.createElement(Rain,{low:true}),React.createElement(FarmLife,{rain:true})));
+  try {
+    await renderer.advanceFrames(1,1/60);
+    const rain=renderer.scene.findByProps({name:'gentle-rain'}).instance;
+    assert.equal(rain.geometry.attributes.position.count,240);
+    assert.equal(renderer.scene.findByProps({name:'orchard-bees'}).instance.visible,false);
+    const initial=Array.from(rain.geometry.attributes.position.array);
+    advanceWorld(.05);await renderer.advanceFrames(1,1/60);
+    assert.notDeepEqual(Array.from(rain.geometry.attributes.position.array),initial);
+    gameClock.reduced=true;const frozen=Array.from(rain.geometry.attributes.position.array);
+    advanceWorld(1);await renderer.advanceFrames(1,1/60);
+    assert.deepEqual(Array.from(rain.geometry.attributes.position.array),frozen);
+    for(const value of frozen) assert.ok(Number.isFinite(value));
+    await renderer.update(React.createElement(Rain,{low:false}));await renderer.advanceFrames(1,1/60);
+    assert.equal(renderer.scene.findByProps({name:'gentle-rain'}).instance.geometry.attributes.position.count,840);
+  } finally {await renderer.unmount();Object.assign(gameClock,saved);}
 });

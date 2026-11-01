@@ -56,7 +56,7 @@ test('invalid, future, inconsistent and corrupt saves recover without blocking a
   assert.equal(readProfile(storage).available,false); assert.equal(writeProfile(storage,freshProfile()),false);
 });
 test('valid saved settings and safe walking positions survive reload', () => {
-  const profile = {...freshProfile(),position:{x:13,z:22},introduced:true,preferences:{quality:'low',volume:.6,reducedMotion:true,daylight:true}};
+  const profile = {...freshProfile(),position:{x:13,z:22},introduced:true,preferences:{quality:'low',volume:.6,reducedMotion:true,daylight:true,weather:'rain'}};
   let raw; const storage={setItem(key,value){raw=value},getItem(){return raw}};
   assert.equal(writeProfile(storage,profile),true); assert.deepEqual(readProfile(storage).profile,profile);
 });

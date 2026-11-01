@@ -22,3 +22,10 @@ export function distance(a: Point, b: Point) { return Math.hypot(a.x - b.x, a.z 
 export function nearestPlace(point: Point) {
   return DESTINATIONS.reduce((nearest, place) => distance(point, place) < distance(point, nearest) ? place : nearest, DESTINATIONS[0] as typeof DESTINATIONS[number]);
 }
+
+/** Compass follows the map's north (-Z), independent of camera orbit. */
+export function waypointBearing(from: Point, to: Point) {
+  if (distance(from, to) <= 3.2) return "Nearby";
+  const angle = Math.atan2(to.x - from.x, from.z - to.z);
+  return ["N", "NE", "E", "SE", "S", "SW", "W", "NW"][(Math.round(angle / (Math.PI / 4)) + 8) % 8];
+}

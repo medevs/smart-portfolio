@@ -21,6 +21,8 @@ import { Horizon, MillWorks, Scenery } from "./scenery";
 import { AtlasLandscape } from "./MiddleAtlas";
 import { CameraRig } from "./CameraRig";
 import { PhysicsYard } from "./explore";
+import { WEATHER, type Weather } from "@/farm/game/weather";
+import { Rain } from "./Weather";
 import { FarmLife } from "./FarmLife";
 import { GameWorld, WorldClock } from "./GameWorld";
 import { gameClock } from "@/farm/game/clock";
@@ -62,6 +64,7 @@ export type FarmCanvasProps = {
   progress: Progress;
   waypoint: DestinationId | null;
   cycle: boolean;
+  weather: Weather;
   onLight: (mode: LightMode) => void;
 };
 
@@ -96,6 +99,7 @@ function Scene(props: FarmCanvasProps & { onDecline: () => void }) {
   const focused = activeId ? placed.find(entry => entry.plot.id === activeId || entry.item.id === activeId) : null;
   const focusPosition = focused ? plotPosition(focused.plot, farm.grid) : null;
 
+  const overcast = WEATHER[props.weather].overcast;
   const fog = night ? "#12162a" : sunset ? "#e8b48a" : "#b9d4ee";
   const hdri = night ? "/farm/hdri/night.hdr" : sunset ? "/farm/hdri/sunset.hdr" : "/farm/hdri/day.hdr";
 
@@ -106,21 +110,22 @@ function Scene(props: FarmCanvasProps & { onDecline: () => void }) {
       <PerformanceMonitor onDecline={props.onDecline} />
       {quality === "high" && <SoftShadows size={18} samples={12} focus={0.35} />}
       <color attach="background" args={[night ? "#07091c" : sunset ? "#e8885a" : "#8ec8ef"]} />
-      <fog attach="fog" args={[fog, night ? 40 : sunset ? 55 : 70, night ? 110 : 160]} />
-      <Sky night={night} sunset={sunset} />
-      <Lights night={night} sunset={sunset} quality={quality} />
-      {sunset && quality === "high" && <SunShafts />}
+      <fog attach="fog" args={[fog, night ? 40 : sunset ? 55 : 70, night ? 110 : props.weather === "rain" ? 100 : 160]} />
+      <Sky night={night} sunset={sunset} overcast={overcast} />
+      <Lights night={night} sunset={sunset} quality={quality} overcast={overcast} />
+      {sunset && props.weather !== "rain" && quality === "high" && <SunShafts />}
       <OptionalAsset><Environment files={hdri} background={false} environmentIntensity={night ? 0.32 : sunset ? 0.75 : 0.55} /></OptionalAsset>
       <Textures>
       <Horizon />
       <AtlasLandscape night={night} />
-      <FarmLife />
+      <FarmLife rain={props.weather === "rain"} />
+      {props.weather === "rain" && <Rain low={quality === "low"} />}
       <Ground />
       <Lane />
       <HayBales />
       <Rocks />
       <Wildflowers count={quality === "low" ? 40 : 110} />
-      <Grass placed={placed} grid={farm.grid} count={quality === "low" ? 400 : 1600} />
+      <Grass wind={WEATHER[props.weather].wind} placed={placed} grid={farm.grid} count={quality === "low" ? 400 : 1600} />
       <Clouds night={night} />
       <Birds />
       {placed.map((entry) => (
@@ -141,14 +146,14 @@ function Scene(props: FarmCanvasProps & { onDecline: () => void }) {
       {props.explore && <OptionalAsset onFailure={props.onWalkFailure} fallback={<Html center><span className="world-place-label" role="status">Starting walking controls…</span></Html>}><PhysicsYard paused={props.paused} /></OptionalAsset>}
       <CameraRig walking={props.explore} paused={props.paused} reducedMotion={reducedMotion}
         focus={focusPosition ? [focusPosition[0], focusPosition[2]] : null} />
-      {props.plain ? null : (
+      {props.plain || (quality === "low" && props.phase === "color") ? null : (
         <OptionalAsset><Effects night={night} phase={props.phase} reduced={reducedMotion} quality={quality} onSketchDone={props.onSketchDone} focused={!!activeId} /></OptionalAsset>
       )}
     </>
   );
 }
 
-function Lights({ night, sunset, quality }: { night: boolean; sunset: boolean; quality: Quality }) {
+function Lights({ night, sunset, quality, overcast }: { night: boolean; sunset: boolean; quality: Quality; overcast: number }) {
   const sun = useRef<THREE.DirectionalLight>(null);
   const amb = useRef<THREE.AmbientLight>(null);
   const hemi = useRef<THREE.HemisphereLight>(null);
@@ -166,7 +171,7 @@ function Lights({ night, sunset, quality }: { night: boolean; sunset: boolean; q
     const k = blend.current;
     const s = setBlend.current * (1 - k);
     if (sun.current) {
-      sun.current.intensity = THREE.MathUtils.lerp(3.6, 0.34, k) * (1 - s * 0.15);
+      sun.current.intensity = THREE.MathUtils.lerp(3.6, 0.34, k) * (1 - s * 0.15) * (1 - overcast * .75);
       sun.current.color.copy(dayColor).lerp(setColor, s).lerp(cool, k);
       sun.current.position.set(
         THREE.MathUtils.lerp(14, 24, s) * (1 - k) + -10 * k,
@@ -207,7 +212,7 @@ function Lights({ night, sunset, quality }: { night: boolean; sunset: boolean; q
   );
 }
 
-function Sky({ night, sunset }: { night: boolean; sunset: boolean }) {
+function Sky({ night, sunset, overcast }: { night: boolean; sunset: boolean; overcast: number }) {
   const mat = useRef<THREE.ShaderMaterial>(null);
   const blend = useRef(night ? 1 : 0);
   const setBlend = useRef(sunset ? 1 : 0);
@@ -215,6 +220,7 @@ function Sky({ night, sunset }: { night: boolean; sunset: boolean }) {
     blend.current = THREE.MathUtils.damp(blend.current, night ? 1 : 0, 2.2, dt);
     setBlend.current = THREE.MathUtils.damp(setBlend.current, sunset ? 1 : 0, 2.2, dt);
     if (mat.current) {
+      mat.current.uniforms.uOvercast.value = overcast;
       mat.current.uniforms.uNight.value = blend.current;
       mat.current.uniforms.uSunset.value = setBlend.current * (1 - blend.current);
     }
@@ -226,7 +232,7 @@ function Sky({ night, sunset }: { night: boolean; sunset: boolean }) {
         ref={mat}
         side={THREE.BackSide}
         depthWrite={false}
-        uniforms={{ uNight: { value: night ? 1 : 0 }, uSunset: { value: sunset ? 1 : 0 } }}
+        uniforms={{ uOvercast: { value: overcast }, uNight: { value: night ? 1 : 0 }, uSunset: { value: sunset ? 1 : 0 } }}
         vertexShader={`
           varying vec3 vDir;
           void main() {
@@ -236,6 +242,7 @@ function Sky({ night, sunset }: { night: boolean; sunset: boolean }) {
         `}
         fragmentShader={`
           varying vec3 vDir;
+          uniform float uOvercast;
           uniform float uNight;
           uniform float uSunset;
           void main() {
@@ -257,7 +264,8 @@ function Sky({ night, sunset }: { night: boolean; sunset: boolean }) {
             col += haze * vec3(1.0, 0.55, 0.25) * 0.35;
             float stars = fract(sin(dot(floor(dir.xy * 180.0), vec2(12.9, 78.2))) * 43758.5);
             float star = step(0.992, stars) * step(0.15, h) * uNight;
-            col += star;
+            col += star * (1.0 - uOvercast);
+            col = mix(col, mix(vec3(0.42, 0.49, 0.54), vec3(0.045, 0.055, 0.08), uNight), uOvercast);
             gl_FragColor = vec4(col, 1.0);
           }
         `}
@@ -387,7 +395,7 @@ function Wildflowers({ count }: { count: number }) {
   );
 }
 
-function Grass({ placed, grid, count }: { placed: Placed[]; grid: FarmData["grid"]; count: number }) {
+function Grass({ placed, grid, count, wind }: { placed: Placed[]; grid: FarmData["grid"]; count: number; wind: number }) {
   const geom = useMemo(() => {
     const g = new THREE.BufferGeometry();
     const positions = new Float32Array([-0.08, 0, 0, 0.08, 0, 0, 0.02, 0.42, 0.02, -0.02, 0.42, -0.02]);
@@ -404,14 +412,15 @@ function Grass({ placed, grid, count }: { placed: Placed[]; grid: FarmData["grid
     const mat = new THREE.MeshLambertMaterial({ color: "#7e8c4c", side: THREE.DoubleSide });
     mat.onBeforeCompile = (shader) => {
       shader.uniforms.uTime = { value: 0 };
+      shader.uniforms.uWind = { value: 1 };
       shader.vertexShader =
-        "attribute float aPhase;\nuniform float uTime;\n" +
+        "attribute float aPhase;\nuniform float uTime;\nuniform float uWind;\n" +
         shader.vertexShader.replace(
           "#include <begin_vertex>",
           `#include <begin_vertex>
            float tip = uv.y;
-           transformed.x += sin(uTime * 1.5 + aPhase) * tip * 0.12;
-           transformed.z += cos(uTime * 1.2 + aPhase * 0.7) * tip * 0.08;`
+           transformed.x += sin(uTime * 1.5 + aPhase) * tip * 0.12 * uWind;
+           transformed.z += cos(uTime * 1.2 + aPhase * 0.7) * tip * 0.08 * uWind;`
         );
       mat.userData.shader = shader;
     };
@@ -458,10 +467,10 @@ function Grass({ placed, grid, count }: { placed: Placed[]; grid: FarmData["grid
   }, [count, grid, placed]);
 
   useFrame(() => {
-    const shader = (ref.current?.material as THREE.Material | undefined)?.userData.shader as { uniforms: { uTime: { value: number } } } | undefined;
+    const shader = (ref.current?.material as THREE.Material | undefined)?.userData.shader as { uniforms: { uTime: { value: number }; uWind: { value: number } } } | undefined;
     // Three owns this GPU uniform; useFrame updates it without React rerenders.
     // eslint-disable-next-line react-hooks/immutability
-    if (shader) shader.uniforms.uTime.value = gameClock.seconds;
+    if (shader) { shader.uniforms.uTime.value = gameClock.seconds; shader.uniforms.uWind.value = wind; }
   });
 
   return <instancedMesh ref={ref} args={[geom, material, count]} frustumCulled={false} />;

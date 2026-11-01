@@ -76,3 +76,35 @@ test('standing beneath an orchard crown keeps the close camera outside its leave
   keepCameraClear(target,desired);
   assert.equal(crown.containsPoint(desired),false,'camera must exit the canopy, not stop inside it');
 });
+
+
+test('weather saves validate new preferences without discarding old progress',()=>{
+  const profile=freshProfile();profile.discoveries=['apiary'];
+  for(const weather of ['clear','breeze','rain']) {
+    profile.preferences.weather=weather;
+    assert.equal(parseProfile(JSON.stringify(profile)).preferences.weather,weather);
+  }
+  for(const weather of ['storm',null,{},42]) {
+    profile.preferences.weather=weather;
+    const restored=parseProfile(JSON.stringify(profile));
+    assert.equal(restored.preferences.weather,'clear');assert.deepEqual(restored.discoveries,['apiary']);
+  }
+  delete profile.preferences.weather;
+  assert.equal(parseProfile(JSON.stringify(profile)).preferences.weather,'clear');
+});
+
+test('waypoint compass uses map north and handles all eight directions and arrival',()=>{
+  const {waypointBearing}=require('../src/farm/game/world.ts');
+  for(const [x,z,label] of [[0,-10,'N'],[10,-10,'NE'],[10,0,'E'],[10,10,'SE'],[0,10,'S'],[-10,10,'SW'],[-10,0,'W'],[-10,-10,'NW']]) assert.equal(waypointBearing({x:0,z:0},{x,z}),label);
+  assert.equal(waypointBearing({x:4,z:9},{x:4,z:9}),'Nearby');
+});
+
+test('hidden tabs stop rendering, clear held controls and detach lifecycle listeners',()=>{
+  const {bindRenderVisibility}=require('../src/components/farm/scene/render-lifecycle.ts');
+  const doc=new EventTarget();doc.hidden=false;const modes=[];let cleared=0;
+  const dispose=bindRenderVisibility(doc,mode=>modes.push(mode),()=>cleared++);
+  doc.hidden=true;doc.dispatchEvent(new Event('visibilitychange'));
+  doc.hidden=false;doc.dispatchEvent(new Event('visibilitychange'));
+  assert.deepEqual(modes,['always','never','always']);assert.equal(cleared,3);
+  dispose();doc.dispatchEvent(new Event('visibilitychange'));assert.equal(modes.length,3);
+});
