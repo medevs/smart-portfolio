@@ -291,3 +291,26 @@ A repeat local build failed restoring cached task data: block 23 header was
 truncated in .next/cache/turbopack/v16.4.3-29bbeab0/00000054.sst, referenced
 by 00000061.meta. Quarantined that generated database and rebuilt it from source;
 no build validation/configuration was disabled. Confirm clean CI before merge.
+
+## Weather and rendering batch · 2026-11-01
+
+Add saved clear/breeze/rain atmosphere in Settings, softened overcast sun/sky,
+wind-scaled grass and single-draw rain; bees shelter during rain. These are artistic
+settings, not live weather. Shared-clock precipitation respects pause, hidden tabs
+and reduced motion. Old saves default to clear without losing journal/discoveries.
+Waypoint HUD adds map-aligned compass directions and nearby confirmation.
+
+Water/bees now use two instanced draws rather than 26 individual meshes. Low
+color mode omits the postprocessing composer. Hidden tabs stop the Fiber render
+loop and clear transient input; Fiber resets its frame clock on resume. Overlay
+position sampling skips hidden tabs and unchanged positions. No FPS improvement
+is claimed without a GPU measurement.
+
+Local Node24: 52 tests (including actual weather GLSL semantic compilation,
+instanced Three matrices, rain quality/pause/reduced-motion, old/new weather saves,
+eight compass directions and visibility lifecycle), TypeScript and lint pass.
+Direct Next build attempted but sandbox host reports ENOENT
+uv_resident_set_memory during Turbopack; do not suppress that failure or weaken
+checks. Node22 CI and Vercel must pass before promotion. No dependency changes,
+paid service or indexer run. #11 remains separate. Actual GPU appearance, frame
+rate, full playthrough and physical narrow/touch validation remain #20/#28.

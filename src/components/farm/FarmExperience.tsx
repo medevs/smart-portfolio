@@ -166,6 +166,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
           progress={game.profile.progress}
           waypoint={game.waypoint}
           cycle={game.profile.preferences.daylight}
+          weather={game.profile.preferences.weather}
           onLight={updateLight}
           activeId={activeId}
           hoveredId={hoveredId}

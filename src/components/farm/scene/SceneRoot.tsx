@@ -3,6 +3,8 @@
 import { Component, useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 import { createRoot, events, extend, type RootState } from "@react-three/fiber";
 import * as THREE from "three";
+import { bindRenderVisibility } from "./render-lifecycle";
+import { resetWalkInput } from "./walk-state";
 import { routeShaderFailure } from "./shader-failure";
 
 extend(THREE as unknown as Parameters<typeof extend>[0]);
@@ -39,6 +41,7 @@ export function SceneRoot({ children, low, onFailure, onShaderFailure }: { child
     container.appendChild(element);
     let disposed = false;
     let starting = false;
+    let unbindVisibility: (() => void) | undefined;
     const renderer = createRoot(element);
     root.current = renderer;
     const fail = (error: unknown) => {
@@ -65,6 +68,7 @@ export function SceneRoot({ children, low, onFailure, onShaderFailure }: { child
         onCreated: created => {
           if (disposed) return;
           state.current = created;
+          unbindVisibility = bindRenderVisibility(document, created.setFrameloop, resetWalkInput);
           created.gl.debug.onShaderError = (gl, program, vertex, fragment) => {
             console.error("Farm shader compilation failed:", gl.getProgramInfoLog(program), gl.getShaderInfoLog(vertex), gl.getShaderInfoLog(fragment));
             routeShaderFailure(gl.getShaderSource(fragment), {
@@ -96,6 +100,7 @@ export function SceneRoot({ children, low, onFailure, onShaderFailure }: { child
       configured.current = false;
       state.current = null;
       observer.disconnect();
+      unbindVisibility?.();
       element.removeEventListener("webglcontextlost", lost);
       renderer.unmount();
       element.remove();

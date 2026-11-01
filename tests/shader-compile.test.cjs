@@ -52,3 +52,18 @@ test('only identified compositor shader failures use plain 3D recovery', () => {
   ]) routeShaderFailure(source, handlers);
   assert.deepEqual(results, ['effects', 'scene', 'scene', 'scene', 'scene']);
 });
+
+
+test('weather sky fragment passes actual GLSL semantic compilation',()=>{
+  const source=fs.readFileSync('src/components/farm/scene/FarmCanvas.tsx','utf8');
+  const fragment=source.match(/fragmentShader=\{`([\s\S]*?)`\}/)[1]
+    .replace('varying vec3 vDir;', 'layout(location=0) in vec3 vDir;')
+    .replace(/uniform float u(Overcast|Night|Sunset);/g,'')
+    .replace('gl_FragColor','fragColor');
+  const binary=compiler.compileGLSL(`#version 310 es
+precision highp float;
+layout(set=0,binding=0) uniform Weather {float uOvercast;float uNight;float uSunset;};
+layout(location=0) out vec4 fragColor;
+${fragment}`, 'fragment');
+  assert.equal(binary[0],0x07230203);
+});

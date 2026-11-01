@@ -1,13 +1,14 @@
+import { isWeather, type Weather } from "./weather";
 import { FIELD_NOTES, type DiscoveryId } from "./discoveries";
 import { safeSpawn } from "@/components/farm/scene/yard-boundaries";
 import { ACTIVITIES, freshProgress, type ActivityId, type Progress } from "./progress";
 import { SPAWN, type Point } from "./world";
 
 export const SAVE_KEY = "medevsmaker.atlas-game.v1";
-export type Preferences = { quality: "auto" | "low" | "high"; reducedMotion: boolean; daylight: boolean; volume: number };
+export type Preferences = { quality: "auto" | "low" | "high"; reducedMotion: boolean; daylight: boolean; volume: number; weather: Weather };
 export type Profile = { version: 1; discoveries: DiscoveryId[]; progress: Progress; position: Point; preferences: Preferences; introduced: boolean };
 export function freshProfile(): Profile {
-  return { version: 1, discoveries: [], progress: freshProgress(), position: { ...SPAWN }, preferences: { quality: "auto", reducedMotion: false, daylight: false, volume: .35 }, introduced: false };
+  return { version: 1, discoveries: [], progress: freshProgress(), position: { ...SPAWN }, preferences: { quality: "auto", reducedMotion: false, daylight: false, volume: .35, weather: "clear" }, introduced: false };
 }
 const record = (value: unknown): value is Record<string, unknown> => !!value && typeof value === "object" && !Array.isArray(value);
 const bounded = (value: unknown, min: number, max: number): value is number => typeof value === "number" && Number.isFinite(value) && value >= min && value <= max;
@@ -32,6 +33,7 @@ export function parseProfile(raw: string | null): Profile {
     fresh.progress = { completed, water: p.water, apples: p.apples };
     if (Array.isArray(value.discoveries)) fresh.discoveries = FIELD_NOTES.filter(note => (value.discoveries as unknown[]).includes(note.id)).map(note => note.id);
     const prefs = value.preferences;
+    if (isWeather(prefs.weather)) fresh.preferences.weather = prefs.weather;
     if (prefs.quality === "auto" || prefs.quality === "low" || prefs.quality === "high") fresh.preferences.quality = prefs.quality;
     fresh.preferences.reducedMotion = prefs.reducedMotion === true;
     fresh.preferences.daylight = prefs.daylight === true;
