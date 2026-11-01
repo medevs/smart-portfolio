@@ -314,3 +314,34 @@ uv_resident_set_memory during Turbopack; do not suppress that failure or weaken
 checks. Node22 CI and Vercel must pass before promotion. No dependency changes,
 paid service or indexer run. #11 remains separate. Actual GPU appearance, frame
 rate, full playthrough and physical narrow/touch validation remain #20/#28.
+
+## Guided tour and graceful graphics recovery · 2026-11-01
+
+PR #34 merged as 185ca06435ff28f12e02d17f8142b70df6538d28 after explicit merge
+approval. Node22 Farm checks 41337269680 and Vercel production
+9WEF8QVfXUMxjFg46VWUPx9ti5mv passed. Live browser verified weather/Low graphics
+selection, persistence after reload and defaults restored. The cloud GPU is still
+disabled; no weather appearance/FPS claim.
+
+Next batch: a five-chapter guided tour (place, maker, orchard, cedars, future
+shared table), existing regional reference photos with credits, chapter links,
+clipboard fallback, direct project/vision/reference actions, waypoint feedback
+and safe Walk here. Menu/welcome/recovery entrances retain the quiet walking HUD.
+Known ?tour= IDs open the matching chapter; invalid IDs do nothing. Tours never
+award field notes or activity progress. Orbit owns each curated cinematic view;
+walking ownership resumes on close. Reduced motion uses immediate camera cuts.
+Physical bodies stay paused rather than being teleported by the tour.
+
+WebGL2 capability is acquired on the real renderer canvas before creating the
+Three renderer and passed through to it. Unsupported/throwing context creation
+uses normal recovery without Three exception logs. Actual renderer, context-loss
+and shader failures remain reported. This is expected-capability handling, not
+console suppression. No dependency, paid service, indexer or sponsor form action.
+
+57 local tests pass, including real animated/instant orbit transforms and return
+to follow camera, all chapter assets/links/credits, no-WebGL controls and context
+recovery. TypeScript/lint pass. Local direct Turbopack build again hits sandbox
+uv_resident_set_memory ENOENT; require clean Node22 CI and Vercel before merge.
+After promotion check all chapters, sharing/waypoint feedback, Escape/focus,
+projects, support and console on production. Keep GPU/touch gates #20/#28 and
+separate product-focus PR #11 open; do not infer visual GPU success from CPU tests.

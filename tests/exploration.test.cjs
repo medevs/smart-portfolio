@@ -108,3 +108,33 @@ test('hidden tabs stop rendering, clear held controls and detach lifecycle liste
   assert.deepEqual(modes,['always','never','always']);assert.equal(cleared,3);
   dispose();doc.dispatchEvent(new Event('visibilitychange'));assert.equal(modes.length,3);
 });
+
+
+test('tour links select only known stops and cannot create progress or unsafe camera views',()=>{
+  const {TOUR_STOPS,tourIndex,tourPath}=require('../src/farm/game/tour.ts');
+  const profile=freshProfile(),before=JSON.stringify(profile);
+  assert.equal(tourIndex(null),-1);assert.equal(tourIndex('unknown'),-1);
+  for(const [i,stop] of TOUR_STOPS.entries()) {
+    assert.equal(tourIndex(stop.id),i);
+    assert.equal(tourPath(i),`/?tour=${stop.id}`);
+    assert.ok(destination(stop.id));
+    assert.ok(stop.eye.every(Number.isFinite)&&stop.target.every(Number.isFinite));
+    assert.ok(stop.eye[1]>=7,'tour eyes clear low buildings');
+    assert.ok(new THREE.Vector3(...stop.eye).distanceTo(new THREE.Vector3(...stop.target))>5);
+    assert.ok(fs.existsSync(path.join('public',stop.image)));
+  }
+  assert.equal(tourPath(-90),tourPath(0));assert.equal(tourPath(NaN),tourPath(0));
+  assert.equal(tourPath(999),tourPath(TOUR_STOPS.length-1));
+  assert.equal(JSON.stringify(profile),before,'browsing a tour cannot grant discoveries or activities');
+});
+
+test('unsupported WebGL recovers before constructing Three without hiding other renderer errors',()=>{
+  const {farmContext}=require('../src/components/farm/scene/webgl-context.ts');
+  const calls=[],context={};
+  const canvas={getContext(...args){calls.push(args);return context}};
+  assert.equal(farmContext(canvas,true),context);
+  assert.equal(calls[0][0],'webgl2');assert.equal(calls[0][1].antialias,false);
+  farmContext(canvas,false);assert.equal(calls[1][1].antialias,true);
+  assert.equal(farmContext({getContext(){return null}},false),null);
+  assert.equal(farmContext({getContext(){throw Error('unsupported')}},false),null);
+});

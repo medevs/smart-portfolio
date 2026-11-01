@@ -133,3 +133,14 @@ suspension and unchanged-position UI sampling reduce work. 52 CPU/GLSL tests,
 types/lint pass locally; local Turbopack build hit sandbox host memory syscall
 failure. Require clean Node22 CI/Vercel before merge; GPU FPS/visual/touch gates
 remain unverified. No claim of a measured speedup or photorealistic rendering.
+
+### Guided showcase visit
+
+A five-chapter tour ties the regional setting, actual software, playable farm
+loop and future community vision together. Shareable chapter links, reference
+photo credits, map waypoints and safe walking transitions work without granting
+rewards. 3D tour views use the one existing orbit controller; reduced-motion cuts
+and return to follow camera have real camera-controls regression coverage.
+Unsupported WebGL is detected before constructing Three, retaining genuine error
+reporting and the useful non-3D story. Await clean CI/deployment and live UI/console
+verification; GPU appearance and physical touch remain explicit release gates.

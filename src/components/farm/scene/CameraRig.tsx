@@ -4,15 +4,16 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { CameraControls } from "@react-three/drei";
 import * as THREE from "three";
 import { bindFollowCamera, cameraView, keepCameraClear } from "./camera-view";
+import type { TourView } from "@/farm/game/tour";
 import { TRACTOR, walk } from "./walk-state";
 
 /** Disabled orbit input still runs CameraControls.update. Mount exactly one camera owner. */
-export function CameraRig({ walking, paused, reducedMotion, focus }: {
-  walking: boolean; paused: boolean; reducedMotion: boolean; focus: [number, number] | null;
+export function CameraRig({ walking, paused, reducedMotion, focus, tour }: {
+  walking: boolean; paused: boolean; reducedMotion: boolean; focus: [number, number] | null; tour?: TourView | null;
 }) {
-  return walking ? <FollowCamera paused={paused} /> : <OrbitCamera paused={paused} reducedMotion={reducedMotion} focus={focus} />;
+  return walking ? <FollowCamera paused={paused} /> : <OrbitCamera paused={paused} reducedMotion={reducedMotion} focus={focus} tour={tour} />;
 }
-function OrbitCamera({ paused, reducedMotion, focus }: { paused: boolean; reducedMotion: boolean; focus: [number, number] | null }) {
+function OrbitCamera({ paused, reducedMotion, focus, tour }: { paused: boolean; reducedMotion: boolean; focus: [number, number] | null; tour?: TourView | null }) {
   const controls = useRef<CameraControls>(null);
   const previousDistance = useRef(cameraView.distance);
   useFrame(() => {
@@ -26,8 +27,9 @@ function OrbitCamera({ paused, reducedMotion, focus }: { paused: boolean; reduce
     controls.current?.dollyTo(Math.hypot(34, 23.8, 39) * cameraView.distance / 6.2, false);
   }, []);
   useEffect(() => {
-    if (x !== undefined && z !== undefined) controls.current?.setLookAt(x + 6.2, 4.8, z + 7.4, x, 1.7, z, !reducedMotion);
-  }, [x, z, reducedMotion]);
+    if (tour) controls.current?.setLookAt(...tour.eye, ...tour.target, !reducedMotion);
+    else if (x !== undefined && z !== undefined) controls.current?.setLookAt(x + 6.2, 4.8, z + 7.4, x, 1.7, z, !reducedMotion);
+  }, [x, z, reducedMotion, tour]);
   return <CameraControls ref={controls} makeDefault minDistance={5} maxDistance={85}
     maxPolarAngle={Math.PI / 2.05} minPolarAngle={.35} smoothTime={reducedMotion ? 0 : .45} enabled={!paused} />;
 }

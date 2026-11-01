@@ -87,3 +87,18 @@ test('quiet walking HUD offers only useful actions and keeps tractor exit availa
     assert.doesNotMatch(driving, /game-touch-action/);
   } finally { walk.driving = wasDriving; }
 });
+
+
+test('tour chapters render meaningful accessible content, honest vision, credits and safe controls without WebGL',()=>{
+  const {TourStory}=require('../src/components/farm/game/TourStory.tsx');
+  const {TOUR_STOPS}=require('../src/farm/game/tour.ts');const noop=()=>{};
+  for(let index=0;index<TOUR_STOPS.length;index++) {
+    const html=renderToStaticMarkup(React.createElement(TourStory,{index,onStep:noop,onWaypoint:noop,onWalk:noop,onHelp:noop,ready:false}));
+    assert.ok(html.includes(TOUR_STOPS[index].title));
+    assert.match(html,/aria-label="Tour chapters"/);assert.match(html,/aria-current="step"/);
+    assert.match(html,/disabled="">Walk here/);
+    assert.ok(html.includes(`href="/?tour=${TOUR_STOPS[index].id}"`));
+    assert.ok(html.includes(TOUR_STOPS[index].credit));
+    if(index===4) assert.match(html,/future concepts, not open bookings/);
+  }
+});

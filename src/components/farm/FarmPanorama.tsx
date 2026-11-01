@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-type Props = { onSelect: (id: string) => void; onExplore: () => void; loading: boolean; unavailable: boolean };
+type Props = { onTour?: () => void; onSelect: (id: string) => void; onExplore: () => void; loading: boolean; unavailable: boolean };
 const PLACES = [
   { id: "about", name: "The maker’s studio", detail: "Meet medevsmaker", x: 34, y: 57 },
   { id: "reelstyles", name: "ReelStyles", detail: "Tools for moving ideas", x: 62, y: 48 },
@@ -12,7 +12,7 @@ const PLACES = [
   { id: "talkthedoc", name: "TalkTheDoc", detail: "Conversations with your documents", x: 71, y: 64 },
 ];
 
-export function FarmPanorama({ onSelect, onExplore, loading, unavailable }: Props) {
+export function FarmPanorama({ onSelect, onTour, onExplore, loading, unavailable }: Props) {
   const [selected, setSelected] = useState(0);
   const futurePlaces = [
     { name: "The gathering place", detail: "Future meetups & shared tables", href: "/gather#meetups", x: 32, y: 41 },
@@ -33,7 +33,7 @@ export function FarmPanorama({ onSelect, onExplore, loading, unavailable }: Prop
       <p className="atlas-eyebrow"><span /> A maker’s little corner of Morocco</p>
       <h2>Rooted here.<br /><em>Building everywhere.</em></h2>
       <p className="atlas-description">A home for making. A farm for gathering. Software, shared tables, and a future welcome in the Middle Atlas.</p>
-      <div className="atlas-cta-row"><button className="atlas-primary" onClick={() => onSelect("reelstyles")}>Explore the work <span aria-hidden="true">↗</span></button><button className="atlas-secondary" onClick={onExplore} disabled={loading}>{loading ? "Opening the 3D world…" : unavailable ? "Retry the 3D farm" : "Enter the 3D farm"} <span aria-hidden="true">→</span></button></div>
+      <div className="atlas-cta-row">{onTour && <button className="atlas-primary" onClick={onTour}>Take the guided tour <span aria-hidden="true">→</span></button>}<button className="atlas-primary" onClick={() => onSelect("reelstyles")}>Explore the work <span aria-hidden="true">↗</span></button><button className="atlas-secondary" onClick={onExplore} disabled={loading}>{loading ? "Opening the 3D world…" : unavailable ? "Retry the 3D farm" : "Enter the 3D farm"} <span aria-hidden="true">→</span></button></div>
       <p className="atlas-support" role="status">{unavailable ? "The 3D world couldn’t start here. Retry it, or explore every project below." : "Choose a place in the landscape to discover what’s inside."}</p>
     </div>
     <div className="atlas-mobile-places" aria-label="Explore projects">{PLACES.map(place => <button key={place.id} onClick={() => onSelect(place.id)}>{place.name} <span aria-hidden="true">↗</span></button>)}</div>

@@ -3,6 +3,7 @@
 import { Component, useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 import { createRoot, events, extend, type RootState } from "@react-three/fiber";
 import * as THREE from "three";
+import { farmContext } from "./webgl-context";
 import { bindRenderVisibility } from "./render-lifecycle";
 import { resetWalkInput } from "./walk-state";
 import { routeShaderFailure } from "./shader-failure";
@@ -39,6 +40,8 @@ export function SceneRoot({ children, low, onFailure, onShaderFailure }: { child
     const element = document.createElement("canvas");
     element.setAttribute("aria-label", "Interactive 3D Middle Atlas farm. Wheel or pinch to zoom; drag to look around. Choose Walk in Menu to explore.");
     container.appendChild(element);
+    const context = farmContext(element, current.current.low);
+    if (!context) { element.remove(); current.current.onFailure(); return; }
     let disposed = false;
     let starting = false;
     let unbindVisibility: (() => void) | undefined;
@@ -64,7 +67,7 @@ export function SceneRoot({ children, low, onFailure, onShaderFailure }: { child
         shadows: true,
         dpr: current.current.low ? [1, 1.2] : [1, 1.5],
         camera: { position: [34, 25, 39], fov: 45, near: 0.1, far: 240 },
-        gl: { antialias: !current.current.low, powerPreference: "default", preserveDrawingBuffer: false },
+        gl: { context, antialias: !current.current.low, powerPreference: "default", preserveDrawingBuffer: false },
         onCreated: created => {
           if (disposed) return;
           state.current = created;
