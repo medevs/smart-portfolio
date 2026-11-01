@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { freshProfile, readProfile, writeProfile, type Preferences, type Profile } from "@/farm/game/save";
+import { TOUR_STOPS, tourIndex as findTourIndex } from "@/farm/game/tour";
 import { discover } from "@/farm/game/discoveries";
 import { zoomCamera } from "../scene/camera-view";
 import { interact } from "@/farm/game/progress";
@@ -8,12 +9,13 @@ import { destination, nearestPlace, SPAWN, type DestinationId } from "@/farm/gam
 import { safeSpawn } from "../scene/yard-boundaries";
 import { resetWalkInput, walk } from "../scene/walk-state";
 
-export type Panel = "welcome" | "map" | "journal" | "settings" | "pause" | "controls" | "notes" | "reset" | null;
+export type Panel = "welcome" | "map" | "journal" | "settings" | "pause" | "controls" | "notes" | "reset" | "tour" | null;
 export function useFarmGame({ ready, exploring, externalPaused, onExplore, onProduct }: {
   ready: boolean; exploring: boolean; externalPaused: boolean; onExplore: () => void; onProduct: (id: string) => void;
 }) {
   const [profile, setProfile] = useState<Profile>(freshProfile);
   const [loaded, setLoaded] = useState(false);
+  const [tourIndex, setTourIndex] = useState(0);
   const [panel, setPanel] = useState<Panel>(null);
   const [waypoint, setWaypoint] = useState<DestinationId | null>(null);
   const [message, setMessage] = useState("");
@@ -36,6 +38,8 @@ export function useFarmGame({ ready, exploring, externalPaused, onExplore, onPro
       setProfile(saved.profile); setStorageAvailable(saved.available);
 
     } catch { setStorageAvailable(false); }
+    const chapter = findTourIndex(new URLSearchParams(window.location.search).get("tour"));
+    if (chapter >= 0) { setTourIndex(chapter); setPanel("tour"); }
     setLoaded(true);
   }, []);
   useEffect(() => {
@@ -97,6 +101,10 @@ export function useFarmGame({ ready, exploring, externalPaused, onExplore, onPro
     resetWalkInput(); onExplore(); close(); setWaypoint(id);
     setMessage(`Travelling to ${target.name.toLowerCase()}.`);
   }
+  function tourStep(index: number) {
+    if (!Number.isInteger(index) || index < 0 || index >= TOUR_STOPS.length) return;
+    resetWalkInput(); setTourIndex(index); setPanel("tour");
+  }
   function preferences(patch: Partial<Preferences>) { setProfile(value => ({ ...value, preferences: { ...value.preferences, ...patch } })); }
   function reset() {
     const fresh = freshProfile();
@@ -104,6 +112,6 @@ export function useFarmGame({ ready, exploring, externalPaused, onExplore, onPro
     setWaypoint(null); setMessage("A fresh journal. Your settings are kept.");
     walk.travel = { ...SPAWN }; close();
   }
-  return { profile, panel: visiblePanel, setPanel, close, waypoint, setWaypoint, message, storageAvailable, paused, act, travel, preferences, reset };
+  return { tourIndex, tourStep, profile, panel: visiblePanel, setPanel, close, waypoint, setWaypoint, message, storageAvailable, paused, act, travel, preferences, reset };
 }
 export type FarmGame = ReturnType<typeof useFarmGame>;

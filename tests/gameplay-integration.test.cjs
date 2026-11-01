@@ -158,3 +158,45 @@ test('orbit zoom also moves the real camera-controls rig within its limits',asyn
     setCameraDistance(16);await frames(renderer,120,1/60);assert.ok(camera.position.distanceTo(target)<=85.01);assert.ok(camera.position.distanceTo(target)>original);
   } finally { await renderer.unmount();resetCameraView(); }
 });
+
+
+test('every guided tour view moves the real orbit camera and yields ownership back to walking',async()=>{
+  reset();const {TOUR_STOPS}=require('../src/farm/game/tour.ts');
+  const camera=new THREE.PerspectiveCamera(45,1,.1,240);
+  const props={walking:false,paused:true,reducedMotion:true,focus:null};
+  const renderer=await create(React.createElement(CameraRig,{...props,tour:TOUR_STOPS[0]}),{camera});
+  try {
+    for(const tour of TOUR_STOPS) {
+      await renderer.update(React.createElement(CameraRig,{...props,tour}));
+      await frames(renderer,2,1/60);
+      assert.ok(camera.position.distanceTo(new THREE.Vector3(...tour.eye))<.01,`instant reduced-motion view: ${tour.id}`);
+      const direction=camera.getWorldDirection(new THREE.Vector3());
+      const expected=new THREE.Vector3(...tour.target).sub(camera.position).normalize();
+      assert.ok(direction.dot(expected)>.999);
+    }
+    await renderer.update(React.createElement(CameraRig,{...props,reducedMotion:false,tour:TOUR_STOPS[1]}));
+    await frames(renderer,180,1/60);
+    assert.ok(camera.position.distanceTo(new THREE.Vector3(...TOUR_STOPS[1].eye))<.02,'animated orbit settles at the selected chapter');
+    await renderer.update(React.createElement(CameraRig,{...props,walking:true,paused:false,tour:null}));
+    await frames(renderer,120,1/60);
+    assert.ok(camera.position.distanceTo(new THREE.Vector3(0,3.2,14.2))<.01,'walking owns the camera again');
+  } finally {await renderer.unmount();}
+});
+
+test('real game hook opens a shared chapter without awarding progress and respects unavailable walking',async()=>{
+  const {useFarmGame}=require('../src/components/farm/game/useFarmGame.ts');
+  const keys=['location','localStorage','setTimeout','clearTimeout','setInterval'];
+  const saved=Object.fromEntries(keys.map(key=>[key,window[key]]));
+  Object.assign(window,{location:{search:'?tour=cedars'},localStorage:{getItem(){return null},setItem(){}},setTimeout,clearTimeout,setInterval});
+  let game,explored=false;
+  function Harness(){game=useFarmGame({ready:false,exploring:false,externalPaused:false,onExplore(){explored=true},onProduct(){}});return null;}
+  const renderer=await create(React.createElement(Harness));
+  try {
+    assert.equal(game.panel,'tour');assert.equal(game.tourIndex,3);
+    await act(async()=>game.tourStep(4));assert.equal(game.tourIndex,4);
+    await act(async()=>game.tourStep(999));assert.equal(game.tourIndex,4);
+    await act(async()=>game.travel('table'));assert.equal(explored,false);
+    assert.deepEqual(game.profile.progress.completed,[]);assert.deepEqual(game.profile.discoveries,[]);
+    await act(async()=>game.close());assert.equal(game.panel,null);
+  } finally {await renderer.unmount();for(const key of keys){if(saved[key]===undefined)delete window[key];else window[key]=saved[key];}}
+});

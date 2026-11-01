@@ -11,6 +11,7 @@ import { ShopDialog, SpotCard } from "./SpotCard";
 import type { LightMode } from "./scene/FarmCanvas";
 import { resetWalkInput, walk } from "./scene/walk-state";
 import { useFarmGame } from "./game/useFarmGame";
+import { TOUR_STOPS } from "@/farm/game/tour";
 import { GameOverlay } from "./game/GameOverlay";
 import "./farm.css";
 
@@ -151,7 +152,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
       </header>
       {sceneRequested && phase === "intro" && <div className="intro-bar" aria-hidden="true" />}
       <div className="farm-stage" onPointerDown={() => setHint(false)}>
-        {sceneFailed && <FarmPanorama onSelect={setActiveId} onExplore={openScene} loading={sceneRequested && !sceneFailed} unavailable={sceneFailed} />}
+        {sceneFailed && <FarmPanorama onSelect={setActiveId} onTour={() => game.tourStep(0)} onExplore={openScene} loading={sceneRequested && !sceneFailed} unavailable={sceneFailed} />}
         {sceneRequested && !sceneFailed && <div className={`farm-canvas-wrap${ready ? " is-ready" : ""}`}>
         <FarmBoundary key={attempt} onError={failScene}>
         <FarmCanvas
@@ -167,6 +168,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
           waypoint={game.waypoint}
           cycle={game.profile.preferences.daylight}
           weather={game.profile.preferences.weather}
+          tour={game.panel === "tour" ? TOUR_STOPS[game.tourIndex] : null}
           onLight={updateLight}
           activeId={activeId}
           hoveredId={hoveredId}

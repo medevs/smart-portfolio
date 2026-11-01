@@ -21,6 +21,7 @@ import { Horizon, MillWorks, Scenery } from "./scenery";
 import { AtlasLandscape } from "./MiddleAtlas";
 import { CameraRig } from "./CameraRig";
 import { PhysicsYard } from "./explore";
+import type { TourView } from "@/farm/game/tour";
 import { WEATHER, type Weather } from "@/farm/game/weather";
 import { Rain } from "./Weather";
 import { FarmLife } from "./FarmLife";
@@ -65,6 +66,7 @@ export type FarmCanvasProps = {
   waypoint: DestinationId | null;
   cycle: boolean;
   weather: Weather;
+  tour: TourView | null;
   onLight: (mode: LightMode) => void;
 };
 
@@ -144,7 +146,7 @@ function Scene(props: FarmCanvasProps & { onDecline: () => void }) {
       <OptionalAsset><Scenery detail={props.detail && props.quality === "high"} /></OptionalAsset>
       </Textures>
       {props.explore && <OptionalAsset onFailure={props.onWalkFailure} fallback={<Html center><span className="world-place-label" role="status">Starting walking controls…</span></Html>}><PhysicsYard paused={props.paused} /></OptionalAsset>}
-      <CameraRig walking={props.explore} paused={props.paused} reducedMotion={reducedMotion}
+      <CameraRig tour={props.tour} walking={props.explore && !props.tour} paused={props.paused} reducedMotion={reducedMotion}
         focus={focusPosition ? [focusPosition[0], focusPosition[2]] : null} />
       {props.plain || (quality === "low" && props.phase === "color") ? null : (
         <OptionalAsset><Effects night={night} phase={props.phase} reduced={reducedMotion} quality={quality} onSketchDone={props.onSketchDone} focused={!!activeId} /></OptionalAsset>
