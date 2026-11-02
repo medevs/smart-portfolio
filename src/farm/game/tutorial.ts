@@ -1,8 +1,8 @@
 import type { Progress } from "./progress";
 import { HARVEST_APPLES, pickedApples, type DeliveryContext } from "./journey";
 import { destination, distance, type Point } from "./world";
-export type Practice = { moved: boolean; looked: boolean; loaded: boolean; route: "tractor" | "walk" };
-export const freshPractice = (): Practice => ({moved:false,looked:false,loaded:false,route:"tractor"});
+export type Practice = { needsExit:boolean; moved: boolean; looked: boolean; loaded: boolean; route: "tractor" | "walk" };
+export const freshPractice = (): Practice => ({needsExit:false,moved:false,looked:false,loaded:false,route:"tractor"});
 export type GuideStep = { id: string; title: string; instruction: string; controls: string; target: Point | null; count: number };
 export const LESSONS = [
   {id:"move",title:"Find your feet",eyebrow:"01 · Getting around",body:"Choose Walk the farm from Menu. Walk a few steps with W A S D or the movement pad. Shift or Sprint moves faster. Your walking directions stay aligned with the map even when you turn the view.",keys:"W A S D · Shift",touch:"Drag the movement pad · tap Sprint",diagram:"move"},
@@ -17,6 +17,7 @@ export const LESSONS = [
 /** Instructions reflect real inventory/movement. Reading or stepping through lessons grants nothing. */
 export function practiceStep(practice:Practice,progress:Progress,context:DeliveryContext):GuideStep {
   const step=(id:string,title:string,instruction:string,controls:string,target:Point|null,count:number)=>({id,title,instruction,controls,target,count});
+  if(practice.needsExit)return step("exit","Park and step outside","Release the controls, then exit the tractor. If the sides are blocked, park in an open patch first. Walking practice begins beside it.","Release · F / Exit tractor",null,1);
   if(!practice.moved)return step("move","Walk a few steps","Move around the gate. You can pause the guide at any time.","W A S D / movement pad",null,1);
   if(!practice.looked)return step("look","Make the view comfortable","Drag the scene to turn, or zoom closer and farther.","Drag · wheel / pinch · + / −",null,2);
   for(const [id,title,instruction] of [["studio","Meet the maker","Walk to the studio and interact. Close the project window to continue."],["well","Fill your can","Follow the path to the well and fill your watering can."],["garden","Water the garden","Bring the water to the kitchen garden and interact with the bed."]] as const){

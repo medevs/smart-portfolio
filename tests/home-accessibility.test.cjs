@@ -113,3 +113,12 @@ test('illustrated tutorial is readable without WebGL and offers distinct keyboar
   const available=renderToStaticMarkup(React.createElement(TutorialBook,{ready:true,onPractice(){}}));
   assert.doesNotMatch(available,/disabled="">Start guided visit/);
 });
+
+test('walking practice instructions are hidden in Orbit and shown after returning to Walk',()=>{
+  const {GameOverlay}=require('../src/components/farm/game/GameOverlay.tsx');
+  const {freshProfile}=require('../src/farm/game/save.ts');const {freshPractice}=require('../src/farm/game/tutorial.ts');const noop=()=>{};
+  const game={profile:freshProfile(),panel:null,paused:false,storageAvailable:true,message:'',waypoint:null,practicing:true,practice:freshPractice(),stopPractice:noop,setPanel:noop,close:noop,act:noop};
+  const render=exploring=>renderToStaticMarkup(React.createElement(GameOverlay,{game,ready:true,exploring,onExplore:noop,light:'day',onLight:noop,onToggleExplore:noop,onProduct:noop,onHelp:noop,raised:'$0'}));
+  assert.doesNotMatch(render(false),/aria-label="Guided farm visit"/);
+  assert.match(render(true),/aria-label="Guided farm visit"/);
+});

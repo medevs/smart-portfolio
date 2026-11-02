@@ -74,9 +74,15 @@ export function useFarmGame({ ready, exploring, externalPaused, onExplore, onPro
   useEffect(()=>{
     if(!practicing||!ready||!exploring||paused){guideMarker.point=null;return;}
     const sample=()=>{
-      const previous=practiceCurrent.current,start=practiceStart.current;
-      const next={...previous,moved:previous.moved||Math.hypot(walk.px-start.x,walk.pz-start.z)>1,looked:previous.looked||Math.abs(cameraView.distance-start.distance)>.25||Math.abs(cameraView.turn-start.turn)>.15,loaded:previous.loaded||current.current.progress.basket==="trailer"};
-      if(next.moved!==previous.moved||next.looked!==previous.looked||next.loaded!==previous.loaded)setPractice(next);
+      const previous=practiceCurrent.current;
+      if(previous.needsExit&&!walk.driving){
+        // Record the actual on-foot location after physics has completed the exit.
+        // Its relocation must not count as the walking lesson.
+        practiceStart.current={x:walk.px,z:walk.pz,distance:cameraView.distance,turn:cameraView.turn};
+      }
+      const start=practiceStart.current,needsExit=previous.needsExit&&walk.driving;
+      const next={...previous,needsExit,moved:previous.moved||(!previous.needsExit&&Math.hypot(walk.px-start.x,walk.pz-start.z)>1),looked:previous.looked||(!previous.needsExit&&(Math.abs(cameraView.distance-start.distance)>.25||Math.abs(cameraView.turn-start.turn)>.15)),loaded:previous.loaded||current.current.progress.basket==="trailer"};
+      if(next.needsExit!==previous.needsExit||next.moved!==previous.moved||next.looked!==previous.looked||next.loaded!==previous.loaded)setPractice(next);
       guideMarker.point=practiceStep(next,current.current.progress,deliveryContext()).target;
     };
     sample();const timer=window.setInterval(sample,200);
@@ -137,7 +143,7 @@ export function useFarmGame({ ready, exploring, externalPaused, onExplore, onPro
   function startPractice() {
     if(!ready)return;
     practiceStart.current={x:walk.px,z:walk.pz,distance:cameraView.distance,turn:cameraView.turn};
-    setPractice(freshPractice());setPracticing(true);resetWalkInput();if(walk.driving)walk.toggleDrive=true;onExplore();close();
+    setPractice({...freshPractice(),needsExit:walk.driving});setPracticing(true);resetWalkInput();onExplore();close();
   }
   function stopPractice(){setPracticing(false);guideMarker.point=null;}
   function carryOnFoot(){setPractice(value=>({...value,route:"walk"}));}
