@@ -20,17 +20,20 @@ vec3 earthR1=cross(earthDy,normal), earthR2=cross(normal,earthDx);
 float earthDet=dot(earthDx,earthR1);
 if(abs(earthDet)>0.00000001) normal=normalize(abs(earthDet)*normal-sign(earthDet)*(dFdx(earthHeight)*earthR1+dFdy(earthHeight)*earthR2));`;
 
+/** Shared factory keeps the component and full Three shader regression on the same hook. */
+export function createEarthMaterial(color: string) {
+  const mat = new THREE.MeshStandardMaterial({ color, metalness: 0, roughness: .97 });
+  mat.onBeforeCompile = shader => {
+    shader.vertexShader = "varying vec3 vEarthPosition;\n" + shader.vertexShader.replace("#include <project_vertex>", "vEarthPosition=(modelMatrix*vec4(transformed,1.0)).xyz;\n#include <project_vertex>");
+    shader.fragmentShader = earthFunctions + "\n" + shader.fragmentShader.replace("#include <color_fragment>", "#include <color_fragment>\n" + earthColor).replace("#include <normal_fragment_maps>", "#include <normal_fragment_maps>\n" + earthNormal);
+  };
+  mat.customProgramCacheKey = () => "atlas-earth-plaster-v2";
+  return mat;
+}
+
 /** Fine mineral relief and restrained damp staining, in stable world metres. */
 export function EarthPlaster({ color }: { color: string }) {
-  const material = useMemo(() => {
-    const mat = new THREE.MeshStandardMaterial({ color, metalness: 0, roughness: .97 });
-    mat.onBeforeCompile = shader => {
-      shader.vertexShader = "varying vec3 vEarthPosition;\n" + shader.vertexShader.replace("#include <project_vertex>", "vEarthPosition=(modelMatrix*vec4(transformed,1.0)).xyz;\n#include <project_vertex>");
-      shader.fragmentShader = earthFunctions + shader.fragmentShader.replace("#include <color_fragment>", "#include <color_fragment>\n" + earthColor).replace("#include <normal_fragment_maps>", "#include <normal_fragment_maps>\n" + earthNormal);
-    };
-    mat.customProgramCacheKey = () => "atlas-earth-plaster-v1";
-    return mat;
-  }, [color]);
+  const material = useMemo(() => createEarthMaterial(color), [color]);
   useEffect(() => () => material.dispose(), [material]);
   return <primitive object={material} attach="material" />;
 }
