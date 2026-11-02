@@ -72,6 +72,7 @@ function Field({cols=3,rows=1,wheat=false,watered=false,wind=.65}:ModelProps&{wh
   const low=useContext(NaturalDetail),w=Math.max(1.4,cols*CELL*.9),d=Math.max(1.4,rows*CELL*.9);
   const perRow=Math.max(5,Math.round(w/(low?.5:.34))),rowCount=Math.max(2,Math.round(d/(low?.7:.5))),count=perRow*rowCount;
   const plants=useRef<THREE.InstancedMesh>(null),stamp=useRef(-1),dummy=useMemo(()=>new THREE.Object3D(),[]);
+  useLayoutEffect(()=>{stamp.current=-1},[count,w,d,wind]);
   useFrame(()=>{const tick=Math.floor(gameClock.seconds*20);if(tick===stamp.current||!plants.current)return;stamp.current=tick;for(let i=0;i<count;i++){const x=-w/2+((i%perRow+.5)*w/perRow),z=-d/2+(Math.floor(i/perRow)+.5)*d/rowCount;dummy.position.set(x,.03,z);dummy.rotation.set(0,i*2.399,Math.sin(gameClock.seconds*1.2+i)*.035*wind);dummy.scale.setScalar(.85+(i%5)*.055);dummy.updateMatrix();plants.current.setMatrixAt(i,dummy.matrix)}plants.current.instanceMatrix.needsUpdate=true;plants.current.computeBoundingSphere()});
   return <group name={wheat?"wheat-with-grain-heads":"leafy-kitchen-beds"}>
     <mesh position={[0,.015,0]} rotation={[-Math.PI/2,0,0]} receiveShadow><planeGeometry args={[w+.3,d+.3]}/><Surface name="dirt" color={watered?'#6e654b':'#a09370'} repeat={[3,2]} roughness={watered?.8:1} metalness={0}/></mesh>

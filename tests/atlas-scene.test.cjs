@@ -67,6 +67,9 @@ test('every existing farm item still mounts a 3D model at its stable plot', asyn
   t.diagnostic(`Core yard mesh count: ${renderer.scene.findAll(node => node.instance.isMesh).length}`);
   await renderer.advanceFrames(3, 1 / 60);
   await renderer.unmount();
+  const catalogue=await create(React.createElement('group',null,Object.entries(MODELS).map(([key,Model])=>React.createElement(Model,{key,night:false}))));
+  for(const node of catalogue.scene.findAll(n=>n.instance.isMesh))for(const value of node.instance.geometry.attributes.position.array)assert.ok(Number.isFinite(value));
+  assert.equal(Object.keys(MODELS).length,31);await catalogue.unmount();
 });
 
 test('real Rapier collisions keep walking and driving inside the visible land', async () => {
@@ -267,7 +270,9 @@ test('crop quality reduces instances and watered soil reflects completed activit
   try{await renderer.advanceFrames(1,1/60);const full=renderer.scene.findAll(n=>n.instance.isInstancedMesh)[0].instance.count;
     const dry=renderer.scene.findByProps({name:'leafy-kitchen-beds'}).instance.children[0].material.color.clone();
     await renderer.update(tree(true,true));await renderer.advanceFrames(1,1/60);
-    assert.ok(renderer.scene.findAll(n=>n.instance.isInstancedMesh)[0].instance.count<full);
+    const plants=renderer.scene.findAll(n=>n.instance.isInstancedMesh)[0].instance;
+    assert.ok(plants.count<full);
+    const a=new THREE.Matrix4(),b=new THREE.Matrix4();plants.getMatrixAt(0,a);plants.getMatrixAt(plants.count-1,b);assert.notEqual(a.elements[12],b.elements[12],'quality changes initialize planting even with a frozen clock');
     assert.ok(!renderer.scene.findByProps({name:'leafy-kitchen-beds'}).instance.children[0].material.color.equals(dry));
   }finally{await renderer.unmount();}
 });
