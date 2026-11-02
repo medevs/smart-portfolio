@@ -5,6 +5,7 @@ import * as THREE from "three";
 import { HARVEST_APPLES, pickedApples } from "@/farm/game/journey";
 import type { Progress } from "@/farm/game/progress";
 import { gameClock } from "@/farm/game/clock";
+import { AppleFruit } from "./RealisticDetails";
 import { Rod } from "./ObjectParts";
 
 export function HarvestScene({progress}:{progress:Progress}) {
@@ -14,8 +15,7 @@ export function HarvestScene({progress}:{progress:Progress}) {
     {HARVEST_APPLES.map((apple,i)=><group key={i} position={[apple.x,apple.y,apple.z]}>
       <Rod a={[0,0,0]} b={i===0?[0,.25,-.95]:i===1?[.95,.25,0]:[0,.25,-.95]} r={.025} color="#746849"/>
       {!picked.includes(i) && <group name={`pickable-apple-${i}`}>
-        <mesh scale={[1,.93,1]} castShadow><sphereGeometry args={[.115,14,10]}/><meshStandardMaterial color="#ba6245" roughness={.68}/></mesh>
-        <Rod a={[0,.08,0]} b={[.015,.17,0]} r={.009} color="#655c40"/>
+        <AppleFruit/>
         {available && <mesh position={[0,-apple.y+.1,0]} rotation={[-Math.PI/2,0,0]}><ringGeometry args={[.27,.31,24]}/><meshBasicMaterial color="#c3a268" transparent opacity={.65} depthWrite={false}/></mesh>}
       </group>}
     </group>)}

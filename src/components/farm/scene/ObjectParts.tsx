@@ -1,14 +1,18 @@
 "use client";
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { RoundedBox } from "@react-three/drei";
 import * as THREE from "three";
+import { agedMetalGeometry, paintRoughness } from "./surface-geometry";
 import { Surface } from "./materials";
 export type V3 = [number,number,number];
 export function Timber({position=[0,0,0],size,rotation=[0,0,0],color="#817159"}:{position?:V3;size:V3;rotation?:V3;color?:string}) {
   return <RoundedBox args={size} position={position} rotation={rotation} radius={Math.min(.018,...size.map(n=>n/5))} smoothness={1} castShadow receiveShadow><Surface name="wood" color={color} repeat={[Math.max(.2,size[0]*1.5),Math.max(.3,size[1]*2)]} metalness={0}/></RoundedBox>;
 }
 export function Metal({position=[0,0,0],size,rotation=[0,0,0],color="#60675e"}:{position?:V3;size:V3;rotation?:V3;color?:string}) {
-  return <RoundedBox args={size} position={position} rotation={rotation} radius={Math.min(.018,...size.map(n=>n/5))} smoothness={1} castShadow><meshStandardMaterial color={color} metalness={.5} roughness={.63}/></RoundedBox>;
+  const [x,y,z]=size;
+  const geometry=useMemo(()=>agedMetalGeometry([x,y,z],color),[x,y,z,color]);
+  useEffect(()=>()=>geometry.dispose(),[geometry]);
+  return <mesh name="weathered-metal" geometry={geometry} position={position} rotation={rotation} castShadow receiveShadow><meshStandardMaterial vertexColors metalness={.15} roughness={.9} roughnessMap={paintRoughness} bumpMap={paintRoughness} bumpScale={.0015}/></mesh>;
 }
 export function Rod({a,b,r=.025,color="#687066",metal=false}:{a:V3;b:V3;r?:number;color?:string;metal?:boolean}) {
   const start=new THREE.Vector3(...a),end=new THREE.Vector3(...b),length=start.distanceTo(end);

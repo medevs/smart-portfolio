@@ -154,3 +154,12 @@ available. New state/Three/Rapier/actual game-hook integration checks accompany
 legacy save and route preservation. See FARM-HANDOFF.md and the release PR for
 CI/deployment evidence. GPU/full rendered driving and physical touch gates remain
 open; the CPU shape study is not a rendered-scene acceptance test.
+
+### Visual material detail and learn-to-play follow-up
+
+Optional existing scanned basket/can, grounded and independently loaded scans,
+detailed apples/painted metal/tyres, a field-book interface, seven illustrated
+keyboard/touch lessons and stoppable progress-aware practice are implemented.
+Reading lessons grants no tasks; existing journals remain intact. CI/deployment
+and actual production interface checks are recorded in the PR. GPU material/scene
+appearance, full guided playthrough/FPS and physical touch remain open gates.

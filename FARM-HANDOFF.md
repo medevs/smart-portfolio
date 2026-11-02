@@ -535,3 +535,43 @@ Direct local Next build was attempted and still fails host uv_resident_set_memor
 ENOENT. Require clean Node22 CI/Vercel before merge; verify production journal,
 controls, map, dialogs and console afterward. GPU gameplay feel, FPS, full rendered
 playthrough and physical narrow/touch acceptance remain #20/#28; do not close them.
+
+## Material detail and illustrated tutorials · 2026-11-02
+
+User says the farm still looks unrealistic and explicitly requests tutorials.
+This pass adds actual local scanned wicker-basket and watering-can assets to the
+interactive objects, isolated behind complete procedural fallbacks. Scans are
+centred and grounded by their real decoded bounds without mutating cached source
+geometry. Ambient scanned props now load independently; one failure no longer
+removes the entire set. Existing local CC0 files/materials are reused, not newly
+downloaded models. Quantity/state still owns the visible fruit, hands and cargo.
+
+Apples now have dimpled/lobed geometry, red/yellow blush, speckling, stems/leaves.
+Painted metal uses deterministic edge wear/oxide colour and shared roughness/bump
+data with low paint metalness. Tractor tyres have shaped shoulders and paired
+angled chevron treads. No new custom GLSL, service or dependency. Physics and
+camera ownership, plot/project/legal IDs and saved journal schema are preserved.
+
+How to play is available from ?, H, welcome and Menu. Seven original SVG field-
+book diagrams explain movement, camera/map/journal, water, individual harvest,
+loading, driving/braking, unloading and final table interaction. Keyboard/mouse
+and touch instructions are separate. The restrained paper/brass/ink interface
+replaces rounded plastic-like panels. Guided practice stays small and stoppable,
+detects actual movement/camera/inventory, follows the next apple/trailer rear,
+and offers carrying on foot. Reading/next/previous never awards progress. Guides
+pause with dialogs and use an imperative marker rather than rerendering physics
+at the sampling rate. Practice does not reset or overwrite the player's journal.
+
+84 tests pass: actual meshopt GLB geometry decode/grounding/source ownership,
+finite deterministic apple/metal geometry, tyre matrices, all tutorial stages and
+keyboard/touch content, no-WebGL reading, real game-hook movement/camera/guide
+pause and no inventory awards, alongside prior Three/Rapier/save/shader tests.
+CPU diagrams were visually reviewed; corrected clipped trailer/caption overlap.
+Actual decoded mesh CPU shape study reviewed for the basket/tyres/carrying pose;
+it uses flat shading and texture placeholders, not GPU pixels or lighting proof.
+TypeScript/lint pass. Local direct Next build still hits the recorded host
+uv_resident_set_memory ENOENT; require clean Node22 CI/Vercel before merge.
+Live browser is available again but WebGL still takes recovery; verify deployed
+book paging, device instructions, H/?/Escape, map/projects and console. Actual
+GPU material appearance, full guided playthrough/FPS and physical touch remain
+#20/#28; do not claim photorealism or close the visual gate from CPU tests.

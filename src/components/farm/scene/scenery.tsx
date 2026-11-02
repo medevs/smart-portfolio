@@ -3,6 +3,8 @@
 import { useMemo, useRef } from "react";
 import { gameClock, animationDelta } from "@/farm/game/clock";
 import { useFrame } from "@react-three/fiber";
+import { OptionalAsset } from "./OptionalAsset";
+import { groundedModel } from "./prop-geometry";
 import { foothillGeometry } from "./natural-geometry";
 import { Surface } from "./materials";
 import { useGLTF } from "@react-three/drei";
@@ -15,7 +17,7 @@ type Spot = {
   rotation?: number;
 };
 
-/** Models that have to be in before the loader finishes. */
+/** Optional local scans enrich the yard without blocking the playable scene. */
 export const CORE_PROPS: Spot[] = [
   { file: "shrub_02", position: [-4.2, 0, 5.2], height: 1.15, rotation: 0.3 },
   { file: "shrub_03", position: [6.4, 0, 5.6], height: 0.9 },
@@ -60,41 +62,26 @@ export const EXTRA_PROPS: Spot[] = [
   { file: "fern_02", position: [14, 0, -3], height: 0.65, rotation: 1.7 },
 ];
 
-const ready = new Set<string>();
-
 function Prop({ spot }: { spot: Spot }) {
   const url = `/farm/models/${spot.file}.glb`;
   const { scene } = useGLTF(url);
   const object = useMemo(() => {
-    const root = scene.clone(true);
-    root.updateWorldMatrix(true, true);
-    const box = new THREE.Box3().setFromObject(root);
-    const size = box.getSize(new THREE.Vector3());
-    const scale = spot.height / Math.max(size.y, 1e-4);
-    root.scale.setScalar(scale);
-    root.position.set(spot.position[0], -box.min.y * scale, spot.position[2]);
+    const root = groundedModel(scene,spot.height);
+    root.position.set(...spot.position);
     root.rotation.y = spot.rotation ?? 0;
-    root.traverse((child) => {
-      const mesh = child as THREE.Mesh;
-      if (mesh.isMesh) {
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-      }
-    });
     return root;
   }, [scene, spot]);
-  ready.add(url);
-  return <primitive object={object} />;
+  return <primitive object={object} dispose={null} />;
 }
 
 export function Scenery({ detail }: { detail: boolean }) {
   return (
     <group>
       {CORE_PROPS.map((spot, index) => (
-        <Prop key={`core-${spot.file}-${index}`} spot={spot} />
+        <OptionalAsset key={`core-${spot.file}-${index}`}><Prop spot={spot} /></OptionalAsset>
       ))}
       {detail
-        ? EXTRA_PROPS.map((spot, index) => <Prop key={`extra-${spot.file}-${index}`} spot={spot} />)
+        ? EXTRA_PROPS.map((spot, index) => <OptionalAsset key={`extra-${spot.file}-${index}`}><Prop spot={spot} /></OptionalAsset>)
         : null}
     </group>
   );
