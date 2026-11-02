@@ -1,13 +1,17 @@
 "use client";
-import { useRef } from "react";
+import { useContext, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { JourneyProgress } from "./journey-state";
+import { AppleBasket } from "./FarmObjects";
 import { MakerHead } from "./MakerAvatar";
 import { walk } from "./walk-state";
 import { gameClock } from "@/farm/game/clock";
 
 /** Walking maker avatar, using the owner-authorized portfolio portrait. */
 export function Visitor() {
+  const progress = useContext(JourneyProgress);
+  const carrying = progress.apples > 0 && progress.basket !== "trailer";
   const root = useRef<THREE.Group>(null);
   const leftArm = useRef<THREE.Group>(null), rightArm = useRef<THREE.Group>(null);
   const leftLeg = useRef<THREE.Group>(null), rightLeg = useRef<THREE.Group>(null);
@@ -20,7 +24,7 @@ export function Visitor() {
     }
     const stride = gameClock.paused || gameClock.reduced ? 0 : Math.sin(gameClock.seconds * (walk.sprinting ? 12 : 8)) * Math.min(walk.moving / 3.6, 1.4) * .55;
     const blend = 1 - Math.exp(-12 * Math.min(dt, .05));
-    for (const [part, target] of [[leftLeg, stride], [rightLeg, -stride], [leftArm, -stride * .7], [rightArm, stride * .7]] as const) {
+    for (const [part, target] of [[leftLeg, stride], [rightLeg, -stride], [leftArm, carrying ? -1.05 : -stride * .7], [rightArm, carrying ? -1.05 : stride * .7]] as const) {
       if (part.current) part.current.rotation.x = THREE.MathUtils.lerp(part.current.rotation.x, target, blend);
     }
     if(leftKnee.current) leftKnee.current.rotation.x=Math.max(0,-stride)*.8;
@@ -36,6 +40,7 @@ export function Visitor() {
   return <group name="maker-visitor" ref={root} position={[0, -.7, 0]}>
     <mesh position={[0, .95, 0]} castShadow><capsuleGeometry args={[.18, .32, 4, 9]} /><meshStandardMaterial color="#998886" roughness={.94} /></mesh>
     <MakerHead />
+    {carrying && <group name="carried-apple-basket" position={[0,.8,.43]} scale={.7}><AppleBasket count={progress.apples}/></group>}
     {limb(leftArm, -.24, 1.13, .45, "#998886")}{limb(rightArm, .24, 1.13, .45, "#998886")}
     {limb(leftLeg, -.1, .7, .62, "#414847", leftKnee)}{limb(rightLeg, .1, .7, .62, "#414847", rightKnee)}
     <mesh position={[0,.76,0]}><boxGeometry args={[.32,.035,.24]}/><meshStandardMaterial color="#685f4a" roughness={1}/></mesh>

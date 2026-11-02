@@ -60,11 +60,11 @@ function Wool() {
   useLayoutEffect(()=>{if(!ref.current)return;const random=randomSeed(29),o=new THREE.Object3D();for(let i=0;i<64;i++){const a=i*2.399,y=1-2*(i+.5)/64,r=Math.sqrt(1-y*y);o.position.set(Math.cos(a)*r*.48,y*.27,Math.sin(a)*r*.28);o.scale.setScalar(.075+random()*.025);o.updateMatrix();ref.current.setMatrixAt(i,o.matrix)}ref.current.instanceMatrix.needsUpdate=true;ref.current.computeBoundingSphere()},[]);
   return <instancedMesh name="sheep-fleece" ref={ref} args={[undefined,undefined,64]} castShadow><sphereGeometry args={[1,7,5]}/><meshStandardMaterial color="#c6c1ad" roughness={1}/></instancedMesh>;
 }
-export function FarmAnimal({kind,phase=0,raining=false}:{kind:Kind;phase?:number;raining?:boolean}) {
+export function FarmAnimal({kind,phase=0,raining=false,motion}:{kind:Kind;phase?:number;raining?:boolean;motion?:ModelProps["motion"]}) {
   const cfg=ANATOMY[kind],body=useRef<THREE.Group>(null),head=useRef<THREE.Group>(null),tail=useRef<THREE.Group>(null),legs=useRef<(THREE.Group|null)[]>([]);
   const geometry=useMemo(()=>coatGeometry(kind),[kind]),faceGeometry=useMemo(()=>headGeometry(kind),[kind]),limbGeometry=useMemo(()=>legGeometry(kind),[kind]);
   const tailGeometry=useMemo(()=>new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(),new THREE.Vector3(-cfg.tail*.45,kind==="dog"||kind==="cat"?.12:-.12,0),new THREE.Vector3(-cfg.tail,kind==="cat"?.3:kind==="dog"?.2:-.35,.03)]),10,kind==="cat"?.025:.018,6,false),[cfg.tail,kind]);
-  useFrame(()=>{const pose=animalPose(gameClock.seconds,phase,raining);if(body.current)body.current.scale.y=1+pose.breath;if(head.current){head.current.rotation.z=-pose.head*1.8;head.current.position.y=cfg.leg+cfg.depth*.85+.1-pose.head*.12;}if(tail.current)tail.current.rotation.y=pose.tail;legs.current.forEach((leg,i)=>{if(leg)leg.rotation.z=pose.gait*.3*(i===0||i===3?1:-1)})});
+  useFrame(()=>{const pose=motion?.current??animalPose(gameClock.seconds,phase,raining);if(body.current)body.current.scale.y=1+pose.breath;if(head.current){head.current.rotation.z=-pose.head*1.8;head.current.position.y=cfg.leg+cfg.depth*.85+.1-pose.head*.12;}if(tail.current)tail.current.rotation.y=pose.tail;legs.current.forEach((leg,i)=>{if(leg)leg.rotation.z=pose.gait*.3*(i===0||i===3?1:-1)})});
   const y=cfg.leg+cfg.depth*.85;
   return <group name={`natural-${kind}`}>
     <group name="animal-torso" ref={body} position={[0,y,0]}><mesh geometry={geometry} castShadow receiveShadow><meshStandardMaterial vertexColors roughness={.96} metalness={0}/></mesh>{kind==="sheep"&&<Wool/>}</group>

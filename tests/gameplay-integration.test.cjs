@@ -36,7 +36,7 @@ Module._load=function(request,...rest){return request==='@react-three/drei'?{Cam
 const { CameraRig }=require('../src/components/farm/scene/CameraRig.tsx');
 const { PhysicsYard }=require('../src/components/farm/scene/explore.tsx');
 const { walk, resetWalkInput }=require('../src/components/farm/scene/walk-state.ts');
-function reset(){resetWalkInput();Object.assign(walk,{px:0,pz:8,tx:0,tz:0,yaw:Math.PI,vehicleYaw:Math.PI/2,driving:false,paused:false,travel:null,cameraCut:true})}
+function reset(){resetWalkInput();Object.assign(walk,{px:0,pz:8,tx:0,tz:0,yaw:Math.PI,vehicleYaw:Math.PI/2,trailerInitialized:false,driving:false,paused:false,travel:null,cameraCut:true})}
 
 // The test renderer batches subscribers across frames. Step one frame at a time
 // so physics/camera callbacks interleave exactly as they do in the real render loop.
@@ -260,4 +260,68 @@ test('tractor collision stops throttle buildup and release leaves it parked at t
     walk.driving=false;walk.stickY=0;await frames(renderer,30,1/60);
     const parked=walk.tx;await frames(renderer,60,1/60);assert.ok(Math.abs(walk.tx-parked)<.01,'unoccupied tractor brakes and stays parked');
   } finally {await renderer.unmount();reset();}
+});
+
+test('actual hitched trailer follows turns, stays connected and freezes with physics pause',async()=>{
+  reset();Object.assign(walk,{tx:25,tz:20,vehicleYaw:0});const renderer=await yard();
+  try {
+    await frames(renderer,30,1/60);walk.driving=true;walk.stickY=-1;
+    await frames(renderer,50,1/60);walk.stickX=.8;await frames(renderer,25,1/60);
+    const tractor=renderer.scene.findByProps({name:'farm-tractor-body'}).instance;
+    const trailer=renderer.scene.findByProps({name:'farm-trailer-body'}).instance;
+    const hitch=new THREE.Vector3(0,-.23,-1).applyQuaternion(tractor.quaternion).add(tractor.position);
+    const tongue=new THREE.Vector3(0,0,1.25).applyQuaternion(trailer.quaternion).add(trailer.position);
+    assert.ok(hitch.distanceTo(tongue)<.09,`joint keeps tongue attached: ${hitch.distanceTo(tongue)}`);
+    assert.ok(Math.abs(walk.trailerYaw-walk.vehicleYaw)>.02,'trailer articulates through the turn');
+    assert.ok(Math.hypot(walk.trailerX-25,walk.trailerZ-23.25)>1,'trailer physically travels');
+    walk.paused=true;await renderer.update(React.createElement(React.Suspense,{fallback:null},React.createElement(PhysicsYard,{paused:true})));
+    const stopped=trailer.position.clone();await frames(renderer,30,1/60);assert.ok(trailer.position.equals(stopped));
+    assert.equal(walk.stickY,0);assert.equal(walk.stickX,0);
+  }finally{await renderer.unmount();reset();}
+});
+
+test('real game hook harvests through physical visits, transfers cargo and completes delivery without remote rewards',async()=>{
+  const {useFarmGame}=require('../src/components/farm/game/useFarmGame.ts');
+  const {freshProfile}=require('../src/farm/game/save.ts');
+  const {HARVEST_APPLES}=require('../src/farm/game/journey.ts');
+  const {deliveryContext}=require('../src/components/farm/scene/delivery-state.ts');
+  const keys=['location','localStorage','setTimeout','clearTimeout','setInterval'];
+  const saved=Object.fromEntries(keys.map(key=>[key,window[key]]));
+  const initial={...freshProfile(),introduced:true,progress:{completed:['studio','well','garden'],water:2,apples:0}};
+  let stored=JSON.stringify(initial),game;
+  Object.assign(window,{location:{search:''},localStorage:{getItem(){return stored},setItem(key,value){stored=value}},setTimeout,clearTimeout,setInterval});
+  reset();
+  function Harness(){game=useFarmGame({ready:true,exploring:true,externalPaused:false,onExplore(){},onProduct(){}});return React.createElement(PhysicsYard,{paused:game.paused});}
+  const renderer=await create(React.createElement(React.Suspense,{fallback:null},React.createElement(Harness)));
+  try {
+    for(let i=0;i<100&&!renderer.scene.findAll(n=>n.instance.name==='farm-visitor-body').length;i++)await act(async()=>{await new Promise(resolve=>setTimeout(resolve,10))});
+    await frames(renderer,30,1/60);
+    await act(async()=>game.act());assert.equal(game.profile.progress.apples,0,'E from the gate cannot harvest');
+    for(let i=0;i<3;i++){
+      walk.travel={...HARVEST_APPLES[i]};await frames(renderer,3,1/60);await act(async()=>game.act());
+      assert.equal(game.profile.progress.apples,i+1,'actual hook picks one reachable apple');
+      await act(async()=>game.act());assert.equal(game.profile.progress.apples,i+1,'held spot cannot pick duplicate fruit');
+    }
+    const loading=deliveryContext().loading;walk.travel={...loading};await frames(renderer,3,1/60);
+    await act(async()=>game.act());assert.equal(game.profile.progress.basket,'trailer');
+    walk.travel={x:-3,z:21.7};await frames(renderer,3,1/60);await act(async()=>game.act());
+    assert.equal(game.profile.progress.completed.length,4,'walking to table cannot summon remote cargo');
+    walk.travel={...deliveryContext().loading};await frames(renderer,3,1/60);await act(async()=>game.act());
+    assert.equal(game.profile.progress.basket,'carried');
+    walk.travel={x:-3,z:21.7};await frames(renderer,3,1/60);await act(async()=>game.act());
+    assert.equal(game.profile.progress.completed.length,5);assert.equal(game.profile.progress.apples,0);
+    assert.equal(JSON.parse(stored).progress.completed.length,5,'finished visit saves');
+  }finally{await renderer.unmount();reset();for(const key of keys){if(saved[key]===undefined)delete window[key];else window[key]=saved[key];}}
+});
+
+test('returning from orbit preserves the parked trailer position and articulation',async()=>{
+  reset();Object.assign(walk,{tx:25,tz:20,vehicleYaw:0});let renderer=await yard();
+  try {
+    await frames(renderer,30,1/60);walk.driving=true;walk.stickY=-1;await frames(renderer,40,1/60);
+    walk.stickX=.8;await frames(renderer,25,1/60);resetWalkInput();walk.driving=false;await frames(renderer,60,1/60);
+    const before={x:walk.trailerX,z:walk.trailerZ,yaw:walk.trailerYaw};
+    assert.ok(walk.trailerInitialized);await renderer.unmount();renderer=await yard();await frames(renderer,2,1/60);
+    assert.ok(Math.hypot(walk.trailerX-before.x,walk.trailerZ-before.z)<.08,'does not respawn a straight trailer across nearby objects');
+    assert.ok(Math.abs(walk.trailerYaw-before.yaw)<.05);
+  }finally{await renderer.unmount();reset();}
 });

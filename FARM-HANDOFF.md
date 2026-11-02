@@ -495,3 +495,43 @@ TypeScript and lint pass. Direct local Next build attempted: this host again
 fails uv_resident_set_memory ENOENT; require clean Node22 CI and Vercel before
 merge. Production interface/console verification follows deployment. Actual GPU
 driving feel, visual acceptance, FPS and physical touch gates remain #20/#28.
+
+## Orchard to tea table · 2026-11-02
+
+The existing five-step journal now has a hands-on harvest: three individually
+reachable low-branch apples on existing trees, picked once each within 1.25 units.
+Partial harvest saves; each picked fruit disappears. A quantity-matched basket
+is held by both hands. Once full, carry it to the table or load at the rear of a
+stopped tractor trailer (E/touch). Unload before table delivery; a distant table
+cannot summon cargo. The journal explains the route and map T marks the trailer.
+Completion adds apples, a woven runner/plates and shared-clock tea steam. All
+visits/gatherings remain an imagined future concept, not operating/bookable claims.
+
+The trailer is a real Rapier body with bed/wheel colliders and a limited yaw hitch,
+not a mesh rigidly stuck to the tractor. Both vehicle and trailer brake on release;
+hitch position and articulation persist across Orbit/Walk remounts. Visual wheels
+read actual travel. Existing gradual acceleration, reverse, collisions, camera and
+entry/exit remain tested. Reload still resets parking; loaded cargo returns to the
+visitor's hands with no lost apples. Old partial/finished v1 journals remain valid.
+New picked IDs, quantities, cargo and delivery fields are bounded/validated.
+
+The existing farm dog notices nearby on-foot visitors, turns before approaching,
+stays inside a 2.2-unit home leash and checks static safe ground; rain returns it
+home. Parent movement and animal joints share the same pose, paused/reduced clock.
+It is an artistic companion response, not navigation to distant shelters or a
+biological model. No new dependency, downloaded asset, shader, account or service.
+
+77 tests pass, including state/save migration and malformed inventory, actual
+Three harvest disappearance/carried-vs-loaded basket/table geometry, actual
+Rapier hitch articulation, braking, boundary/reverse, pause and orbit remount,
+and the real game hook harvesting via physical visits, loading/unloading and
+finishing delivery without remote rewards. TypeScript and lint pass. A Node
+EventTarget capture-removal mismatch exposed by the longer hook test was fixed
+using explicit {capture:true} options, preserving browser semantics.
+
+Internal CPU shape review inspected the actual carrying and loaded-tractor mesh
+transforms; it uses flat colours and cannot validate GPU textures/shadows/lighting.
+Direct local Next build was attempted and still fails host uv_resident_set_memory
+ENOENT. Require clean Node22 CI/Vercel before merge; verify production journal,
+controls, map, dialogs and console afterward. GPU gameplay feel, FPS, full rendered
+playthrough and physical narrow/touch acceptance remain #20/#28; do not close them.

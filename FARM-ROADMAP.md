@@ -144,3 +144,13 @@ and return to follow camera have real camera-controls regression coverage.
 Unsupported WebGL is detected before constructing Three, retaining genuine error
 reporting and the useful non-3D story. Await clean CI/deployment and live UI/console
 verification; GPU appearance and physical touch remain explicit release gates.
+
+### Orchard to tea table · first playable delivery
+
+Individual low-branch harvest, persistent partial basket, carrying pose, optional
+jointed trailer transport, stopped loading/unloading, table transformation and a
+nearby responsive farm dog extend the existing journal. Walk delivery remains
+available. New state/Three/Rapier/actual game-hook integration checks accompany
+legacy save and route preservation. See FARM-HANDOFF.md and the release PR for
+CI/deployment evidence. GPU/full rendered driving and physical touch gates remain
+open; the CPU shape study is not a rendered-scene acceptance test.

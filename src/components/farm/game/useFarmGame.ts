@@ -1,9 +1,11 @@
 "use client";
+import { deliveryContext } from "../scene/delivery-state";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { freshProfile, readProfile, writeProfile, type Preferences, type Profile } from "@/farm/game/save";
 import { TOUR_STOPS, tourIndex as findTourIndex } from "@/farm/game/tour";
 import { discover } from "@/farm/game/discoveries";
 import { zoomCamera } from "../scene/camera-view";
+import { canTransferBasket, nearbyApple, transferBasket, harvestApple } from "@/farm/game/journey";
 import { interact } from "@/farm/game/progress";
 import { destination, nearestPlace, SPAWN, type DestinationId } from "@/farm/game/world";
 import { safeSpawn } from "../scene/yard-boundaries";
@@ -69,13 +71,20 @@ export function useFarmGame({ ready, exploring, externalPaused, onExplore, onPro
     if (!ready || !exploring || paused || walk.driving) return;
     const point = { x: walk.px, z: walk.pz };
     const place = nearestPlace(point);
+    const progress = current.current.progress;
+    const context = deliveryContext();
+    const journey = nearbyApple(progress,point) >= 0 ? harvestApple(progress,point,true) : canTransferBasket(progress,point,context) ? transferBasket(progress,point,context,true) : null;
+    if (journey) {
+      if(journey.changed) setProfile(value=>({...value,progress:journey.progress}));
+      setMessage(journey.message);return;
+    }
     const observation = discover(current.current.discoveries, place.id, point, true);
     if (observation.note) {
       if (observation.changed) setProfile(value => ({ ...value, discoveries: observation.found }));
       setPanel("notes");
       return;
     }
-    const result = interact(current.current.progress, place.id, point, true);
+    const result = interact(progress, place.id, point, true);
     setMessage(result.message);
     if (result.changed) setProfile(value => ({ ...value, progress: result.progress }));
     if (Math.hypot(point.x - place.x, point.z - place.z) <= 3.2 && "product" in place) onProduct(place.product);
@@ -91,8 +100,8 @@ export function useFarmGame({ ready, exploring, externalPaused, onExplore, onPro
       if (k === "e") { event.preventDefault(); act(); }
     };
     // Inspect dialog state before Radix dismisses and detaches the key target.
-    window.addEventListener("keydown", key, true);
-    return () => window.removeEventListener("keydown", key, true);
+    window.addEventListener("keydown", key, { capture: true });
+    return () => window.removeEventListener("keydown", key, { capture: true });
   }, [act, visiblePanel, externalPaused, ready]);
   function travel(id: DestinationId) {
     const target = destination(id);

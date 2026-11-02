@@ -101,3 +101,10 @@ pause/reduced-motion clock. These are artistic behaviour models, not livestock,
 weather, mechanical or agricultural forecasts. Static structural details describe
 construction; ladders, valves, greenhouse doors and coop nesting boxes are not new
 interactive activities. Original footprint IDs and game rules are retained.
+
+### Orchard delivery additions · 2026-11-02
+
+The pickable low branches/apples, quantity-matched basket use, articulated wooden
+trailer, table runner/plates and tea steam are original procedural Three geometry.
+They reuse the existing local wood surface and maker portrait; no external asset
+or license dependency was added. Dog approach is deterministic procedural motion.
