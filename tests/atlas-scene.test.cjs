@@ -63,6 +63,7 @@ test('every existing farm item still mounts a 3D model at its stable plot', asyn
     const node = renderer.scene.findByProps({ name: id });
     assert.ok(node.instance.children.length > 0, `${id} has real 3D geometry`);
   }
+  assert.ok(renderer.scene.findAll(node => node.instance.isMesh).length < 800, 'catalogue detail stays inside the yard mesh budget');
   t.diagnostic(`Core yard mesh count: ${renderer.scene.findAll(node => node.instance.isMesh).length}`);
   await renderer.advanceFrames(3, 1 / 60);
   await renderer.unmount();
@@ -217,4 +218,56 @@ test('well bucket and rope read the same collected-water state without a perpetu
   await renderer.advanceFrames(60,1/60);
   assert.equal(renderer.scene.findByProps({name:'well-bucket'}).instance.position.y,1.2);
   await renderer.unmount();
+});
+
+
+test('animal behaviour cycles continuously within its pen and shelters from rain',()=>{
+  const {animalPose}=require('../src/components/farm/scene/object-motion.ts');
+  for(const [seconds,state] of [[3,'graze'],[14,'walk'],[23,'rest']]) assert.equal(animalPose(seconds).state,state);
+  assert.equal(animalPose(14,0,true).state,'shelter');
+  assert.equal(animalPose(14,0,true).gait,0);
+  for(let t=0;t<56;t+=.05){const p=animalPose(t);assert.ok(Math.abs(p.x)<=.42&&p.z>=0&&p.z<=.48);for(const v of Object.values(p))if(typeof v==='number')assert.ok(Number.isFinite(v));}
+  for(const t of [10,19,28]){const a=animalPose(t-.0001),b=animalPose(t+.0001);assert.ok(Math.hypot(a.x-b.x,a.z-b.z)<.001);assert.ok(Math.abs(a.head-b.head)<.001);}
+});
+
+test('actual animal joints use the shared clock and freeze with pause or reduced motion',async()=>{
+  const {gameClock,advanceWorld}=require('../src/farm/game/clock.ts');const saved={...gameClock};
+  Object.assign(gameClock,{seconds:12,paused:false,reduced:false});
+  const renderer=await create(React.createElement(MODELS.cow,{night:false}));
+  try{
+    await renderer.advanceFrames(1,1/60);const leg=renderer.scene.findByProps({name:'animal-leg-0'}).instance;
+    const first=leg.rotation.z;advanceWorld(.05);await renderer.advanceFrames(1,1/60);assert.notEqual(leg.rotation.z,first);
+    for(const flag of ['paused','reduced']){gameClock[flag]=true;const frozen=leg.rotation.z;advanceWorld(1);await renderer.advanceFrames(3,1/60);assert.equal(leg.rotation.z,frozen);gameClock[flag]=false;}
+  }finally{await renderer.unmount();Object.assign(gameClock,saved);}
+});
+
+test('tractor wheels follow signed ground travel with independent tyre radii and pause sync',async()=>{
+  const {vehicleVisual}=require('../src/components/farm/scene/object-motion.ts');
+  const origin={x:0,z:0,yaw:0,rear:0,front:0,steer:0};
+  const forward=vehicleVisual(origin,{x:0,z:.4,yaw:0},false);assert.equal(forward.rear,-1);assert.ok(Math.abs(forward.front+.4/.245)<1e-8);
+  const back=vehicleVisual(forward,{x:0,z:0,yaw:0},false);assert.ok(Math.abs(back.rear)<1e-8);
+  assert.equal(vehicleVisual(forward,{x:0,z:.8,yaw:.2},true).rear,forward.rear);
+  assert.equal(vehicleVisual(forward,{x:0,z:10,yaw:0},false).rear,forward.rear);
+  assert.ok(Math.abs(vehicleVisual(origin,{x:0,z:.2,yaw:.2},false).steer)<=.48);
+  const {walk}=require('../src/components/farm/scene/walk-state.ts');const saved={...walk};const {gameClock}=require('../src/farm/game/clock.ts');const clock={...gameClock};
+  Object.assign(walk,{tx:0,tz:0,vehicleYaw:0,driving:false});gameClock.paused=false;
+  const renderer=await create(React.createElement(MODELS.tractor,{night:false}));
+  try{await renderer.advanceFrames(3,1/60);const wheel=renderer.scene.findByProps({name:'tractor-rear-wheel-0'}).instance;assert.equal(wheel.rotation.z,0);
+    walk.tz=.4;await renderer.advanceFrames(1,1/60);assert.ok(Math.abs(wheel.rotation.z+1)<1e-8);
+    gameClock.paused=true;walk.tz=.8;await renderer.advanceFrames(1,1/60);assert.ok(Math.abs(wheel.rotation.z+1)<1e-8);
+    gameClock.paused=false;await renderer.advanceFrames(1,1/60);assert.ok(Math.abs(wheel.rotation.z+1)<1e-8);
+    walk.driving=true;await renderer.advanceFrames(1,1/60);assert.equal(renderer.scene.findByProps({name:'tractor-driver'}).instance.visible,true);
+  }finally{await renderer.unmount();Object.assign(walk,saved);Object.assign(gameClock,clock);}
+});
+
+test('crop quality reduces instances and watered soil reflects completed activity',async()=>{
+  const {NaturalDetail}=require('../src/components/farm/scene/MiddleAtlas.tsx');
+  const tree=(low,watered)=>React.createElement(NaturalDetail.Provider,{value:low},React.createElement(MODELS.crops,{night:false,cols:3,rows:1,watered}));
+  const renderer=await create(tree(false,false));
+  try{await renderer.advanceFrames(1,1/60);const full=renderer.scene.findAll(n=>n.instance.isInstancedMesh)[0].instance.count;
+    const dry=renderer.scene.findByProps({name:'leafy-kitchen-beds'}).instance.children[0].material.color.clone();
+    await renderer.update(tree(true,true));await renderer.advanceFrames(1,1/60);
+    assert.ok(renderer.scene.findAll(n=>n.instance.isInstancedMesh)[0].instance.count<full);
+    assert.ok(!renderer.scene.findByProps({name:'leafy-kitchen-beds'}).instance.children[0].material.color.equals(dry));
+  }finally{await renderer.unmount();}
 });
