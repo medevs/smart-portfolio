@@ -15,6 +15,8 @@ import type { FarmData } from "@/farm/types";
 import type { Placed } from "@/farm/loadFarm";
 import { plateFor } from "@/farm/plates";
 import { CELL, plotPosition } from "@/farm/world";
+import { animalPose } from "./object-motion";
+import { Hay } from "./FarmObjects";
 import { MODELS, type ModelProps } from "./models";
 import { Surface, Textures } from "./materials";
 import { Horizon, MillWorks, Scenery } from "./scenery";
@@ -137,6 +139,9 @@ function Scene(props: FarmCanvasProps & { onDecline: () => void }) {
           entry={entry}
           farm={farm}
           night={night}
+          watered={props.progress.completed.includes("garden")}
+          raining={props.weather === "rain"}
+          wind={WEATHER[props.weather].wind}
           hot={props.hoveredId === entry.plot.id}
           onHover={props.onHover}
           onSelect={props.onSelect}
@@ -320,21 +325,7 @@ function SunShafts() {
 }
 
 function HayBales() {
-  const spots: [number, number][] = [
-    [3.4, 1.1],
-    [4.3, 1.7],
-    [2.6, 2.2],
-  ];
-  return (
-    <group>
-      {spots.map(([x, z], i) => (
-        <mesh key={i} position={[x, 0.28, z]} rotation={[0, i, Math.PI / 2]} castShadow>
-          <cylinderGeometry args={[0.32, 0.34, 0.55, 10]} />
-          <meshStandardMaterial color="#c6a15a" roughness={0.92} />
-        </mesh>
-      ))}
-    </group>
-  );
+  return <group>{[[3.4,1.1],[4.3,1.7],[2.6,2.2]].map(([x,z],i)=><group key={i} position={[x,0,z]} scale={.7}><Hay/></group>)}</group>;
 }
 
 function Lane() {
@@ -526,23 +517,13 @@ function Clouds({ night }: { night: boolean }) {
 }
 
 function Birds() {
-  const ref = useRef<THREE.Group>(null);
-  useFrame(() => {
-    const t = gameClock.seconds;
-    if (!ref.current) return;
-    ref.current.position.set(Math.sin(t * 0.25) * 8, 7.5 + Math.sin(t * 0.8) * 0.4, Math.cos(t * 0.2) * 6 - 2);
-    ref.current.rotation.y = t * 0.25;
-  });
-  return (
-    <group ref={ref}>
-      {[0, 1.2, -1.1].map((x, i) => (
-        <mesh key={i} position={[x, i * 0.2, i * 0.4]} rotation={[0, 0, Math.sin(i) * 0.4]}>
-          <boxGeometry args={[0.45, 0.03, 0.08]} />
-          <meshStandardMaterial color="#2a241c" />
-        </mesh>
-      ))}
-    </group>
-  );
+  const ref=useRef<THREE.Group>(null),wings=useRef<(THREE.Group|null)[]>([]);
+  const geometry=useMemo(()=>{const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.Float32BufferAttribute([0,0,0,.38,0,.1,.22,0,-.12],3));g.computeVertexNormals();return g},[]);
+  useFrame(()=>{const t=gameClock.seconds;if(ref.current){ref.current.position.set(Math.sin(t*.25)*8,7.5+Math.sin(t*.8)*.2,Math.cos(t*.25)*8-2);ref.current.rotation.y=t*.25;}wings.current.forEach((wing,i)=>{if(wing)wing.rotation.z=Math.sin(t*5+i*.7)*.4*(i%2?1:-1)})});
+  return <group ref={ref}>{[0,1.2,-1.1].map((x,i)=><group key={i} position={[x,i*.2,i*.4]}>
+    <mesh rotation={[0,0,Math.PI/2]}><capsuleGeometry args={[.025,.15,3,6]}/><meshStandardMaterial color="#4b5145" roughness={1}/></mesh>
+    {[-1,1].map((side,j)=><group key={side} ref={node=>{wings.current[i*2+j]=node}} scale={[side,1,1]}><mesh geometry={geometry}><meshStandardMaterial color="#4c5548" roughness={1} side={THREE.DoubleSide}/></mesh></group>)}
+  </group>)}</group>;
 }
 
 function PlacedModel({
@@ -550,6 +531,9 @@ function PlacedModel({
   farm,
   night,
   hot,
+  watered,
+  raining,
+  wind,
   onHover,
   onSelect,
 }: {
@@ -557,6 +541,9 @@ function PlacedModel({
   farm: FarmData;
   night: boolean;
   hot: boolean;
+  watered: boolean;
+  raining: boolean;
+  wind: number;
   onHover: (id: string | null) => void;
   onSelect: (id: string) => void;
 }) {
@@ -573,25 +560,20 @@ function PlacedModel({
       return;
     }
     if (!roam) return;
-    const t = gameClock.seconds * 0.35 + (entry.plot.animDelay ?? 0);
-    node.position.set(x + Math.sin(t) * 0.45, 0, z + Math.cos(t * 0.8) * 0.28);
+    const pose = animalPose(gameClock.seconds, entry.plot.animDelay ?? 0, raining);
+    node.position.set(x + pose.x, 0, z + pose.z);
+    node.rotation.y = pose.heading + (entry.plot.flip ? Math.PI : 0);
   });
   const plate = plateFor(entry, farm);
   const golden = Boolean(plate?.golden);
   const interactive = Boolean(entry.item.interactive);
-  const size: Record<string, number> = {
-    chicken: 1.55,
-    hen: 1.55,
-    cat: 1.25,
-    dog: 1.15,
-    cow: 1,
-    sheep: 1,
-  };
-  const s = size[entry.item.sprite] ?? 1;
+  const s = 1;
   const labelY = entry.item.sprite === "barn" ? 6.2 : entry.item.sprite === "windmill" || entry.item.sprite === "silo" ? 5.2 : 2.4;
   const props: ModelProps = {
     night,
     golden,
+    phase: entry.plot.animDelay ?? 0,
+    watered, raining, wind,
     cols: entry.plot.cols,
     rows: entry.plot.rows,
   };

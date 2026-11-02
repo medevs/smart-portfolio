@@ -438,3 +438,32 @@ existing sandbox uv_resident_set_memory ENOENT. Require clean Node22 CI/Vercel,
 merge the fix under the user's standing authorization, then check production
 UI/console. Cloud no-WebGL recovery still cannot prove the user's GPU scene; exact
 compiler reproduction is the acceptance evidence for this bug. Keep #20 open.
+
+## Catalogue and object behaviour · 2026-11-02
+
+Replaced legacy catalogue primitive models with Animals, TractorModel,
+FarmObjects and shared ObjectParts. All 31 model keys are preserved, including
+regional building aliases. Improved species proportions, merged coloured coat/head/
+limb geometry, instanced fleece, tread blocks, bolts, grain heads and leafy plants.
+Added coop joinery/ramp, hoop greenhouse, galvanized tank/bracing/ladder, irregular
+pond bank/reeds, produce stall, hay twine, timber signs/fences, watering can,
+apple basket, bench and tea set. Visitor boots/hands follow limbs; knees flex.
+Maker portrait identity, physics/controller ownership, route/project/sponsor IDs,
+progress storage and ordered inventory activities remain intact.
+
+Animal parent translation and joints share deterministic object-motion poses;
+grazing head transitions ease into walking. Rain stops roaming/feeding in a
+shelter pose at the existing plot (no route to a barn is simulated). Each tractor
+wheel rotates from signed ground displacement with its own radius; pause/load
+teleports synchronize without wheel catch-up. Steering reads actual yaw change.
+Plant density/reeds reduce with Low quality; wind matrices update at 20Hz.
+Merged animal parts and instanced repetitions keep the fixture's core yard at
+722 mesh objects (<800 regression budget); this is not a GPU draw/FPS benchmark.
+
+66 tests cover all existing behaviours plus pen bounds, pose boundaries,
+rain/pause/reduced motion, actual animal joints, actual tractor wheels/driver,
+travel/reverse/teleport, quality-scaled crops and watered soil. Full Three shader
+compilation regressions from #38 remain. No new custom GLSL was introduced.
+Internal before/after CPU SVG shape studies inspect actual scene geometry but
+cannot prove GPU materials, lighting, shadows, frame rate or full playability.
+Cloud browser lacks WebGL; keep that limitation explicit in release evidence.

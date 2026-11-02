@@ -83,3 +83,21 @@ shared state for moving parts/readouts, bounded quality and inspection of actual
 renders. No Teardown code/kit or skill installation was copied into this repo.
 The farm continues using its existing R3F/Rapier runtime. The well's visible
 bucket position reads collected-water progress; it is not a hydraulic simulation.
+
+## Complete catalogue pass · 2026-11-02
+
+Original code models now cover all 31 stable catalogue keys: farmhouse/barn,
+granary/silo/windmill aliases, workshop, cedar and blossom, water tower, coop,
+pond, wheat/crops, scarecrow, seven animal entries, tractor, mailbox, produce
+stall, signs, fences, hay and hoop greenhouse. Shared CC0 surface maps remain
+credited above; no additional model downloads, paid services or dependencies.
+Existing scanned scenery and the owner's portrait remain in use.
+
+Animals have species-specific proportions, coat geometry, articulated head/legs,
+fleece and deterministic grazing/walking/rest cycles. Tractor tyre rotation reads
+actual signed travel with separate radii; steering and seated driver read gameplay.
+Wetter beds follow watering progress. Wind, ripples, birds and bees read the shared
+pause/reduced-motion clock. These are artistic behaviour models, not livestock,
+weather, mechanical or agricultural forecasts. Static structural details describe
+construction; ladders, valves, greenhouse doors and coop nesting boxes are not new
+interactive activities. Original footprint IDs and game rules are retained.
