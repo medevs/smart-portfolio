@@ -24,21 +24,21 @@ class SceneBoundary extends Component<{ children: ReactNode; onFailure: () => vo
  * React error boundaries alone cannot catch a rejection in Canvas's async effect.
  * https://r3f.docs.pmnd.rs/api/canvas#custom-canvas
  */
-export function SceneRoot({ children, low, onFailure, onShaderFailure }: { children: ReactNode; low: boolean; onFailure: () => void; onShaderFailure: () => void }) {
+export function SceneRoot({ children, low, conserve=false, onFailure, onShaderFailure }: { children: ReactNode; low: boolean; conserve?:boolean; onFailure: () => void; onShaderFailure: () => void }) {
   const host = useRef<HTMLDivElement>(null);
   const root = useRef<ReturnType<typeof createRoot<HTMLCanvasElement>> | null>(null);
   const configured = useRef(false);
   const state = useRef<RootState | null>(null);
-  const current = useRef({ children, low, onFailure, onShaderFailure });
+  const current = useRef({ children, low, conserve, onFailure, onShaderFailure });
   useLayoutEffect(() => {
-    current.current = { children, low, onFailure, onShaderFailure };
-  }, [children, low, onFailure, onShaderFailure]);
+    current.current = { children, low, conserve, onFailure, onShaderFailure };
+  }, [children, low, conserve, onFailure, onShaderFailure]);
 
   useEffect(() => {
     const container = host.current;
     if (!container) return;
     const element = document.createElement("canvas");
-    element.setAttribute("aria-label", "Interactive 3D Middle Atlas farm. Wheel or pinch to zoom; drag to look around. Choose Walk in Menu to explore.");
+    element.setAttribute("aria-label", "Interactive 3D Middle Atlas farm. Wheel or pinch to zoom; drag to look around. Use WASD or arrow keys to walk; Map & travel skips long walks.");
     container.appendChild(element);
     const context = farmContext(element, current.current.low);
     if (!context) { element.remove(); current.current.onFailure(); return; }
@@ -65,7 +65,7 @@ export function SceneRoot({ children, low, onFailure, onShaderFailure }: { child
         size: { width, height, top, left },
         events,
         shadows: true,
-        dpr: current.current.low ? [1, 1.2] : [1, 1.5],
+        dpr: current.current.low ? current.current.conserve ? [.75,1] : [1,1.2] : [1,1.5],
         camera: { position: [34, 25, 39], fov: 45, near: 0.1, far: 240 },
         gl: { context, antialias: !current.current.low, powerPreference: "default", preserveDrawingBuffer: false },
         onCreated: created => {
@@ -82,7 +82,7 @@ export function SceneRoot({ children, low, onFailure, onShaderFailure }: { child
           created.events.connect?.(element);
           const bounds = container.getBoundingClientRect();
           created.setSize(bounds.width, bounds.height, bounds.top, bounds.left);
-          created.setDpr(current.current.low ? [1, 1.2] : [1, 1.5]);
+          created.setDpr(current.current.low ? current.current.conserve ? [.75,1] : [1,1.2] : [1,1.5]);
         },
       });
       starting = false;
@@ -114,8 +114,8 @@ export function SceneRoot({ children, low, onFailure, onShaderFailure }: { child
   useEffect(() => {
     if (!configured.current || !root.current) return;
     root.current.render(<SceneBoundary onFailure={onFailure}>{children}</SceneBoundary>);
-    state.current?.setDpr(low ? [1, 1.2] : [1, 1.5]);
-  }, [children, low, onFailure, onShaderFailure]);
+    state.current?.setDpr(low ? conserve ? [.75,1] : [1,1.2] : [1,1.5]);
+  }, [children, low, conserve, onFailure, onShaderFailure]);
 
   return <div ref={host} className="world-renderer" />;
 }

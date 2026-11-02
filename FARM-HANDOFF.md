@@ -598,3 +598,32 @@ synchronizer with the actual physics/game-hook test to exercise callback order.
 practice → F exit → new baseline → physical walking. TypeScript and lint pass.
 Attempt direct Next build and require clean Node22 CI/Vercel before promotion.
 All earlier GPU/full-playthrough/FPS/physical touch limits remain #20/#28.
+
+## Faster and easier navigation · 2026-11-02
+
+Automatic now starts Low on every screen; explicit saved High remains available.
+Low uses DPR 1–1.2; measured performance decline in Auto lowers it to .75–1.
+SceneRoot owns DPR without a competing AdaptiveDpr writer. Standard color mode
+omits postprocessing, soft-shadow shader and extra foliage/scanned scenery at
+Low. This reduces rendering work; no measured GPU FPS claim is made.
+
+Visits/retries start in Walk mode. Walking is 4.5 units/s (previously 3.6),
+sprinting 7.2, and camera follow catches up faster. Movement is relative to
+cameraView.turn, independently of avatar yaw: this replaces the old fixed
+compass choice without reintroducing facing-feedback spin. Arrows and WASD
+have separate held states. Touch uses a floating drag origin and radial analog
+deadzone; release stops the stick without clearing the Sprint toggle.
+
+Map & travel is directly beside the journal objective, with a next-task travel
+button. Travel still grants no task completion or inventory. Tutorials and
+quick controls explain all changes. HUD samples Sprint/drive changes as well
+as position so touch feedback updates while stationary.
+
+Local tests, types and lint pass. Real Three/Rapier tests cover movement at
+30/60/120 fps and arrow input toward a turned camera; pointer-event tests
+cover proportional drag, competing fingers, capture, release, blur, visibility
+and disposal. The rerender regression now compares rendered body position
+before/after rerender rather than next-step walk state (one frame ahead).
+Direct build remains blocked by host uv_resident_set_memory ENOENT; require
+Node22 CI and Vercel before merge. GPU FPS/full playthrough and physical touch
+remain unverified under #20/#28.

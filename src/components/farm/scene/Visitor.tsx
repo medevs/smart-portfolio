@@ -5,7 +5,7 @@ import * as THREE from "three";
 import { JourneyProgress } from "./journey-state";
 import { AppleBasket } from "./FarmObjects";
 import { MakerHead } from "./MakerAvatar";
-import { walk } from "./walk-state";
+import { walk, WALK_SPEED } from "./walk-state";
 import { gameClock } from "@/farm/game/clock";
 
 /** Walking maker avatar, using the owner-authorized portfolio portrait. */
@@ -22,7 +22,7 @@ export function Visitor() {
       root.current.visible = !walk.driving && camera.position.distanceToSquared(cameraTarget.current.set(walk.px, 1.1, walk.pz)) > .56;
       root.current.rotation.y = walk.yaw;
     }
-    const stride = gameClock.paused || gameClock.reduced ? 0 : Math.sin(gameClock.seconds * (walk.sprinting ? 12 : 8)) * Math.min(walk.moving / 3.6, 1.4) * .55;
+    const stride = gameClock.paused || gameClock.reduced ? 0 : Math.sin(gameClock.seconds * (walk.sprinting ? 14 : 10)) * Math.min(walk.moving / WALK_SPEED, 1.4) * .55;
     const blend = 1 - Math.exp(-12 * Math.min(dt, .05));
     for (const [part, target] of [[leftLeg, stride], [rightLeg, -stride], [leftArm, carrying ? -1.05 : -stride * .7], [rightArm, carrying ? -1.05 : stride * .7]] as const) {
       if (part.current) part.current.rotation.x = THREE.MathUtils.lerp(part.current.rotation.x, target, blend);

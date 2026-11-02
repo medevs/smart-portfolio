@@ -3,7 +3,6 @@
 import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import {
-  AdaptiveDpr,
   Environment,
   Html,
   PerformanceMonitor,
@@ -80,9 +79,8 @@ export default function FarmCanvas(props: FarmCanvasProps) {
   const [effectsFailed, setEffectsFailed] = useState(false);
   const effectiveQuality = degraded && props.adaptive ? "low" : props.quality;
   return (
-    <SceneRoot low={effectiveQuality === "low"} onFailure={props.onFailure} onShaderFailure={() => setEffectsFailed(true)}>
+    <SceneRoot low={effectiveQuality === "low"} conserve={props.adaptive && degraded} onFailure={props.onFailure} onShaderFailure={() => setEffectsFailed(true)}>
       <Suspense fallback={null}>
-      <AdaptiveDpr pixelated={false} />
       <Scene {...props} quality={effectiveQuality} plain={props.plain || effectsFailed} onDecline={() => { if (props.adaptive) setDegraded(true); }} />
       <FirstFrame onReady={props.onReady} />
       </Suspense>

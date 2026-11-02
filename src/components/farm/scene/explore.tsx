@@ -6,7 +6,8 @@ import type { RapierRigidBody } from "@react-three/rapier";
 import { ORCHARD_TREES } from "@/farm/game/world";
 import { Visitor } from "./Visitor";
 import { GROUND_HALF, YARD_WALLS, YARD_BUILDINGS, safeSpawn } from "./yard-boundaries";
-import { resetWalkInput, TRACTOR, walk, walkingMovement } from "./walk-state";
+import { resetWalkInput, TRACTOR, walk, walkingMovement, movementInput, isMovementKey } from "./walk-state";
+import { cameraView } from "./camera-view";
 import { tractorDrive } from "./tractor-drive";
 
 
@@ -25,14 +26,14 @@ export function PhysicsYard({ paused = false }: { paused?: boolean }) {
     const down = (event: KeyboardEvent) => {
       if (walk.paused || isEditing(event.target) || event.ctrlKey || event.metaKey || event.altKey) return;
       const key = event.key.toLowerCase();
-      if (key === "w" || key === "a" || key === "s" || key === "d") keys[key] = true;
+      if(isMovementKey(key)){keys[key]=true;if(key.startsWith("arrow"))event.preventDefault();}
       if (key === "shift") walk.sprinting = true;
       if (key === "f" && !event.repeat) walk.toggleDrive = true;
     };
     const up = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
       if (key === "shift") walk.sprinting = false;
-      if (key === "w" || key === "a" || key === "s" || key === "d") keys[key] = false;
+      if(isMovementKey(key))keys[key]=false;
     };
     const onVisibility = () => {
       if (document.hidden) resetWalkInput();
@@ -69,15 +70,7 @@ export function PhysicsYard({ paused = false }: { paused?: boolean }) {
   );
 }
 
-function input() {
-  if (walk.paused) {
-    resetWalkInput();
-    return { forward: 0, strafe: 0 };
-  }
-  const forward = (keys.w || walk.stickY < -0.25 ? 1 : 0) - (keys.s || walk.stickY > 0.25 ? 1 : 0);
-  const strafe = (keys.d || walk.stickX > 0.25 ? 1 : 0) - (keys.a || walk.stickX < -0.25 ? 1 : 0);
-  return { forward, strafe };
-}
+const input=movementInput;
 
 function Player() {
   const [spawn] = useState<[number, number, number]>(() => [walk.px, VISITOR_HEIGHT, walk.pz]);
@@ -141,7 +134,7 @@ function Player() {
     if (walk.driving) return;
 
     const { forward, strafe } = input();
-    const { x: dx, z: dz } = walkingMovement(forward, strafe, dt, walk.sprinting);
+    const { x: dx, z: dz } = walkingMovement(forward, strafe, dt, walk.sprinting, cameraView.turn);
 
     velocityY.current = Math.max(velocityY.current - 9.81 * dt, -20);
     const collider = rigid.collider(0);

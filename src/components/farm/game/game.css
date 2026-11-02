@@ -21,3 +21,6 @@
 @media(max-height:600px){.practice-guide{top:72px;max-height:calc(100dvh - 240px);overflow:auto}.lesson-drawing{max-height:140px}}
 
 @media(max-height:600px){.practice-guide>p:first-of-type{display:none}}
+
+.game-objective-row{position:absolute;z-index:6;bottom:24px;left:24px;display:flex;gap:8px;align-items:stretch;max-width:calc(100% - 48px)}.game-objective-row .game-objective{position:static;min-width:0;max-width:340px}.game-map-shortcut{min-height:44px;border:1px solid #c7bd9f;border-radius:7px;background:#f3eddf;color:#344534;padding:10px 12px;font:13px/1.4 system-ui,sans-serif;cursor:pointer;white-space:nowrap;box-shadow:0 3px 20px #1b2b2420}.game-map-shortcut:focus-visible{outline:3px solid #bd7e3b;outline-offset:3px}.game-touch-action[aria-pressed=true]{background:#526b46;color:#fff}
+@media(max-width:800px){.game-objective-row{left:14px;bottom:16px;max-width:calc(100% - 28px)}.game-objective-row .game-objective{flex:1}.game-map-shortcut{font-size:12px;padding:10px}}

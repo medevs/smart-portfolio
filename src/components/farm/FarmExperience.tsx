@@ -10,6 +10,7 @@ import { FarmPanorama } from "./FarmPanorama";
 import { ShopDialog, SpotCard } from "./SpotCard";
 import type { LightMode } from "./scene/FarmCanvas";
 import { resetWalkInput, walk } from "./scene/walk-state";
+import { MovementPad } from "./game/MovementPad";
 import { useWalkingPause } from "./game/useWalkingPause";
 import { useFarmGame } from "./game/useFarmGame";
 import { TOUR_STOPS } from "@/farm/game/tour";
@@ -46,7 +47,6 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
   const [showGrid, setShowGrid] = useState(false);
   const [ready, setReady] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [quality, setQuality] = useState<"low" | "high">("high");
   const [hidden, setHidden] = useState(false);
   useEffect(() => {
     const visibility = () => setHidden(document.hidden);
@@ -55,7 +55,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
   }, []);
   const [plain, setPlain] = useState(false);
   const [hint, setHint] = useState(true);
-  const [explore, setExplore] = useState(false);
+  const [explore, setExplore] = useState(true);
   const [walkFailed, setWalkFailed] = useState(false);
   const [sceneRequested, setSceneRequested] = useState(true);
   const [attempt, setAttempt] = useState(0);
@@ -73,6 +73,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
     setSceneFailed(false);
     setAttempt(value => value + 1);
     setSceneRequested(true);
+    setExplore(true);
     setPhase("color");
   }
 
@@ -107,7 +108,6 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
     setReducedMotion(document.documentElement.dataset.farmReduce === "1");
     setShowGrid(new URLSearchParams(window.location.search).get("grid") === "1");
     setPlain(new URLSearchParams(window.location.search).get("raw") === "1");
-    setQuality(window.matchMedia("(max-width: 800px), (pointer: coarse)").matches ? "low" : "high");
     const spot = initialSpot || readSpot();
     if (spot && nextPhase !== "sketch") setActiveId(spot);
     document.documentElement.dataset.farmReady = "1";
@@ -123,7 +123,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
 
   const game = useFarmGame({ ready: ready && !sceneFailed, exploring: explore, externalPaused: hidden || shopOpen || Boolean(active), onExplore: () => { setWalkFailed(false); setExplore(true); }, onProduct: setActiveId });
   const effectiveReduced = reducedMotion || game.profile.preferences.reducedMotion;
-  const effectiveQuality = game.profile.preferences.quality === "auto" ? quality : game.profile.preferences.quality;
+  const effectiveQuality = game.profile.preferences.quality === "auto" ? "low" : game.profile.preferences.quality;
   const controlsPaused = !explore || game.paused;
   const updateLight = useCallback((next: LightMode) => {
     setLight(next);
@@ -184,26 +184,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
         </div>}
         {explore && ready && !sceneFailed && !controlsPaused && (
           <>
-            <div
-              className="joystick"
-              role="group"
-              aria-label="Movement pad: drag up, down, left or right; keyboard users can use WASD"
-              onPointerDown={(event) => {
-                event.currentTarget.setPointerCapture(event.pointerId);
-                const rect = event.currentTarget.getBoundingClientRect();
-                walk.stickX = Math.max(-1, Math.min(1, ((event.clientX - rect.left) / rect.width) * 2 - 1));
-                walk.stickY = Math.max(-1, Math.min(1, ((event.clientY - rect.top) / rect.height) * 2 - 1));
-              }}
-              onPointerMove={(event) => {
-                if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
-                const rect = event.currentTarget.getBoundingClientRect();
-                walk.stickX = Math.max(-1, Math.min(1, ((event.clientX - rect.left) / rect.width) * 2 - 1));
-                walk.stickY = Math.max(-1, Math.min(1, ((event.clientY - rect.top) / rect.height) * 2 - 1));
-              }}
-              onPointerUp={resetWalkInput}
-              onPointerCancel={resetWalkInput}
-              onLostPointerCapture={resetWalkInput}
-            />
+            <MovementPad/>
           </>
         )}
         {sceneRequested && !ready && !sceneFailed && <div className="scene-loading" role="status"><span className="scene-loading-dot" /> Opening the 3D farm… <button onClick={failScene}>Use the accessible view</button></div>}

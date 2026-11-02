@@ -28,6 +28,7 @@ test('keyboard skip opens the real catalog and duplicate off-screen links are no
   assert.match(html, /aria-haspopup="dialog">Menu<\/button>/);
   assert.doesNotMatch(html, /world-projects|hud-actions|Walk near a place to interact/);
   assert.ok(html.includes('Opening the 3D farm'));
+  assert.match(html,/farm-root is-color is-world is-walking/);
   assert.doesNotMatch(html, /atlas-homestead.webp/);
 });
 
@@ -76,6 +77,7 @@ test('quiet walking HUD offers only useful actions and keeps tractor exit availa
   const game = { profile: freshProfile(), panel: null, paused: false, storageAvailable: true, message: '', waypoint: null, setPanel: noop, close: noop, act: noop };
   const render = () => renderToStaticMarkup(React.createElement(GameOverlay, { game, ready: true, exploring: true, onExplore: noop, light: 'day', onLight: noop, onToggleExplore: noop, onProduct: noop, onHelp: noop, raised: '$0' }));
   const idle = render();
+  assert.match(idle,/aria-haspopup="dialog">Map &amp; travel/);
   assert.match(idle, /Open journal: 0 of 5 activities completed/);
   assert.doesNotMatch(idle, /Drive tractor|Exit tractor|Walk near a place|game-minimap/);
   assert.match(idle, /aria-haspopup="dialog">Menu/);

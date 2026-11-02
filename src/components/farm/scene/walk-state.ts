@@ -2,7 +2,7 @@ import type { Point } from "@/farm/game/world";
 
 /** Shared by the walk controls, the physics bodies, and the tractor mesh. */
 export const walk = {
-  keys: { w: false, a: false, s: false, d: false },
+  keys: { w: false, a: false, s: false, d: false, arrowup:false, arrowdown:false, arrowleft:false, arrowright:false },
   cameraCut: true,
   driving: false,
   trailerX: -2.25,
@@ -31,7 +31,7 @@ export const TRACTOR = { x: 0, z: 5.5 };
 
 /** Clear transient input without moving the visitor or parked tractor. */
 export function resetWalkInput() {
-  walk.keys.w = walk.keys.a = walk.keys.s = walk.keys.d = false;
+  for(const key of Object.keys(walk.keys) as (keyof typeof walk.keys)[])walk.keys[key]=false;
   walk.stickX = 0;
   walk.stickY = 0;
   walk.toggleDrive = false;
@@ -39,9 +39,28 @@ export function resetWalkInput() {
   walk.moving = 0;
 }
 
-/** WASD moves in a stable world frame; facing never feeds back into input. */
-export function walkingMovement(forward: number, strafe: number, dt: number, sprint = false) {
+export const WALK_SPEED=4.5;
+export const SPRINT_MULTIPLIER=1.6;
+
+/** Camera orientation defines input; avatar facing never feeds back into steering. */
+export function walkingMovement(forward: number, strafe: number, dt: number, sprint = false, cameraTurn = 0) {
   const length = Math.max(1, Math.hypot(forward, strafe));
-  const distance = 3.6 * (sprint ? 1.65 : 1) * Math.min(Math.max(dt, 0), 0.05);
-  return { x: (strafe / length) * distance, z: (-forward / length) * distance };
+  const distance = WALK_SPEED * (sprint ? SPRINT_MULTIPLIER : 1) * Math.min(Math.max(dt, 0), 0.05);
+  const c=Math.cos(cameraTurn),s=Math.sin(cameraTurn);
+  return { x: (strafe*c-forward*s)/length*distance, z: (-forward*c-strafe*s)/length*distance };
+}
+
+/** Radial analog input allows gentle motion in every direction, with a small jitter dead zone. */
+export function movementInput() {
+  if(walk.paused){resetWalkInput();return {forward:0,strafe:0};}
+  const keys=walk.keys,length=Math.hypot(walk.stickX,walk.stickY);
+  const strength=Math.max(0,Math.min(1,(length-.12)/.88));
+  const x=length?walk.stickX/length*strength:0,y=length?walk.stickY/length*strength:0;
+  return {
+    forward:Number(keys.w||keys.arrowup)-Number(keys.s||keys.arrowdown)-y,
+    strafe:Number(keys.d||keys.arrowright)-Number(keys.a||keys.arrowleft)+x,
+  };
+}
+export function isMovementKey(key:string):key is keyof typeof walk.keys {
+  return Object.hasOwn(walk.keys,key);
 }
