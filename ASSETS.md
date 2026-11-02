@@ -108,3 +108,12 @@ The pickable low branches/apples, quantity-matched basket use, articulated woode
 trailer, table runner/plates and tea steam are original procedural Three geometry.
 They reuse the existing local wood surface and maker portrait; no external asset
 or license dependency was added. Dog approach is deterministic procedural motion.
+
+### Scanned interaction props, surface wear and field guide · 2026-11-02
+
+The existing CC0 `wicker_basket_01.glb` and `watering_can_metal_01.glb` now provide
+optional detailed interaction props with procedural fallbacks. Original asset
+files/embedded material maps and their credits above remain unchanged. Dimpled
+apple geometry, paint wear/roughness data, chevron tyre geometry and seven SVG
+instruction diagrams are original code. No model, image, font or service was
+newly downloaded. The diagrams are instructional drawings, not farm screenshots.

@@ -9,11 +9,21 @@ import { Metal, Timber, Rod, Rivets, type V3 } from "./ObjectParts";
 import { MakerHead } from "./MakerAvatar";
 function Wheel({radius,width,front=false}:{radius:number;width:number;front?:boolean}) {
   const tread=useRef<THREE.InstancedMesh>(null);
-  const count=front?18:26;
-  useLayoutEffect(()=>{if(!tread.current)return;const o=new THREE.Object3D();for(let i=0;i<count;i++){const a=i/count*Math.PI*2;o.position.set(Math.cos(a)*(radius-.01),Math.sin(a)*(radius-.01),0);o.rotation.set(0,0,a);o.updateMatrix();tread.current.setMatrixAt(i,o.matrix)}tread.current.instanceMatrix.needsUpdate=true;tread.current.computeBoundingSphere()},[count,radius]);
+  const count=(front?18:26)*2;
+  useLayoutEffect(()=>{
+    if(!tread.current)return;
+    const o=new THREE.Object3D(),radial=new THREE.Vector3(0,0,1),axial=new THREE.Vector3(0,1,0),slope=new THREE.Quaternion();
+    for(let i=0;i<count;i++){
+      const a=Math.floor(i/2)/(count/2)*Math.PI*2,side=i%2?1:-1;
+      o.position.set(Math.cos(a)*(radius-.005),Math.sin(a)*(radius-.005),side*width*.24);
+      o.quaternion.setFromAxisAngle(radial,a-Math.PI/2).multiply(slope.setFromAxisAngle(axial,side*.55));o.updateMatrix();tread.current.setMatrixAt(i,o.matrix);
+    }
+    tread.current.instanceMatrix.needsUpdate=true;tread.current.computeBoundingSphere();
+  },[count,radius,width]);
+  const profile=[new THREE.Vector2(radius*.46,-width*.5),new THREE.Vector2(radius*.82,-width*.54),new THREE.Vector2(radius*.96,-width*.32),new THREE.Vector2(radius*.96,width*.32),new THREE.Vector2(radius*.82,width*.54),new THREE.Vector2(radius*.46,width*.5)];
   return <group>
-    <mesh rotation={[Math.PI/2,0,0]} castShadow><cylinderGeometry args={[radius*.94,radius*.94,width,24]}/><meshStandardMaterial color="#343a32" roughness={.96}/></mesh>
-    <instancedMesh ref={tread} args={[undefined,undefined,count]} castShadow><boxGeometry args={[.055,radius*.2,width*1.12]}/><meshStandardMaterial color="#30372e" roughness={1}/></instancedMesh>
+    <mesh rotation={[Math.PI/2,0,0]} castShadow><latheGeometry args={[profile,32]}/><meshStandardMaterial color="#34382f" roughness={.96}/></mesh>
+    <instancedMesh ref={tread} args={[undefined,undefined,count]} castShadow><boxGeometry args={[.045,.045,width*.64]}/><meshStandardMaterial color="#30372e" roughness={1}/></instancedMesh>
     {[-1,1].map(side=><group key={side} position={[0,0,side*width*.53]}>
       <mesh rotation={[Math.PI/2,0,0]}><cylinderGeometry args={[radius*.52,radius*.52,.025,20]}/><meshStandardMaterial color="#9a5948" metalness={.35} roughness={.7}/></mesh>
       <mesh rotation={[Math.PI/2,0,0]}><cylinderGeometry args={[radius*.19,radius*.19,.06,12]}/><meshStandardMaterial color="#777b6b" metalness={.5} roughness={.64}/></mesh>

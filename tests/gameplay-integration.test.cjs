@@ -31,8 +31,9 @@ const Orbit=React.forwardRef(function Orbit(props,ref){
 });
 // A CPU texture fixture checks material/UV wiring; it does not simulate GPU pixels.
 const portraitTexture = new THREE.Texture({src:'/images/profile.jpeg'});
+const pendingScan=new Promise(()=>{});
 const originalLoad=Module._load;
-Module._load=function(request,...rest){return request==='@react-three/drei'?{CameraControls:Orbit,useTexture:()=>portraitTexture}:originalLoad.call(this,request,...rest)};
+Module._load=function(request,...rest){return request==='@react-three/drei'?{CameraControls:Orbit,useTexture:()=>portraitTexture,useGLTF:()=>{throw pendingScan}}:originalLoad.call(this,request,...rest)};
 const { CameraRig }=require('../src/components/farm/scene/CameraRig.tsx');
 const { PhysicsYard }=require('../src/components/farm/scene/explore.tsx');
 const { walk, resetWalkInput }=require('../src/components/farm/scene/walk-state.ts');
@@ -324,4 +325,27 @@ test('returning from orbit preserves the parked trailer position and articulatio
     assert.ok(Math.hypot(walk.trailerX-before.x,walk.trailerZ-before.z)<.08,'does not respawn a straight trailer across nearby objects');
     assert.ok(Math.abs(walk.trailerYaw-before.yaw)<.05);
   }finally{await renderer.unmount();reset();}
+});
+
+test('real guided practice follows movement and camera, pauses with the lesson book and awards no inventory',async()=>{
+  const {useFarmGame}=require('../src/components/farm/game/useFarmGame.ts');
+  const {freshProfile}=require('../src/farm/game/save.ts');const {guideMarker}=require('../src/components/farm/scene/guide-state.ts');
+  const {cameraView,resetCameraView}=require('../src/components/farm/scene/camera-view.ts');
+  const keys=['location','localStorage','setTimeout','clearTimeout','setInterval','clearInterval'];const saved=Object.fromEntries(keys.map(key=>[key,window[key]]));
+  Object.assign(window,{location:{search:''},localStorage:{getItem(){return JSON.stringify({...freshProfile(),introduced:true})},setItem(){}},setTimeout,clearTimeout,setInterval,clearInterval});
+  reset();resetCameraView();let game,explored=false;
+  function Harness(){game=useFarmGame({ready:true,exploring:true,externalPaused:false,onExplore(){explored=true},onProduct(){}});return null;}
+  const renderer=await create(React.createElement(Harness));
+  try {
+    await act(async()=>key('keydown','h'));assert.equal(game.panel,'tutorial');assert.equal(game.paused,true);
+    await act(async()=>game.startPractice());assert.equal(game.practicing,true);assert.equal(explored,true);assert.equal(game.panel,null);
+    walk.px+=2;cameraView.distance+=1;
+    await act(async()=>{await new Promise(resolve=>setTimeout(resolve,240))});
+    assert.equal(game.practice.moved,true);assert.equal(game.practice.looked,true);assert.equal(guideMarker.point.id,'studio');
+    assert.deepEqual(game.profile.progress.completed,[]);assert.equal(game.profile.progress.apples,0);
+    await act(async()=>game.setPanel('tutorial'));assert.equal(guideMarker.point,null,'reading pauses world guidance');
+    await act(async()=>game.act());assert.deepEqual(game.profile.progress.completed,[]);
+    await act(async()=>game.close());await act(async()=>game.carryOnFoot());assert.equal(game.practice.route,'walk');
+    await act(async()=>game.stopPractice());assert.equal(guideMarker.point,null);assert.equal(game.practicing,false);
+  }finally{await renderer.unmount();reset();resetCameraView();for(const key of keys){if(saved[key]===undefined)delete window[key];else window[key]=saved[key];}}
 });

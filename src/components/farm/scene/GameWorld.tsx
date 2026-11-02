@@ -5,6 +5,7 @@ import type * as THREE from "three";
 import { advanceWorld, cycleLighting, gameClock } from "@/farm/game/clock";
 import { nextActivity, type Progress } from "@/farm/game/progress";
 import { destination, type DestinationId } from "@/farm/game/world";
+import { guideMarker } from "./guide-state";
 import { HarvestScene, TeaSteam, SharedTableSetting } from "./HarvestScene";
 import { TrailerModel } from "./TrailerModel";
 import { Crops, WateringCan, AppleBasket } from "./FarmObjects";
@@ -26,7 +27,7 @@ export function GameWorld({ progress, waypoint }: { progress: Progress; waypoint
   const marker = useRef<THREE.Group>(null);
   const next = nextActivity(progress);
   const target = destination(waypoint ?? next?.id ?? "gate");
-  useFrame(() => { if (marker.current) marker.current.position.y = .12 + Math.sin(gameClock.seconds * 2) * .04; });
+  useFrame(() => { if(marker.current){const point=guideMarker.point??target;if(point)marker.current.position.set(point.x,.12+Math.sin(gameClock.seconds*2)*.04,point.z);} });
   const watered = progress.completed.includes("garden"), delivered = progress.completed.includes("table");
   return <group name="farm-game-feedback">
     <HarvestScene progress={progress}/>

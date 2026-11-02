@@ -102,3 +102,14 @@ test('tour chapters render meaningful accessible content, honest vision, credits
     if(index===4) assert.match(html,/future concepts, not open bookings/);
   }
 });
+
+test('illustrated tutorial is readable without WebGL and offers distinct keyboard/touch lessons',()=>{
+  const {TutorialBook,LessonDrawing}=require('../src/components/farm/game/TutorialBook.tsx');
+  const {LESSONS}=require('../src/farm/game/tutorial.ts');
+  const html=renderToStaticMarkup(React.createElement(TutorialBook,{ready:false,onPractice(){}}));
+  assert.match(html,/aria-label="Tutorial lessons"/);assert.match(html,/Keyboard &amp; mouse/);assert.match(html,/Touch controls/);
+  assert.match(html,/disabled="">Start guided visit/);assert.match(html,/Every lesson is available to read/);
+  for(const lesson of LESSONS){assert.ok(html.includes(lesson.title));const drawing=renderToStaticMarkup(React.createElement(LessonDrawing,{kind:lesson.diagram}));assert.match(drawing,/role="img" aria-label="[^"]+"/);assert.match(drawing,/viewBox="0 0 540 220"/);}
+  const available=renderToStaticMarkup(React.createElement(TutorialBook,{ready:true,onPractice(){}}));
+  assert.doesNotMatch(available,/disabled="">Start guided visit/);
+});

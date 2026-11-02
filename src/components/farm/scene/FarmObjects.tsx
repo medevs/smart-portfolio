@@ -1,4 +1,7 @@
 "use client";
+import { OptionalAsset } from "./OptionalAsset";
+import { ScannedProp } from "./ScannedProp";
+import { AppleFruit } from "./RealisticDetails";
 import { useContext, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
@@ -147,9 +150,18 @@ export function BuildingFinish({width=5.4,depth=2.6,height=2.8}:{width?:number;d
 }
 
 export function WateringCan() {
+  return <OptionalAsset fallback={<ProceduralWateringCan/>}><group name="scanned-watering-can" position={[0,-.16,0]}><ScannedProp file="watering_can_metal_01" height={.36}/></group></OptionalAsset>;
+}
+function ProceduralWateringCan() {
   return <group name="metal-watering-can"><mesh castShadow><cylinderGeometry args={[.15,.19,.32,20]}/><meshStandardMaterial color="#7c8d80" metalness={.35} roughness={.7}/></mesh><mesh position={[0,.17,0]}><torusGeometry args={[.145,.012,5,20]}/><meshStandardMaterial color="#677b6a" metalness={.45} roughness={.7}/></mesh><Rod a={[.14,-.09,0]} b={[.42,.16,0]} r={.025} color="#7c8d80" metal/><mesh position={[.44,.19,0]} rotation={[0,0,-.8]}><cylinderGeometry args={[.075,.035,.045,12]}/><meshStandardMaterial color="#6b7b6b" metalness={.5} roughness={.6}/></mesh><mesh position={[-.19,.01,0]} scale={[1,1.4,1]}><torusGeometry args={[.12,.014,6,20,Math.PI*1.5]}/><meshStandardMaterial color="#657a69" metalness={.4} roughness={.7}/></mesh></group>;
 }
 export function AppleBasket({count=7}:{count?:number}) {
+  return <group name="woven-apple-basket">
+    <OptionalAsset fallback={<BasketFallback/>}><group name="scanned-wicker-basket"><ScannedProp file="wicker_basket_01" height={.23}/></group></OptionalAsset>
+    {Array.from({length:Math.max(0,Math.min(7,count))},(_,i)=><group key={i} position={[Math.sin(i*2.399)*.21,.23+(i===6?.1:0),Math.cos(i*2.399)*.21]} rotation={[0,i*2.399,i%2*.12]}><AppleFruit size={.092}/></group>)}
+  </group>;
+}
+function BasketFallback() {
   const points=[new THREE.Vector2(.2,0),new THREE.Vector2(.28,.035),new THREE.Vector2(.35,.2),new THREE.Vector2(.36,.23)];
-  return <group name="woven-apple-basket"><mesh castShadow><latheGeometry args={[points,20]}/><Surface name="wood" color="#a19169" repeat={[8,2]} metalness={0}/></mesh>{[.07,.13,.2,.23].map(y=><mesh key={y} position={[0,y,0]} rotation={[Math.PI/2,0,0]}><torusGeometry args={[.23+y*.55,.012,5,20]}/><meshStandardMaterial color="#877e5c" roughness={1}/></mesh>)}{Array.from({length:Math.max(0,Math.min(7,count))},(_,i)=><group key={i} position={[Math.sin(i*2.399)*.23,.23+(i===6?.1:0),Math.cos(i*2.399)*.23]}><Ellipsoid scale={[.092,.09,.085]} color={i%2?'#ab8150':'#9f6650'}/><Rod a={[0,.07,0]} b={[.012,.11,0]} r={.008} color="#6c644c"/></group>)}</group>;
+  return <group><mesh castShadow><latheGeometry args={[points,28]}/><Surface name="wood" color="#a19169" repeat={[8,2]} metalness={0}/></mesh>{[.07,.13,.2,.23].map(y=><mesh key={y} position={[0,y,0]} rotation={[Math.PI/2,0,0]}><torusGeometry args={[.23+y*.55,.012,6,28]}/><meshStandardMaterial color="#877e5c" roughness={1}/></mesh>)}</group>;
 }

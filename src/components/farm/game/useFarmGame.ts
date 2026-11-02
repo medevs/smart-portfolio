@@ -4,6 +4,9 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import { freshProfile, readProfile, writeProfile, type Preferences, type Profile } from "@/farm/game/save";
 import { TOUR_STOPS, tourIndex as findTourIndex } from "@/farm/game/tour";
 import { discover } from "@/farm/game/discoveries";
+import { freshPractice, practiceStep } from "@/farm/game/tutorial";
+import { guideMarker } from "../scene/guide-state";
+import { cameraView } from "../scene/camera-view";
 import { zoomCamera } from "../scene/camera-view";
 import { canTransferBasket, nearbyApple, transferBasket, harvestApple } from "@/farm/game/journey";
 import { interact } from "@/farm/game/progress";
@@ -11,10 +14,15 @@ import { destination, nearestPlace, SPAWN, type DestinationId } from "@/farm/gam
 import { safeSpawn } from "../scene/yard-boundaries";
 import { resetWalkInput, walk } from "../scene/walk-state";
 
-export type Panel = "welcome" | "map" | "journal" | "settings" | "pause" | "controls" | "notes" | "reset" | "tour" | null;
+export type Panel = "welcome" | "map" | "journal" | "settings" | "pause" | "controls" | "notes" | "reset" | "tour" | "tutorial" | null;
 export function useFarmGame({ ready, exploring, externalPaused, onExplore, onProduct }: {
   ready: boolean; exploring: boolean; externalPaused: boolean; onExplore: () => void; onProduct: (id: string) => void;
 }) {
+  const [practicing,setPracticing]=useState(false);
+  const [practice,setPractice]=useState(freshPractice);
+  const practiceStart=useRef({x:0,z:0,distance:6.2,turn:0});
+  const practiceCurrent=useRef(practice);
+  useLayoutEffect(()=>{practiceCurrent.current=practice},[practice]);
   const [profile, setProfile] = useState<Profile>(freshProfile);
   const [loaded, setLoaded] = useState(false);
   const [tourIndex, setTourIndex] = useState(0);
@@ -63,6 +71,17 @@ export function useFarmGame({ ready, exploring, externalPaused, onExplore, onPro
     window.addEventListener("pagehide", save);
     return () => { clearInterval(timer); window.removeEventListener("pagehide", save); };
   }, [loaded, save]);
+  useEffect(()=>{
+    if(!practicing||!ready||!exploring||paused){guideMarker.point=null;return;}
+    const sample=()=>{
+      const previous=practiceCurrent.current,start=practiceStart.current;
+      const next={...previous,moved:previous.moved||Math.hypot(walk.px-start.x,walk.pz-start.z)>1,looked:previous.looked||Math.abs(cameraView.distance-start.distance)>.25||Math.abs(cameraView.turn-start.turn)>.15,loaded:previous.loaded||current.current.progress.basket==="trailer"};
+      if(next.moved!==previous.moved||next.looked!==previous.looked||next.loaded!==previous.loaded)setPractice(next);
+      guideMarker.point=practiceStep(next,current.current.progress,deliveryContext()).target;
+    };
+    sample();const timer=window.setInterval(sample,200);
+    return ()=>{window.clearInterval(timer);guideMarker.point=null;};
+  },[practicing,ready,exploring,paused]);
   const close = useCallback(() => {
     setPanel(null);
     setProfile(value => value.introduced ? value : { ...value, introduced: true });
@@ -95,6 +114,7 @@ export function useFarmGame({ ready, exploring, externalPaused, onExplore, onPro
       if (event.target instanceof HTMLElement && event.target.closest("input, textarea, select, [contenteditable='true'], [role='dialog']")) return;
       if (visiblePanel) return; // Radix owns Escape and focus while a panel is open.
       const k = event.key.toLowerCase();
+      if (k === "h" || k === "?") { event.preventDefault(); setPanel("tutorial"); }
       if (k === "m" || k === "j" || k === "escape") { event.preventDefault(); setPanel(k === "m" ? "map" : k === "j" ? "journal" : "pause"); }
       if (ready && (k === "+" || k === "=" || k === "-" || k === "_")) { event.preventDefault(); zoomCamera(k === "+" || k === "=" ? -.15 : .15); }
       if (k === "e") { event.preventDefault(); act(); }
@@ -114,13 +134,21 @@ export function useFarmGame({ ready, exploring, externalPaused, onExplore, onPro
     if (!Number.isInteger(index) || index < 0 || index >= TOUR_STOPS.length) return;
     resetWalkInput(); setTourIndex(index); setPanel("tour");
   }
+  function startPractice() {
+    if(!ready)return;
+    practiceStart.current={x:walk.px,z:walk.pz,distance:cameraView.distance,turn:cameraView.turn};
+    setPractice(freshPractice());setPracticing(true);resetWalkInput();if(walk.driving)walk.toggleDrive=true;onExplore();close();
+  }
+  function stopPractice(){setPracticing(false);guideMarker.point=null;}
+  function carryOnFoot(){setPractice(value=>({...value,route:"walk"}));}
   function preferences(patch: Partial<Preferences>) { setProfile(value => ({ ...value, preferences: { ...value.preferences, ...patch } })); }
   function reset() {
     const fresh = freshProfile();
+    stopPractice();
     setProfile(value => ({ ...fresh, preferences: value.preferences, introduced: true }));
     setWaypoint(null); setMessage("A fresh journal. Your settings are kept.");
     walk.travel = { ...SPAWN }; close();
   }
-  return { tourIndex, tourStep, profile, panel: visiblePanel, setPanel, close, waypoint, setWaypoint, message, storageAvailable, paused, act, travel, preferences, reset };
+  return { practicing, practice, startPractice, stopPractice, carryOnFoot, tourIndex, tourStep, profile, panel: visiblePanel, setPanel, close, waypoint, setWaypoint, message, storageAvailable, paused, act, travel, preferences, reset };
 }
 export type FarmGame = ReturnType<typeof useFarmGame>;

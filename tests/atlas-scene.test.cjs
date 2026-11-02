@@ -23,10 +23,12 @@ for (const extension of ['.ts', '.tsx']) Module._extensions[extension] = functio
 // This renderer checks the actual Three scene graph without a GPU. HTML labels
 // are covered by browser checks, so omit their separate React DOM portals here.
 const portraitTexture = new THREE.Texture({src:"/images/profile.jpeg"});
+const scanFixtures=new Map();
+const pendingScan=new Promise(()=>{});
 const originalLoad = Module._load;
 Module._load = function(request, ...rest) {
   const loaded = originalLoad.call(this, request, ...rest);
-  return request === '@react-three/drei' ? { ...loaded, Html: () => null, useTexture: () => portraitTexture } : loaded;
+  return request === '@react-three/drei' ? { ...loaded, Html: () => null, useTexture: () => portraitTexture, useGLTF: url=>{const scene=scanFixtures.get(url);if(!scene)throw pendingScan;return {scene};} } : loaded;
 };
 global.IS_REACT_ACT_ENVIRONMENT = true;
 const { AtlasLandscape } = require('../src/components/farm/scene/MiddleAtlas.tsx');
@@ -35,6 +37,26 @@ const { GameWorld } = require('../src/components/farm/scene/GameWorld.tsx');
 const { MODELS } = require('../src/components/farm/scene/models.tsx');
 const { loadFarm, placePlots } = require('../src/farm/loadFarm.ts');
 const { plotPosition } = require('../src/farm/world.ts');
+
+test('existing scanned basket and watering can decode to grounded, unmodified real geometry',async()=>{
+  const {GLTFLoader}=require('three/examples/jsm/loaders/GLTFLoader.js');
+  const {MeshoptDecoder}=require('three/examples/jsm/libs/meshopt_decoder.module.js');
+  const {groundedModel}=require('../src/components/farm/scene/prop-geometry.ts');
+  for(const file of ['wicker_basket_01','watering_can_metal_01']){
+    const loader=new GLTFLoader();loader.setMeshoptDecoder(MeshoptDecoder);
+    // Decode actual meshopt geometry. GPU WebP decoding is replaced only for this CPU check.
+    loader.register(()=>({name:'EXT_texture_webp',loadTexture:()=>Promise.resolve(new THREE.Texture())}));
+    const bytes=fs.readFileSync(`public/farm/models/${file}.glb`);
+    const asset=await new Promise((resolve,reject)=>loader.parse(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength),'',resolve,reject));
+    const before=new THREE.Box3().setFromObject(asset.scene);
+    const object=groundedModel(asset.scene,.23),box=new THREE.Box3().setFromObject(object),size=box.getSize(new THREE.Vector3()),centre=box.getCenter(new THREE.Vector3());
+    assert.ok(Math.abs(size.y-.23)<1e-5);assert.ok(Math.abs(box.min.y)<1e-5);assert.ok(Math.hypot(centre.x,centre.z)<1e-5);
+    assert.ok(new THREE.Box3().setFromObject(asset.scene).equals(before),'cached source is never translated or scaled');
+    let vertices=0;object.traverse(node=>{if(node.isMesh){vertices+=node.geometry.attributes.position.count;for(const n of node.geometry.attributes.position.array)assert.ok(Number.isFinite(n));assert.ok(node.material.map,'local scan retains material maps');}});
+    assert.ok(vertices>5000,'uses the detailed existing scan, not a primitive stand-in');
+    scanFixtures.set(`/farm/models/${file}.glb`,asset.scene);
+  }
+});
 
 test('expanded agricultural world constructs finite geometry with instanced planting', async () => {
   const renderer = await create(React.createElement(AtlasLandscape, { night: false }));
@@ -302,4 +324,21 @@ test('harvest removes real apples, puts a basket in hands or trailer and sets th
     gameClock.paused=true;await renderer.advanceFrames(3,1/60);steam.getMatrixAt(0,matrix);assert.ok(matrix.equals(frozen));
     for(const node of renderer.scene.findAll(n=>n.instance.isMesh))for(const value of node.instance.geometry.attributes.position.array)assert.ok(Number.isFinite(value));
   }finally{await renderer.unmount();Object.assign(gameClock,clock);}
+});
+
+test('apples and weathered metal have deterministic finite shape/colour detail and tread uses paired angled lugs',async()=>{
+  const {appleFruitGeometry}=require('../src/components/farm/scene/RealisticDetails.tsx');
+  const {agedMetalGeometry,paintRoughness}=require('../src/components/farm/scene/surface-geometry.ts');
+  const apple=appleFruitGeometry(),again=appleFruitGeometry(),metal=agedMetalGeometry([.8,.35,.45],'#9b5e48');
+  assert.deepEqual(apple.attributes.position.array,again.attributes.position.array);
+  apple.computeBoundingBox();assert.ok(apple.boundingBox.max.y<.9,'top is dimpled rather than spherical');
+  for(const geometry of [apple,again,metal])for(const name of ['position','normal','color'])for(const value of geometry.attributes[name].array)assert.ok(Number.isFinite(value));
+  assert.ok(new Set(Array.from(metal.attributes.color.array).map(n=>n.toFixed(3))).size>20,'paint/edge/oxide variation is present');
+  assert.equal(paintRoughness.image.width,128);assert.equal(paintRoughness.image.data.length,128*128*4);
+  const renderer=await create(React.createElement(MODELS.tractor,{night:false}));
+  try{
+    const lugs=renderer.scene.findAll(n=>n.instance.isInstancedMesh&&[36,52].includes(n.instance.count));assert.equal(lugs.length,4);
+    const a=new THREE.Matrix4(),b=new THREE.Matrix4();lugs[0].instance.getMatrixAt(0,a);lugs[0].instance.getMatrixAt(1,b);
+    assert.ok(a.elements[14]*b.elements[14]<0,'chevrons occupy both halves of the tyre');assert.notEqual(a.elements[2],b.elements[2],'the lugs slant in opposite directions');
+  }finally{await renderer.unmount();apple.dispose();again.dispose();metal.dispose();}
 });
