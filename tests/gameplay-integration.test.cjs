@@ -80,10 +80,10 @@ test('actual visitor and tractor keep settled height across moving UI rerenders'
   assert.ok(visitor.position.y>.65&&visitor.position.y<.73);
   const settled=visitor.position.y;
   walk.stickX=1;await frames(renderer,30,1/60);walk.stickX=0;
-  const x=walk.px;
+  const x=visitor.position.x;
   await renderer.update(React.createElement(React.Suspense,{fallback:null},React.createElement(PhysicsYard,{paused:false})));
   assert.ok(Math.abs(visitor.position.y-settled)<.005,'rerender must not relaunch visitor at spawn height');
-  assert.ok(Math.abs(visitor.position.x-x)<.07,'rerender must not rewind horizontal movement');
+  assert.ok(Math.abs(visitor.position.x-x)<.01,'rerender must not rewind horizontal movement');
   walk.driving=true;walk.stickY=-1;await frames(renderer,20,1/60);walk.stickY=0;
   const tractorY=tractor.position.y;
   await renderer.update(React.createElement(React.Suspense,{fallback:null},React.createElement(PhysicsYard,{paused:false})));
@@ -100,7 +100,7 @@ test('walking distance stays stable at 30, 60 and 120 render frames per second',
     await frames(renderer,fps,1/fps);distances.push(walk.px-start);
     walk.stickX=0;await renderer.unmount();
   }
-  for(const d of distances) assert.ok(Math.abs(d-3.6)<.07,`one second must move 3.6 units, measured ${d}`);
+  for(const d of distances) assert.ok(Math.abs(d-4.5)<.07,`one second must move 4.5 units, measured ${d}`);
 });
 
 function key(type,key){const event=new Event(type);Object.defineProperty(event,'key',{value:key});window.dispatchEvent(event)}
@@ -372,4 +372,14 @@ test('practice started while driving teaches exit first and measures walking fro
     await act(async()=>{await new Promise(resolve=>setTimeout(resolve,240))});assert.equal(game.practice.moved,true);
     assert.deepEqual(game.profile.progress.completed,[]);
   }finally{await renderer.unmount();reset();for(const key of keys){if(saved[key]===undefined)delete window[key];else window[key]=saved[key];}}
+});
+
+ test('actual arrow input walks toward the turned view and key overlap releases independently',async()=>{
+  const {cameraView}=require('../src/components/farm/scene/camera-view.ts');
+  reset();walk.px=30;walk.pz=30;cameraView.turn=Math.PI/2;
+  const renderer=await yard();await frames(renderer,20,1/60);
+  key('keydown','ArrowUp');key('keydown','w');key('keyup','w');
+  await frames(renderer,30,1/60);assert.ok(walk.px<28,'forward follows turned camera');assert.ok(Math.abs(walk.pz-30)<.01);
+  key('keyup','ArrowUp');const x=walk.px;await frames(renderer,20,1/60);assert.ok(Math.abs(walk.px-x)<.01);
+  cameraView.turn=0;await renderer.unmount();
 });

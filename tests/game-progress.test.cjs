@@ -66,7 +66,7 @@ test('valid saved settings and safe walking positions survive reload', () => {
 });
 test('sprint keeps normalized diagonal speed and reset clears transient inputs', () => {
   const normal=walkingMovement(1,0,1/60), sprint=walkingMovement(1,1,1/60,true);
-  assert.ok(Math.abs(Math.hypot(sprint.x,sprint.z)/Math.abs(normal.z)-1.65)<1e-10);
+  assert.ok(Math.abs(Math.hypot(sprint.x,sprint.z)/Math.abs(normal.z)-1.6)<1e-10);
   walk.sprinting=true;walk.moving=5;walk.toggleDrive=true;resetWalkInput();
   assert.equal(walk.sprinting,false);assert.equal(walk.moving,0);assert.equal(walk.toggleDrive,false);
 });

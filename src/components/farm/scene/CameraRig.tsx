@@ -52,7 +52,7 @@ export function FollowCamera({ paused }: { paused: boolean }) {
       camera.position.copy(desired.current);
       entered.current = true;
       walk.cameraCut = false;
-    } else camera.position.lerp(desired.current, 1 - Math.exp(-6.5 * Math.min(delta, .05)));
+    } else camera.position.lerp(desired.current, 1 - Math.exp(-10 * Math.min(delta, .05)));
     // Clip the interpolated position too: smoothing must not sweep through a wall.
     keepCameraClear(target.current, camera.position);
     camera.lookAt(target.current);

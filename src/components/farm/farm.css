@@ -1201,3 +1201,5 @@ table.ledger td {
 .joystick{display:none}
 @media(pointer:coarse){.farm-root.is-world.is-walking .joystick{display:block;bottom:88px}}
 @media(max-width:600px){.farm-root .wordmark{font-size:22px}.farm-root .tagline{font-size:9px;letter-spacing:.1em}.farm-root.is-panorama .hud{padding:14px}.farm-root .hud{max-width:calc(100% - 90px)}}
+
+.joystick{background:#f1ebdc25;border:1px solid #efe7cf88;box-shadow:inset 0 0 0 12px #faf2dc12;backdrop-filter:blur(3px)}.joystick .pad-hint{position:absolute;left:50%;top:5px;transform:translateX(-50%);font:16px system-ui,sans-serif;color:#fff8;pointer-events:none}.pad-thumb{position:absolute;left:var(--pad-origin-x,50%);top:var(--pad-origin-y,50%);width:38px;height:38px;border-radius:50%;background:#f1ecdcdd;border:1px solid #fff9;box-shadow:0 3px 12px #13251933;transform:translate(calc(-50% + var(--pad-x,0px)),calc(-50% + var(--pad-y,0px)));pointer-events:none}.joystick[data-active] .pad-thumb{background:#f8f2e3}
