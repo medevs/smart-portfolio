@@ -467,3 +467,31 @@ compilation regressions from #38 remain. No new custom GLSL was introduced.
 Internal before/after CPU SVG shape studies inspect actual scene geometry but
 cannot prove GPU materials, lighting, shadows, frame rate or full playability.
 Cloud browser lacks WebGL; keep that limitation explicit in release evidence.
+
+## Grounded tractor driving · 2026-11-02
+
+The prior controller jumped directly to 7 units/second in either direction and
+rotated the chassis at rest. Replace it with fixed-step acceleration (8 units/s²),
+release/opposite-input braking (12 units/s²), forward/reverse caps of 7/3 and
+bicycle-style signed-speed steering with the existing 1.3 rad/s turn cap. Read
+Rapier-resolved velocity each step so collisions cannot build hidden throttle.
+Small contact-correction velocities below .05 count as stopped, allowing reverse
+to leave a wall instead of repeatedly entering the braking phase.
+
+The box collider now uses zero/min-combined friction: it is a collision hull, not
+four rolling tyres. The controller resolves longitudinal braking and lateral grip;
+vertical gravity/collisions and the existing bounds remain Rapier-owned. This is
+a bounded game controller, not a suspension/soil/traction engineering simulation.
+Help describes release braking and direction changes. Wheel visuals continue to
+read actual travel. No shader, asset, save, dependency or service changes.
+
+69 tests pass, including actual Rapier acceleration, stopped steering, braking
+before reverse, slower reverse, reversed steering, stable stopping/parking, wall
+contact and reverse escape, and equal launch distance at 30/60/120 render FPS.
+Running the new acceleration/pivot tests against the previous controller fails
+(stationary spin and 6.949 units in one second instead of a gradual launch); the
+new controller passes. Existing camera/entry/exit/travel/wheel tests still pass.
+TypeScript and lint pass. Direct local Next build attempted: this host again
+fails uv_resident_set_memory ENOENT; require clean Node22 CI and Vercel before
+merge. Production interface/console verification follows deployment. Actual GPU
+driving feel, visual acceptance, FPS and physical touch gates remain #20/#28.

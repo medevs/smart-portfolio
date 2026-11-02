@@ -118,8 +118,9 @@ test('real input stops on key release and pause; tractor and travel remain contr
   walk.travel={x:0,z:7.5};await frames(renderer,3,1/60);
   assert.ok(Math.hypot(walk.px,walk.pz-7.5)<.01);assert.equal(walk.travel,null);
   key('keydown','f');await frames(renderer,2,1/60);key('keyup','f');assert.equal(walk.driving,true);
-  key('keydown','w');await frames(renderer,30,1/60);key('keyup','w');assert.ok(walk.tx>1,'tractor responds to W');
-  const parked=walk.tx;await frames(renderer,20,1/60);assert.ok(Math.abs(walk.tx-parked)<.05,'release brakes tractor');
+  key('keydown','w');await frames(renderer,30,1/60);key('keyup','w');assert.ok(walk.tx>.8,'tractor accelerates in response to W');
+  await frames(renderer,30,1/60);const parked=walk.tx;
+  await frames(renderer,20,1/60);assert.ok(Math.abs(walk.tx-parked)<.01,'release brakes to a stable stop');
   key('keydown','f');await frames(renderer,3,1/60);key('keyup','f');assert.equal(walk.driving,false);
   const visitor=renderer.scene.findByProps({name:'farm-visitor-body'}).instance;
   assert.ok(visitor.position.y>.65&&visitor.position.y<.73,'exit stays near ground instead of dropping from the air');
@@ -199,4 +200,64 @@ test('real game hook opens a shared chapter without awarding progress and respec
     assert.deepEqual(game.profile.progress.completed,[]);assert.deepEqual(game.profile.discoveries,[]);
     await act(async()=>game.close());assert.equal(game.panel,null);
   } finally {await renderer.unmount();for(const key of keys){if(saved[key]===undefined)delete window[key];else window[key]=saved[key];}}
+});
+
+// These tests step the actual Rapier/controller pair, including collision response.
+test('tractor accelerates, brakes before reversing and cannot pivot while stopped',async()=>{
+  reset();Object.assign(walk,{tx:25,tz:20,vehicleYaw:0});
+  const renderer=await yard();
+  try {
+    await frames(renderer,30,1/60);walk.driving=true;
+    const yaw=walk.vehicleYaw;walk.stickX=1;
+    await frames(renderer,60,1/60);
+    assert.ok(Math.abs(walk.vehicleYaw-yaw)<.001,'steering alone cannot spin the chassis');
+    walk.stickX=0;walk.stickY=-1;const start=walk.tz;
+    await frames(renderer,6,1/60);
+    assert.ok(walk.tz-start>.02&&walk.tz-start<.1,'launch builds speed rather than jumping to 7');
+    await frames(renderer,24,1/60);
+    walk.stickY=1;const switching=walk.tz;
+    await frames(renderer,6,1/60);
+    assert.ok(walk.tz>switching,'opposite input brakes existing forward travel first');
+    await frames(renderer,60,1/60);const reverseStart=walk.tz;
+    await frames(renderer,30,1/60);
+    assert.ok(reverseStart-walk.tz>1&&reverseStart-walk.tz<1.55,'reverse is limited to 3 units per second');
+    const reverseYaw=walk.vehicleYaw;walk.stickX=1;
+    await frames(renderer,10,1/60);
+    assert.ok(walk.vehicleYaw>reverseYaw,'steering reverses with signed travel');
+    walk.stickY=walk.stickX=0;
+    await frames(renderer,30,1/60);const stopped={x:walk.tx,z:walk.tz,yaw:walk.vehicleYaw};
+    await frames(renderer,30,1/60);
+    assert.ok(Math.hypot(walk.tx-stopped.x,walk.tz-stopped.z)<.01);
+    assert.ok(Math.abs(walk.vehicleYaw-stopped.yaw)<.001);
+  } finally {await renderer.unmount();reset();}
+});
+
+test('tractor launch distance is stable at 30, 60 and 120 render frames per second',async()=>{
+  const distances=[];
+  for(const fps of [30,60,120]){
+    reset();Object.assign(walk,{tx:25,tz:20,vehicleYaw:0});const renderer=await yard();
+    try {
+      await frames(renderer,30,1/60);walk.driving=true;walk.stickY=-1;
+      const start=walk.tz;await frames(renderer,fps,1/fps);distances.push(walk.tz-start);
+    } finally {await renderer.unmount();reset();}
+  }
+  for(const distance of distances) assert.ok(distance>2.5&&distance<4.2,`bounded gradual launch: ${distance}`);
+  assert.ok(Math.max(...distances)-Math.min(...distances)<.08,`consistent fixed-step drive: ${distances}`);
+});
+
+test('tractor collision stops throttle buildup and release leaves it parked at the boundary',async()=>{
+  const {YARD_LIMIT}=require('../src/components/farm/scene/yard-boundaries.ts');
+  reset();Object.assign(walk,{tx:YARD_LIMIT-2,tz:20,vehicleYaw:Math.PI/2});
+  const renderer=await yard();
+  try {
+    await frames(renderer,30,1/60);walk.driving=true;walk.stickY=-1;
+    await frames(renderer,180,1/60);
+    assert.ok(walk.tx<YARD_LIMIT&&walk.tx>YARD_LIMIT-1.5,'real hull stays inside the perimeter');
+    walk.stickY=0;const contact=walk.tx;
+    await frames(renderer,30,1/60);assert.ok(Math.abs(walk.tx-contact)<.01,'no stored throttle impulse after hitting a wall');
+    walk.stickY=1;await frames(renderer,60,1/60);
+    assert.ok(walk.tx<contact-.7,'reverse leaves the collision without being stuck');
+    walk.driving=false;walk.stickY=0;await frames(renderer,30,1/60);
+    const parked=walk.tx;await frames(renderer,60,1/60);assert.ok(Math.abs(walk.tx-parked)<.01,'unoccupied tractor brakes and stays parked');
+  } finally {await renderer.unmount();reset();}
 });
