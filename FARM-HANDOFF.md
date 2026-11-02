@@ -458,7 +458,7 @@ wheel rotates from signed ground displacement with its own radius; pause/load
 teleports synchronize without wheel catch-up. Steering reads actual yaw change.
 Plant density/reeds reduce with Low quality; wind matrices update at 20Hz.
 Merged animal parts and instanced repetitions keep the fixture's core yard at
-710 mesh objects (<800 regression budget); this is not a GPU draw/FPS benchmark.
+722 mesh objects (<800 regression budget); this is not a GPU draw/FPS benchmark.
 
 66 tests cover all existing behaviours plus pen bounds, pose boundaries,
 rain/pause/reduced motion, actual animal joints, actual tractor wheels/driver,

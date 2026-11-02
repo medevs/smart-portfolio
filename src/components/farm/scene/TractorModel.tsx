@@ -56,6 +56,14 @@ export function Tractor() {
     <Rivets points={[-.15,.1,.35,.6].flatMap(x=>[-1,1].map(s=>[x,.94,s*.245] as V3))}/>
     <Timber position={[-.77,.35,0]} size={[.12,.09,.2]} color="#827963"/>
     <group ref={driver} name="tractor-driver" position={[-.38,.18,0]} scale={.8} rotation={[0,Math.PI/2,0]} visible={false}>
+      {[-1,1].map(side=><group key={side}>
+        <Rod a={[side*.1,.78,0]} b={[side*.1,.77,.28]} r={.065} color="#414847"/>
+        <Rod a={[side*.1,.77,.28]} b={[side*.1,.46,.32]} r={.052} color="#414847"/>
+        <Metal position={[side*.1,.43,.37]} size={[.14,.1,.24]} color="#514c3d"/>
+        <Rod a={[side*.2,1.16,0]} b={[side*.2,.98,.18]} r={.052} color="#998886"/>
+        <Rod a={[side*.2,.98,.18]} b={[side*.12,1.05,.42]} r={.045} color="#998886"/>
+        <mesh position={[side*.12,1.05,.42]}><sphereGeometry args={[.05,9,7]}/><meshStandardMaterial color="#aa8970" roughness={1}/></mesh>
+      </group>)}
       <mesh position={[0,1.02,0]}><capsuleGeometry args={[.16,.3,4,10]}/><meshStandardMaterial color="#998886" roughness={1}/></mesh><MakerHead/>
     </group>
   </group>;
