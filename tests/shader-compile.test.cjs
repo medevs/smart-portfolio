@@ -67,3 +67,22 @@ layout(location=0) out vec4 fragColor;
 ${fragment}`, 'fragment');
   assert.equal(binary[0],0x07230203);
 });
+
+
+test('mineral plaster noise, colour and derivative normal snippets compile together',()=>{
+  const file=path.resolve('src/components/farm/scene/EarthPlaster.tsx');
+  const earth=new Module(file,module);earth.filename=file;earth.paths=Module._nodeModulePaths(path.dirname(file));
+  earth._compile(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true}}).outputText,file);
+  const {earthFunctions,earthColor,earthNormal}=earth.exports;
+  const binary=compiler.compileGLSL(`#version 310 es
+precision highp float;
+layout(location=0) in vec3 vViewPosition;
+layout(location=1) in vec3 vEarthPosition;
+layout(location=0) out vec4 result;
+${earthFunctions.replace('varying vec3 vEarthPosition;','')}
+void main(){ vec4 diffuseColor=vec4(0.7,0.6,0.5,1.0);vec3 normal=vec3(0,0,1);
+${earthColor}
+${earthNormal}
+result=vec4(diffuseColor.rgb*abs(normal.z),1.0);}`, 'fragment');
+  assert.equal(binary[0],0x07230203);
+});

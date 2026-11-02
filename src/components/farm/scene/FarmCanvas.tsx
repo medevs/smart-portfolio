@@ -18,9 +18,10 @@ import { CELL, plotPosition } from "@/farm/world";
 import { MODELS, type ModelProps } from "./models";
 import { Surface, Textures } from "./materials";
 import { Horizon, MillWorks, Scenery } from "./scenery";
-import { AtlasLandscape } from "./MiddleAtlas";
+import { AtlasLandscape, NaturalDetail } from "./MiddleAtlas";
 import { CameraRig } from "./CameraRig";
 import { PhysicsYard } from "./explore";
+import { landNoise } from "./natural-geometry";
 import type { TourView } from "@/farm/game/tour";
 import { WEATHER, type Weather } from "@/farm/game/weather";
 import { Rain } from "./Weather";
@@ -117,7 +118,7 @@ function Scene(props: FarmCanvasProps & { onDecline: () => void }) {
       <Lights night={night} sunset={sunset} quality={quality} overcast={overcast} />
       {sunset && props.weather !== "rain" && quality === "high" && <SunShafts />}
       <OptionalAsset><Environment files={hdri} background={false} environmentIntensity={night ? 0.32 : sunset ? 0.75 : 0.55} /></OptionalAsset>
-      <Textures>
+      <Textures><NaturalDetail.Provider value={quality === "low"}>
       <Horizon />
       <AtlasLandscape night={night} />
       <FarmLife rain={props.weather === "rain"} />
@@ -142,9 +143,9 @@ function Scene(props: FarmCanvasProps & { onDecline: () => void }) {
         />
       ))}
       {props.showGrid && <GridHelper grid={farm.grid} />}
-      <MillWorks />
+      <MillWorks waterCollected={props.progress.completed.includes("well")} />
       <OptionalAsset><Scenery detail={props.detail && props.quality === "high"} /></OptionalAsset>
-      </Textures>
+      </NaturalDetail.Provider></Textures>
       {props.explore && <OptionalAsset onFailure={props.onWalkFailure} fallback={<Html center><span className="world-place-label" role="status">Starting walking controls…</span></Html>}><PhysicsYard paused={props.paused} /></OptionalAsset>}
       <CameraRig tour={props.tour} walking={props.explore && !props.tour} paused={props.paused} reducedMotion={reducedMotion}
         focus={focusPosition ? [focusPosition[0], focusPosition[2]] : null} />
@@ -173,7 +174,7 @@ function Lights({ night, sunset, quality, overcast }: { night: boolean; sunset: 
     const k = blend.current;
     const s = setBlend.current * (1 - k);
     if (sun.current) {
-      sun.current.intensity = THREE.MathUtils.lerp(3.6, 0.34, k) * (1 - s * 0.15) * (1 - overcast * .75);
+      sun.current.intensity = THREE.MathUtils.lerp(2.7, 0.34, k) * (1 - s * 0.15) * (1 - overcast * .75);
       sun.current.color.copy(dayColor).lerp(setColor, s).lerp(cool, k);
       sun.current.position.set(
         THREE.MathUtils.lerp(14, 24, s) * (1 - k) + -10 * k,
@@ -250,8 +251,8 @@ function Sky({ night, sunset, overcast }: { night: boolean; sunset: boolean; ove
           void main() {
             vec3 dir = normalize(vDir);
             float h = dir.y;
-            vec3 dayTop = vec3(0.16, 0.45, 0.92);
-            vec3 dayHor = vec3(0.62, 0.82, 0.96);
+            vec3 dayTop = vec3(0.27, 0.46, 0.65);
+            vec3 dayHor = vec3(0.69, 0.78, 0.82);
             vec3 setTop = vec3(0.28, 0.18, 0.48);
             vec3 setHor = vec3(1.0, 0.46, 0.22);
             vec3 nightTop = vec3(0.02, 0.03, 0.1);
@@ -281,6 +282,8 @@ function Ground() {
     const g = new THREE.PlaneGeometry(GROUND_HALF * 2, GROUND_HALF * 2, 70, 70);
     g.rotateX(-Math.PI / 2);
     const pos = g.attributes.position;
+    const colors: number[] = [];
+    const dry = new THREE.Color("#b3ac8b"), growth = new THREE.Color("#82906b");
     for (let i = 0; i < pos.count; i++) {
       const x = pos.getX(i);
       const z = pos.getZ(i);
@@ -288,14 +291,17 @@ function Ground() {
       const dist = Math.hypot(x, z);
       const flat = THREE.MathUtils.smoothstep(dist, 38, 60);
       pos.setY(i, roll * flat - 0.02);
+      const color = dry.clone().lerp(growth, landNoise(x * .13, z * .13)).multiplyScalar(.9 + landNoise(x * .7,z * .7) * .16);
+      colors.push(color.r,color.g,color.b);
     }
+    g.setAttribute("color",new THREE.Float32BufferAttribute(colors,3));
     g.computeVertexNormals();
     g.setAttribute("uv2", g.getAttribute("uv"));
     return g;
   }, []);
   return (
     <mesh geometry={geom} receiveShadow>
-      <Surface name="grass" color="#a9a477" repeat={[18, 18]} roughness={0.88} metalness={0} />
+      <Surface name="grass" color="#ffffff" vertexColors repeat={[28,28]} roughness={.95} metalness={0} />
     </mesh>
   );
 }
@@ -510,7 +516,7 @@ function Clouds({ night }: { night: boolean }) {
         <group key={i} position={p as [number, number, number]}>
           {[0, 1, 2].map((k) => (
             <sprite key={k} position={[(k - 1) * 1.4, k === 1 ? 0.4 : 0, 0]} scale={[3.2, 2.2, 1]}>
-              <spriteMaterial map={tex} transparent depthWrite={false} color={night ? "#9aa4c8" : i === 1 ? "#ffd0e0" : "#fff7f2"} opacity={night ? 0.35 : 0.9} />
+              <spriteMaterial map={tex} transparent depthWrite={false} color={night ? "#9aa4c8" : "#f2f0e7"} opacity={night ? 0.35 : 0.9} />
             </sprite>
           ))}
         </group>
@@ -704,11 +710,11 @@ function Effects({
   });
 
   const passes = [
-    <HueSaturation key="sat" saturation={quality === "high" ? 0.16 : 0.06} />,
-    <BrightnessContrast key="grade" brightness={0.01} contrast={quality === "high" ? 0.08 : 0.03} />,
+    <HueSaturation key="sat" saturation={-.05} />,
+    <BrightnessContrast key="grade" brightness={0.01} contrast={.025} />,
     <Bloom
       key="bloom"
-      intensity={night ? 0.7 : 0.08}
+      intensity={night ? 0.35 : 0.035}
       luminanceThreshold={night ? 0.45 : 0.96}
       luminanceSmoothing={0.3}
       mipmapBlur

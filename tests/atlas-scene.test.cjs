@@ -39,7 +39,8 @@ const { plotPosition } = require('../src/farm/world.ts');
 test('expanded agricultural world constructs finite geometry with instanced planting', async () => {
   const renderer = await create(React.createElement(AtlasLandscape, { night: false }));
   const instances = renderer.scene.findAll(node => node.instance.isInstancedMesh);
-  assert.deepEqual(instances.map(node => node.instance.count).sort((a, b) => a - b), [4, 48, 48, 240, 240]);
+  for (const [name,count] of [['orchard-trunk',48],['orchard-canopy',48],['orchard-apple',240],['orchard-crop',240],['orchard-wall',4]]) assert.equal(renderer.scene.findByProps({name}).instance.count,count);
+  assert.ok(instances.some(node=>node.instance.name==='limestone-courses'),'buildings have staggered stonework');
   const bounds = new THREE.Box3().setFromObject(renderer.scene.instance);
   assert.ok(bounds.min.x < -30 && bounds.max.z > 29, 'orchard extends beyond the original yard');
   const meshes = renderer.scene.findAll(node => node.instance.isMesh);
@@ -178,4 +179,42 @@ test('rain is bounded, quality-scaled, paused with the shared clock and shelters
     await renderer.update(React.createElement(Rain,{low:false}));await renderer.advanceFrames(1,1/60);
     assert.equal(renderer.scene.findByProps({name:'gentle-rain'}).instance.geometry.attributes.position.count,840);
   } finally {await renderer.unmount();Object.assign(gameClock,saved);}
+});
+
+
+test('natural foliage uses finite branched geometry with a bounded shared orchard canopy',()=>{
+  const {cedarGeometry,appleGeometry,foothillGeometry}=require('../src/components/farm/scene/natural-geometry.ts');
+  const cedar=cedarGeometry(),apple=appleGeometry(),again=appleGeometry();
+  const lowCedar=cedarGeometry(71,true),lowApple=appleGeometry(96,true);
+  assert.ok(lowCedar.foliage.attributes.position.count<cedar.foliage.attributes.position.count/2);
+  assert.ok(lowApple.foliage.attributes.position.count<apple.foliage.attributes.position.count/2);
+  lowCedar.wood.dispose();lowCedar.foliage.dispose();lowApple.wood.dispose();lowApple.foliage.dispose();
+  assert.deepEqual(apple.foliage.attributes.position.array,again.foliage.attributes.position.array,'stable comparison across reloads');
+  assert.ok(cedar.foliage.attributes.position.count>10000);
+  assert.ok(cedar.foliage.attributes.position.count/3<10000,'foliage stays inside a bounded geometry budget');
+  const sphere=new THREE.Sphere(new THREE.Vector3(0,2.1,0),1.35),p=new THREE.Vector3();
+  for(let i=0;i<apple.foliage.attributes.position.count;i++) {
+    p.fromBufferAttribute(apple.foliage.attributes.position,i);
+    assert.ok(sphere.containsPoint(p),'leaves stay inside existing camera obstruction envelope');
+  }
+  const ground=foothillGeometry();
+  for(let i=0;i<ground.attributes.position.count;i++) {
+    p.fromBufferAttribute(ground.attributes.position,i);
+    if(Math.max(Math.abs(p.x),Math.abs(p.z))<=45) assert.ok(p.y<-.1,'distant hills cannot rise into physical walking area');
+  }
+  for(const g of [cedar.wood,cedar.foliage,apple.wood,apple.foliage,ground]) {
+    for(const name of ['position','normal','color']) for(const n of g.attributes[name].array) assert.ok(Number.isFinite(n));
+    g.dispose();
+  }
+});
+
+test('well bucket and rope read the same collected-water state without a perpetual motor',async()=>{
+  const {Well}=require('../src/components/farm/scene/scenery.tsx');
+  const renderer=await create(React.createElement(Well,{waterCollected:false}));
+  const first=renderer.scene.findByProps({name:'well-bucket'}).instance.position.y;
+  await renderer.update(React.createElement(Well,{waterCollected:true}));
+  assert.ok(renderer.scene.findByProps({name:'well-bucket'}).instance.position.y>first);
+  await renderer.advanceFrames(60,1/60);
+  assert.equal(renderer.scene.findByProps({name:'well-bucket'}).instance.position.y,1.2);
+  await renderer.unmount();
 });

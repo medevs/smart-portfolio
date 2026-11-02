@@ -67,3 +67,19 @@ homestead; earth plaster, irregular limestone, flat roofs, timber lintels, apple
 orchard, narrow irrigation channel, stone well, sheep, donkey and old tractor;
 muted regional foothills and broad ridges; late afternoon; no western barns,
 silos, windmills, fantasy palaces, UI or embedded text.
+
+## Natural-form pass · 2026-11-02
+
+Cedar branches/needle sprays, branched orchard trees with folded leaves, mineral
+plaster shading, staggered limestone courses and outer foothill geometry are
+original deterministic Three.js code. They use the existing CC0 surface maps;
+no new external asset service, generated raster asset or paid model was used.
+Regional references remain the credited photographs above. These are artistic
+models, not surveyed structures, botanical scans or photogrammetry.
+
+Workflow reference reviewed: https://github.com/elvarofficial/teardown
+(README, SKILL.md and MIT license). Useful ideas: reference-first shape review,
+shared state for moving parts/readouts, bounded quality and inspection of actual
+renders. No Teardown code/kit or skill installation was copied into this repo.
+The farm continues using its existing R3F/Rapier runtime. The well's visible
+bucket position reads collected-water progress; it is not a hydraulic simulation.
