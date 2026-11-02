@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CapsuleCollider, CuboidCollider, Physics, RigidBody, useRapier, useBeforePhysicsStep, useAfterPhysicsStep } from "@react-three/rapier";
+import { CapsuleCollider, CuboidCollider, CoefficientCombineRule, Physics, RigidBody, useRapier, useBeforePhysicsStep, useAfterPhysicsStep } from "@react-three/rapier";
 import type { RapierRigidBody } from "@react-three/rapier";
 import { ORCHARD_TREES } from "@/farm/game/world";
 import { Visitor } from "./Visitor";
 import { GROUND_HALF, YARD_WALLS, YARD_BUILDINGS, safeSpawn } from "./yard-boundaries";
 import { resetWalkInput, TRACTOR, walk, walkingMovement } from "./walk-state";
+import { tractorDrive } from "./tractor-drive";
 
 
 
@@ -177,16 +178,13 @@ function Tractor() {
     if (!rigid) return;
     const rotation = rigid.rotation();
     const yaw = Math.atan2(2 * (rotation.w * rotation.y + rotation.x * rotation.z), 1 - 2 * (rotation.y * rotation.y + rotation.z * rotation.z));
-    if (walk.driving) {
-      const { forward, strafe } = input();
-      const speed = forward * 7;
-      rigid.setLinvel({ x: Math.sin(yaw) * speed, y: rigid.linvel().y, z: Math.cos(yaw) * speed }, true);
-      rigid.setAngvel({ x: 0, y: strafe * -1.3, z: 0 }, true);
-    } else {
-      const velocity = rigid.linvel();
-      rigid.setLinvel({ x: velocity.x * 0.9, y: velocity.y, z: velocity.z * 0.9 }, true);
-      rigid.setAngvel({ x: 0, y: 0, z: 0 }, true);
-    }
+    const velocity = rigid.linvel();
+    const { forward, strafe } = walk.driving ? input() : { forward: 0, strafe: 0 };
+    // Read resolved physics velocity so a collision cannot accumulate hidden speed.
+    const actualSpeed = velocity.x * Math.sin(yaw) + velocity.z * Math.cos(yaw);
+    const drive = tractorDrive(actualSpeed, forward, strafe, FIXED_STEP);
+    rigid.setLinvel({ x: Math.sin(yaw) * drive.speed, y: velocity.y, z: Math.cos(yaw) * drive.speed }, true);
+    rigid.setAngvel({ x: 0, y: drive.yawRate, z: 0 }, true);
   });
   useAfterPhysicsStep(() => {
     const rigid = body.current;
@@ -207,7 +205,8 @@ function Tractor() {
       linearDamping={0.6}
       angularDamping={1.2}
     >
-      <CuboidCollider args={[0.5, 0.4, 0.85]} />
+      {/* Tyre grip/braking is resolved above; the hull must not drag like a crate. */}
+      <CuboidCollider args={[0.5, 0.4, 0.85]} friction={0} frictionCombineRule={CoefficientCombineRule.Min} />
     </RigidBody>
   );
 }
