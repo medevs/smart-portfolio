@@ -575,3 +575,26 @@ Live browser is available again but WebGL still takes recovery; verify deployed
 book paging, device instructions, H/?/Escape, map/projects and console. Actual
 GPU material appearance, full guided playthrough/FPS and physical touch remain
 #20/#28; do not claim photorealism or close the visual gate from CPU tests.
+
+## Tutorial control handoff follow-up · 2026-11-02
+
+PR #42 merged at c049a64f45d6d2e4ae69d42889390ceb2f94a0f3 after explicit user
+approval. PR CI 41464236152, merged-main CI 41467523602, preview
+AFEeFUP96mvTXBVvLfnG7Sc1oF7g and production 9NYUizN7YbSTaeRdGYP43MtfAQAM passed.
+Actual production browser verified all seven lessons, paging and touch control
+text, disabled practice without WebGL, H to reopen, Escape/focus and readable
+field-book desktop layout. Browser is in recovery, not a GPU visual acceptance.
+
+Two review findings reproduced in new tests before fixing: walking instructions
+still appeared in Orbit mode, and starting practice while driving showed a
+walking step because the host pause reset cleared the queued automatic exit.
+Hide the practice card outside Walk. Replace that fragile automatic action with
+an explicit Park and step outside lesson using the normal F/touch exit. Capture
+the movement/camera baseline only after physics reports the visitor on foot;
+exit relocation must not count as walking. Share the unchanged host pause/input
+synchronizer with the actual physics/game-hook test to exercise callback order.
+
+86 tests pass, including both before/after reproductions and actual pause →
+practice → F exit → new baseline → physical walking. TypeScript and lint pass.
+Attempt direct Next build and require clean Node22 CI/Vercel before promotion.
+All earlier GPU/full-playthrough/FPS/physical touch limits remain #20/#28.

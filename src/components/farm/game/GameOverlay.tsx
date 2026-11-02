@@ -87,7 +87,7 @@ export function GameOverlay({ game, ready, exploring, onExplore, light, onLight,
         {!walk.driving && <button className="game-touch-action" aria-pressed={walk.sprinting} onClick={() => { walk.sprinting = !walk.sprinting; }}>Sprint</button>}
       </>}
     </>}
-    {guide&&!game.panel&&!game.paused&&ready&&<aside className="practice-guide" aria-label="Guided farm visit">
+    {guide&&exploring&&!game.panel&&!game.paused&&ready&&<aside className="practice-guide" aria-label="Guided farm visit">
       <div className="practice-heading"><span className="field-kicker">Guided visit · {guide.count}/7</span><button onClick={game.stopPractice} aria-label="Stop guided visit">×</button></div>
       <strong>{guide.title}</strong><p>{guide.instruction}</p><p className="practice-controls">{guide.controls}</p>
       {guide.target&&<small>{Math.round(distance(point,guide.target))} m · {waypointBearing(point,guide.target)} · follow the ground marker</small>}

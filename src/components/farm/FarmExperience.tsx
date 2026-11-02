@@ -10,6 +10,7 @@ import { FarmPanorama } from "./FarmPanorama";
 import { ShopDialog, SpotCard } from "./SpotCard";
 import type { LightMode } from "./scene/FarmCanvas";
 import { resetWalkInput, walk } from "./scene/walk-state";
+import { useWalkingPause } from "./game/useWalkingPause";
 import { useFarmGame } from "./game/useFarmGame";
 import { TOUR_STOPS } from "@/farm/game/tour";
 import { GameOverlay } from "./game/GameOverlay";
@@ -129,14 +130,7 @@ export function FarmExperience({ farm, initialSpot = null }: { farm: FarmData; i
     document.documentElement.dataset.farmLight = next;
     document.documentElement.dataset.farmNight = next === "night" ? "1" : "0";
   }, []);
-  useEffect(() => {
-    walk.paused = controlsPaused;
-    resetWalkInput();
-    return () => {
-      walk.paused = true;
-      resetWalkInput();
-    };
-  }, [controlsPaused]);
+  useWalkingPause(controlsPaused);
 
   return (
     <div className={`farm-root is-${phase}${sceneFailed ? " is-panorama" : " is-world"}${explore ? " is-walking" : ""}`}>

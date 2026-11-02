@@ -349,3 +349,27 @@ test('real guided practice follows movement and camera, pauses with the lesson b
     await act(async()=>game.stopPractice());assert.equal(guideMarker.point,null);assert.equal(game.practicing,false);
   }finally{await renderer.unmount();reset();resetCameraView();for(const key of keys){if(saved[key]===undefined)delete window[key];else window[key]=saved[key];}}
 });
+
+test('practice started while driving teaches exit first and measures walking from the actual exit position',async()=>{
+  const {useFarmGame}=require('../src/components/farm/game/useFarmGame.ts');const {useWalkingPause}=require('../src/components/farm/game/useWalkingPause.ts');
+  const {freshProfile}=require('../src/farm/game/save.ts');const {practiceStep}=require('../src/farm/game/tutorial.ts');const {deliveryContext}=require('../src/components/farm/scene/delivery-state.ts');
+  const keys=['location','localStorage','setTimeout','clearTimeout','setInterval','clearInterval'];const saved=Object.fromEntries(keys.map(key=>[key,window[key]]));
+  Object.assign(window,{location:{search:''},localStorage:{getItem(){return JSON.stringify({...freshProfile(),introduced:true})},setItem(){}},setTimeout,clearTimeout,setInterval,clearInterval});
+  reset();Object.assign(walk,{tx:25,tz:20,vehicleYaw:0});let game;
+  function Harness(){game=useFarmGame({ready:true,exploring:true,externalPaused:false,onExplore(){},onProduct(){}});useWalkingPause(game.paused);return React.createElement(PhysicsYard,{paused:game.paused});}
+  const renderer=await create(React.createElement(React.Suspense,{fallback:null},React.createElement(Harness)));
+  try{
+    for(let i=0;i<100&&!renderer.scene.findAll(n=>n.instance.name==='farm-visitor-body').length;i++)await act(async()=>{await new Promise(resolve=>setTimeout(resolve,10))});
+    await frames(renderer,30,1/60);walk.driving=true;await frames(renderer,2,1/60);
+    await act(async()=>game.setPanel('tutorial'));assert.equal(walk.paused,true);
+    await act(async()=>game.startPractice());await frames(renderer,2,1/60);
+    assert.equal(practiceStep(game.practice,game.profile.progress,deliveryContext()).id,'exit','guide must explain the actual driving state');
+    assert.equal(walk.driving,true,'no hidden automatic exit that can be lost on pause');
+    key('keydown','f');await frames(renderer,3,1/60);key('keyup','f');assert.equal(walk.driving,false);
+    await act(async()=>{await new Promise(resolve=>setTimeout(resolve,240))});
+    assert.equal(game.practice.needsExit,false);assert.equal(game.practice.moved,false,'the exit relocation is not walking practice');
+    key('keydown','w');await frames(renderer,30,1/60);key('keyup','w');
+    await act(async()=>{await new Promise(resolve=>setTimeout(resolve,240))});assert.equal(game.practice.moved,true);
+    assert.deepEqual(game.profile.progress.completed,[]);
+  }finally{await renderer.unmount();reset();for(const key of keys){if(saved[key]===undefined)delete window[key];else window[key]=saved[key];}}
+});
