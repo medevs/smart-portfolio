@@ -61,7 +61,8 @@ export function Surface({
   repeat = [1, 1],
   golden = false,
   roughness = 1,
-  metalness = 0.04,
+  metalness = 0,
+  vertexColors = false,
 }: {
   name?: SurfaceName;
   color?: string;
@@ -69,6 +70,7 @@ export function Surface({
   golden?: boolean;
   roughness?: number;
   metalness?: number;
+  vertexColors?: boolean;
 }) {
   const lib = useContext(Ctx);
   const rx = repeat[0];
@@ -90,10 +92,13 @@ export function Surface({
       roughness,
       metalness,
       envMapIntensity: 1,
+      vertexColors,
     });
     if (!set) return mat;
     mat.map = set.diff;
     mat.normalMap = set.nor;
+    mat.aoMap = set.arm;
+    mat.aoMapIntensity = .55;
     mat.roughnessMap = set.arm;
     mat.metalnessMap = set.arm;
     mat.normalScale = new THREE.Vector2(0.85, 0.85);
@@ -114,13 +119,16 @@ export function Surface({
            #ifdef USE_ROUGHNESSMAP
              vRoughnessMapUv *= uRepeat;
            #endif
+           #ifdef USE_AOMAP
+             vAoMapUv *= uRepeat;
+           #endif
            #ifdef USE_METALNESSMAP
              vMetalnessMapUv *= uRepeat;
            #endif`
         );
     };
     return mat;
-  }, [color, golden, lib, metalness, name, roughness, rx, ry]);
+  }, [color, golden, lib, metalness, name, roughness, rx, ry, vertexColors]);
   useEffect(() => () => material.dispose(), [material]);
   return <primitive object={material} attach="material" />;
 }

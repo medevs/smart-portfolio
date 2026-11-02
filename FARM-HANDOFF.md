@@ -368,3 +368,41 @@ pending clipboard regression checks. Make the story card opaque to avoid faint
 background labels showing through; correct the cedar reference alt to describe
 the monkeys actually visible in its photo. 58 local tests, types/lint pass.
 Require Node22 CI/Vercel and live fallback/reload/console checks after promotion.
+
+## Natural forms and materials · 2026-11-02
+
+User still finds the actual 3D farm unrealistic. Prior tour/UI work is not proof
+of a realistic scene. Reviewed the linked Elvar article's public Teardown repo
+README/SKILL/MIT license: useful for reference-led detailed machinery and render
+iteration, not an automatic photoreal farm converter. Do not install or run the
+external skill implicitly. No external code, paid service or dependency added.
+
+Source corrections in this batch:
+- Replace sphere-stack cedar crowns with shared tapered branches and folded
+  needle sprays; replace orchard ball crowns/trunks with instanced branching and
+  individual leaf geometry. Fixed seeds retain identical review shapes on reload. Low graphics uses fewer
+  branches and less than half the leaf/spray geometry; shapes are shared in memory.
+- Mineral plaster uses world-scale mottling, subtle relief and lower-wall stain;
+  stone plinths/courtyard faces have staggered instanced courses. Doors have
+  timber boards/iron hardware. Subtle bevels replace razor-sharp box edges.
+- Natural surfaces default to zero metalness and use existing ARM occlusion.
+  Ground has broad vertex-colour variation; outer square-safe terrain replaces
+  toy dome hills/stray blue strip/utility blocks. Sky, sun, saturation/bloom and
+  cloud colours are more restrained.
+- Well has hollow stonework, posts, axle, connected rope and bucket. Collected-
+  water state raises bucket and changes crank; remove perpetual unpowered spin.
+
+CPU SVG study compared actual old/new cedar and house geometry. It caught a
+segmented-trunk collar defect and overly sparse cedar foliage; corrected both and
+reviewed another sheet. This study omits GPU textures, custom shader relief and
+shadows and is NOT a photoreal render or live WebGL sign-off. Leaf/camera envelope,
+finite geometry, deterministic output, outer-terrain clearance, geometry budget,
+well state and actual GLSL snippet compilation regressions accompany existing
+camera/physics checks. Keep the camera obstruction sphere and physical yard,
+spawn, destinations, project/support/legal identities and saves unchanged.
+
+61 local tests/types/lint pass. Direct local Next build again attempted; sandbox
+uv_resident_set_memory ENOENT persists. Require clean Node22 CI and Vercel before
+merge. Live browser still recovers to the panorama: WebGL unavailable. Verify live
+UI/console after promotion, but do not claim a measured speedup, real GPU visual
+comparison, photorealism, full playthrough or physical touch QA (#20/#28).
