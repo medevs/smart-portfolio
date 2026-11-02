@@ -406,3 +406,35 @@ uv_resident_set_memory ENOENT persists. Require clean Node22 CI and Vercel befor
 merge. Live browser still recovers to the panorama: WebGL unavailable. Verify live
 UI/console after promotion, but do not claim a measured speedup, real GPU visual
 comparison, photorealism, full playthrough or physical touch QA (#20/#28).
+
+## Urgent plaster shader startup regression · 2026-11-02
+
+The user's functioning-GPU console reports fragment '#' invalid character / define
+syntax error, then repeated useProgram invalid-program errors and panorama recovery.
+This is an application regression from #37, not evidence that their GPU is disabled.
+The Permissions-Policy unsupported-feature warnings and content.js extension error
+are separate from the reproduced shader compilation failure.
+
+Root cause: installed Three ShaderLib.standard.fragmentShader starts directly at
+#define STANDARD (trimmed). earthFunctions ends at '}' with no trailing newline.
+The material onBeforeCompile concatenation produced '}#define STANDARD'. The old
+snippet test compiled earthFunctions with a separately padded main() and omitted
+this real integration boundary. Add an explicit newline and bump the material's
+program cache key to v2. Keep renderer/shader errors visible; do not disable the
+plaster or classify this core shader failure as an optional compositor problem.
+
+Extract the actual material factory used by the component. New regression invokes
+its real hook on the installed Three standard vertex/fragment shader, recursively
+expands installed ShaderChunks, replaces light counts like WebGLProgram, and
+compiles both stages with zero and one directional light. Only SPIR-V host I/O is
+adapted (uniform bindings, input/output locations, output colour host function and
+a macro rename for Vulkan glslang's reserved average builtin). No shader body or
+include is omitted. Before fix this test fails with '#' preprocessor directive
+cannot be preceded by another token; after the newline it passes. Standalone
+noise/normal snippets remain as extra arithmetic coverage, not integration proof.
+
+62 local tests, types and lint pass. Local direct Next build attempted and hits
+existing sandbox uv_resident_set_memory ENOENT. Require clean Node22 CI/Vercel,
+merge the fix under the user's standing authorization, then check production
+UI/console. Cloud no-WebGL recovery still cannot prove the user's GPU scene; exact
+compiler reproduction is the acceptance evidence for this bug. Keep #20 open.

@@ -86,3 +86,21 @@ ${earthNormal}
 result=vec4(diffuseColor.rgb*abs(normal.z),1.0);}`, 'fragment');
   assert.equal(binary[0],0x07230203);
 });
+
+test('the actual plaster material hook compiles with installed Three standard vertex/fragment chunks',()=>{
+  const THREE=require('three');
+  const {compileThreeShader}=require('./three-shader-host.cjs');
+  const file=path.resolve('src/components/farm/scene/EarthPlaster.tsx');
+  const earth=new Module(file,module);earth.filename=file;earth.paths=Module._nodeModulePaths(path.dirname(file));
+  earth._compile(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true}}).outputText,file);
+  const material=earth.exports.createEarthMaterial('#baa17f');
+  const shader={vertexShader:THREE.ShaderLib.standard.vertexShader,fragmentShader:THREE.ShaderLib.standard.fragmentShader};
+  assert.ok(shader.fragmentShader.startsWith('#define STANDARD'),'fixture is the real trimmed Three material, not a padded snippet');
+  material.onBeforeCompile(shader,{});
+  try {
+    for(const directionalLights of [0,1]) for(const stage of ['vertex','fragment']) {
+      const binary=compileThreeShader(compiler,shader[`${stage}Shader`],stage,{directionalLights});
+      assert.equal(binary[0],0x07230203);
+    }
+  } finally {material.dispose();}
+});
