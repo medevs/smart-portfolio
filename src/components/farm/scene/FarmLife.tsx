@@ -50,7 +50,7 @@ export function FarmLife({ rain = false }: { rain?: boolean }) {
       {[-1,1].map(x=><group key={x}><Timber position={[x,.3,0]} size={[.14,.6,.75]}/><Timber position={[x,.5,0]} size={[.18,.12,.88]}/></group>)}
       <Timber position={[0,.25,0]} size={[2.2,.12,.12]}/><Rivets points={[-1,1].flatMap(x=>[-.32,0,.32].map(z=>[x,.688,z] as [number,number,number]))}/>
     </group>
-    <group name="courtyard-tea-tray" position={[-4.6,1.08,19]}><TeaTray/></group>
+    <group name="courtyard-tea-tray" position={[-4.6,.98,19]}><TeaTray/></group>
   </group>;
 }
 

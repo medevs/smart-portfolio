@@ -5,6 +5,8 @@ import type * as THREE from "three";
 import { advanceWorld, cycleLighting, gameClock } from "@/farm/game/clock";
 import { nextActivity, type Progress } from "@/farm/game/progress";
 import { destination, type DestinationId } from "@/farm/game/world";
+import { HarvestScene, TeaSteam, SharedTableSetting } from "./HarvestScene";
+import { TrailerModel } from "./TrailerModel";
 import { Crops, WateringCan, AppleBasket } from "./FarmObjects";
 import type { LightMode } from "./FarmCanvas";
 
@@ -27,12 +29,15 @@ export function GameWorld({ progress, waypoint }: { progress: Progress; waypoint
   useFrame(() => { if (marker.current) marker.current.position.y = .12 + Math.sin(gameClock.seconds * 2) * .04; });
   const watered = progress.completed.includes("garden"), delivered = progress.completed.includes("table");
   return <group name="farm-game-feedback">
+    <HarvestScene progress={progress}/>
+    <TrailerModel progress={progress}/>
+    {delivered && <><TeaSteam/><SharedTableSetting/></>}
     {target && <group ref={marker} position={[target.x, .12, target.z]}>
       <mesh rotation={[-Math.PI / 2, 0, 0]}><ringGeometry args={[.65, .76, 32]} /><meshBasicMaterial color="#f6d286" transparent opacity={.85} depthWrite={false} /></mesh>
       <mesh position={[0, .35, 0]}><octahedronGeometry args={[.14]} /><meshStandardMaterial color="#d9b46a" emissive="#9c722b" emissiveIntensity={.5} /></mesh>
     </group>}
     {watered && <group name="watered-garden" position={[13,.02,22]}><Crops night={false} cols={1} rows={1} watered /></group>}
     {progress.completed.includes("well") && <group name="watering-can" position={[-11.2,.2,4.2]}><WateringCan/></group>}
-    {delivered && <group name="shared-apples" position={[-3,1.06,19]}><AppleBasket/></group>}
+    {delivered && <group name="shared-apples" position={[-3,.98,19]}><AppleBasket count={3}/></group>}
   </group>;
 }

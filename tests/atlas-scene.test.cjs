@@ -276,3 +276,30 @@ test('crop quality reduces instances and watered soil reflects completed activit
     assert.ok(!renderer.scene.findByProps({name:'leafy-kitchen-beds'}).instance.children[0].material.color.equals(dry));
   }finally{await renderer.unmount();}
 });
+
+test('harvest removes real apples, puts a basket in hands or trailer and sets the shared table',async()=>{
+  const {HARVEST_APPLES,harvestApple}=require('../src/farm/game/journey.ts');
+  const {JourneyProgress}=require('../src/components/farm/scene/journey-state.tsx');
+  const {gameClock}=require('../src/farm/game/clock.ts');const clock={...gameClock};gameClock.paused=false;
+  let progress={completed:['studio','well','garden'],water:2,apples:0};
+  const tree=()=>React.createElement(JourneyProgress.Provider,{value:progress},React.createElement('group',null,React.createElement(GameWorld,{progress,waypoint:null}),React.createElement(Visitor)));
+  const renderer=await create(tree());
+  try {
+    assert.equal(renderer.scene.findAll(n=>n.instance.name.startsWith('pickable-apple-')).length,3);
+    progress=harvestApple(progress,HARVEST_APPLES[0],true).progress;await renderer.update(tree());await renderer.advanceFrames(1,1/60);
+    assert.equal(renderer.scene.findAll(n=>n.instance.name.startsWith('pickable-apple-')).length,2);
+    assert.ok(renderer.scene.findByProps({name:'carried-apple-basket'}).instance.children.length);
+    progress={...progress,basket:'trailer'};await renderer.update(tree());await renderer.advanceFrames(1,1/60);
+    assert.equal(renderer.scene.findAll(n=>n.instance.name==='carried-apple-basket').length,0);
+    assert.ok(renderer.scene.findByProps({name:'trailer-apple-basket'}).instance.children.length);
+    progress={completed:['studio','well','garden','orchard','table'],water:2,apples:0,picked:[0,1,2],basket:'carried',delivery:'tractor'};
+    await renderer.update(tree());await renderer.advanceFrames(1,1/60);
+    assert.equal(renderer.scene.findAll(n=>n.instance.name.startsWith('pickable-apple-')).length,0);
+    assert.equal(renderer.scene.findAll(n=>n.instance.name==='trailer-apple-basket').length,0);
+    assert.ok(renderer.scene.findByProps({name:'harvest-table-setting'}).instance.children.length);
+    assert.ok(renderer.scene.findByProps({name:'shared-apples'}).instance.children.length);
+    const steam=renderer.scene.findByProps({name:'shared-tea-steam'}).instance,matrix=new THREE.Matrix4();steam.getMatrixAt(0,matrix);const frozen=matrix.clone();
+    gameClock.paused=true;await renderer.advanceFrames(3,1/60);steam.getMatrixAt(0,matrix);assert.ok(matrix.equals(frozen));
+    for(const node of renderer.scene.findAll(n=>n.instance.isMesh))for(const value of node.instance.geometry.attributes.position.array)assert.ok(Number.isFinite(value));
+  }finally{await renderer.unmount();Object.assign(gameClock,clock);}
+});

@@ -1,11 +1,12 @@
 "use client";
-import type { ReactElement } from "react";
+import type { ReactElement, RefObject } from "react";
 import { CourtyardHouse, EarthGranary, StoneWorkshop, AtlasCedar } from "./MiddleAtlas";
 import { Cow, Sheep, Donkey, Cat, Dog, Chicken, Hen } from "./Animals";
 import { Tractor } from "./TractorModel";
 import * as Objects from "./FarmObjects";
 import { Rod } from "./ObjectParts";
-export type ModelProps = {night:boolean;golden?:boolean;cols?:number;rows?:number;phase?:number;watered?:boolean;raining?:boolean;wind?:number};
+import type { animalPose } from "./object-motion";
+export type ModelProps = {motion?:RefObject<ReturnType<typeof animalPose>>;night:boolean;golden?:boolean;cols?:number;rows?:number;phase?:number;watered?:boolean;raining?:boolean;wind?:number};
 export function Barn(props:ModelProps) {return <group><CourtyardHouse {...props}/><group position={[0,0,-.65]}><Objects.BuildingFinish/></group></group>}
 export const Farmhouse=Barn;
 export function Silo(props:ModelProps) {return <group><EarthGranary {...props}/><Objects.BuildingFinish width={1.95} depth={1.95} height={3.3}/></group>}

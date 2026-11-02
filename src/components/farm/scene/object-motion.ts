@@ -26,3 +26,21 @@ export function vehicleVisual(previous: VehicleVisual, sample: VehicleSample, pa
   if(paused||Math.hypot(dx,dz)>2) return {...sample,rear:previous.rear,front:previous.front,steer:previous.steer};
   return {...sample,rear:previous.rear-distance/.4,front:previous.front-distance/.245,steer:Math.abs(distance)>.002?Math.max(-.48,Math.min(.48,Math.atan(turn/ distance))):previous.steer*.9};
 }
+
+/** A gentle approach within a home leash; physical obstacles are checked by the caller. */
+export function companionPose(previous: ReturnType<typeof animalPose>, seconds: number, dt: number, visitor: {x:number;z:number}, raining=false) {
+  if(dt<=0)return previous;
+  const distance=Math.hypot(visitor.x,visitor.z),interested=!raining&&distance<5;
+  const radius=interested?Math.min(2.2,Math.max(0,distance-1.15)):0;
+  const target={x:distance>0?visitor.x/distance*radius:0,z:distance>0?visitor.z/distance*radius:0};
+  const dx=target.x-previous.x,dz=target.z-previous.z,length=Math.hypot(dx,dz);
+  const travel=Math.min(length,.85*Math.min(dt,.05));
+  const moving=travel>.002;
+  const desired=moving?Math.atan2(-dz,dx):interested?Math.atan2(-(visitor.z-previous.z),visitor.x-previous.x):previous.heading;
+  const turn=Math.atan2(Math.sin(desired-previous.heading),Math.cos(desired-previous.heading));
+  const heading=previous.heading+Math.max(-2.4*dt,Math.min(2.4*dt,turn));
+  // Turn before advancing, rather than sliding sideways toward the target.
+  const advance=Math.abs(turn)<.6?travel:0;
+  const pose=animalPose(seconds,0,raining);
+  return {...pose,state:raining?"shelter":moving?"walk":interested?"greet":"rest",x:previous.x+(length?dx/length*advance:0),z:previous.z+(length?dz/length*advance:0),heading,head:.03,gait:advance?Math.sin(seconds*8)*.7:0,tail:Math.sin(seconds*(interested?7:1.4))*(interested?.45:.14)};
+}

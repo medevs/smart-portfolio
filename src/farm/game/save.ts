@@ -29,8 +29,21 @@ export function parseProfile(raw: string | null): Profile {
     // Reject inconsistent saves rather than allowing impossible rewards.
     if (completed.length !== p.completed.length || new Set(p.completed).size !== p.completed.length || completed.some((id, index) => id !== (p.completed as unknown[])[index])) return fresh;
     const count = completed.length;
-    if (p.water !== (count < 2 ? 0 : count === 2 ? 3 : 2) || p.apples !== (count === 4 ? 3 : 0)) return fresh;
+    if (p.water !== (count < 2 ? 0 : count === 2 ? 3 : 2) || (count === 3 ? p.apples > 2 : p.apples !== (count === 4 ? 3 : 0))) return fresh;
+    const picked = p.picked;
+    if (picked !== undefined && (!Array.isArray(picked) || picked.some(id => !Number.isInteger(id) || id < 0 || id > 2) || new Set(picked).size !== picked.length || picked.length !== (count < 3 ? 0 : count === 3 ? p.apples : 3))) return fresh;
+    if (count === 3 && p.apples > 0 && picked === undefined) return fresh;
+    if (p.basket !== undefined && p.basket !== "carried" && p.basket !== "trailer") return fresh;
+    if (p.basket === "trailer" && p.apples !== 3) return fresh;
+    if (p.usedTrailer !== undefined && (typeof p.usedTrailer !== "boolean" || (p.usedTrailer && count < 4))) return fresh;
+    if (p.delivery === "tractor" && p.usedTrailer !== true) return fresh;
+    if (p.delivery !== undefined && (count !== 5 || (p.delivery !== "walk" && p.delivery !== "tractor"))) return fresh;
     fresh.progress = { completed, water: p.water, apples: p.apples };
+    if (Array.isArray(picked)) fresh.progress.picked = [...picked];
+    // Parking resets on reload; return cargo to the visitor, preserving every apple.
+    if (p.basket !== undefined) fresh.progress.basket = "carried";
+    if (p.usedTrailer === true) fresh.progress.usedTrailer = true;
+    if (p.delivery === "walk" || p.delivery === "tractor") fresh.progress.delivery = p.delivery;
     if (Array.isArray(value.discoveries)) fresh.discoveries = FIELD_NOTES.filter(note => (value.discoveries as unknown[]).includes(note.id)).map(note => note.id);
     const prefs = value.preferences;
     if (isWeather(prefs.weather)) fresh.preferences.weather = prefs.weather;

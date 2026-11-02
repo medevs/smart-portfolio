@@ -23,7 +23,11 @@ test('complete the ordered farm loop physically, with exact inventory and no dup
   const expected = [[0,0],[3,0],[2,0],[2,3],[2,0]];
   ACTIVITIES.forEach((activity, i) => {
     assert.equal(nextActivity(progress).id, activity.id);
-    const result = interact(progress, activity.id, destination(activity.id), true);
+    let result;
+    if(activity.id==='orchard') {
+      const {HARVEST_APPLES}=require('../src/farm/game/journey.ts');
+      for(const apple of HARVEST_APPLES){result=interact(progress,'orchard',apple,true);assert.equal(result.changed,true);progress=result.progress;}
+    } else result = interact(progress, activity.id, destination(activity.id), true);
     assert.equal(result.changed, true);
     progress = result.progress;
     assert.deepEqual([progress.water, progress.apples], expected[i]);
@@ -74,4 +78,59 @@ test('shared world clock freezes paused, hidden and reduced motion without catch
   gameClock.paused=false;gameClock.reduced=true;assert.equal(advanceWorld(1),.05);
   gameClock.reduced=false;assert.equal(advanceWorld(.02),.07);
   assert.deepEqual([0,180,270,360].map(cycleLighting),['day','sunset','night','day']);
+});
+
+test('three distinct reachable apples fill the basket; one branch cannot award twice',()=>{
+  const {HARVEST_APPLES,harvestApple}=require('../src/farm/game/journey.ts');
+  let p={completed:['studio','well','garden'],water:2,apples:0};
+  for(const index of [2,0,1]){
+    assert.ok(safeSpawn(HARVEST_APPLES[index]),'low branch is reachable beside its trunk');
+    for(const allowed of [false,true]) {
+      const result=harvestApple(p,{x:0,z:8},allowed);assert.equal(result.changed,false);
+    }
+    const result=harvestApple(p,HARVEST_APPLES[index],true);assert.equal(result.changed,true);p=result.progress;
+    assert.equal(harvestApple(p,HARVEST_APPLES[index],true).changed,false,'same apple stays picked');
+    assert.deepEqual(parseProfile(JSON.stringify({...freshProfile(),progress:p})).progress,p,'partial harvest persists');
+  }
+  assert.equal(p.apples,3);assert.ok(p.completed.includes('orchard'));
+  assert.equal(harvestApple(p,HARVEST_APPLES[0],true).changed,false);
+});
+
+test('basket loading needs physical proximity and a stopped rig; delivery needs unloading',()=>{
+  const {transferBasket,trailerLoadingPoint}=require('../src/farm/game/journey.ts');
+  const full={completed:['studio','well','garden','orchard'],water:2,apples:3,picked:[0,1,2],basket:'carried'};
+  const trailer={x:0,z:5.5,yaw:Math.PI/2},context={trailer,loading:trailerLoadingPoint(trailer),speed:0};
+  for(const [point,speed,allowed] of [[{x:20,z:20},0,true],[context.loading,1,true],[context.loading,0,false]])assert.equal(transferBasket(full,point,{...context,speed},allowed).changed,false);
+  assert.equal(transferBasket({...full,apples:1,picked:[0]},context.loading,context,true).changed,false,'finish harvesting before securing the basket');
+  let p=transferBasket(full,context.loading,context,true).progress;assert.equal(p.basket,'trailer');
+  assert.equal(interact(p,'table',destination('table'),true).changed,false,'cannot deliver remote cargo');
+  const restored=parseProfile(JSON.stringify({...freshProfile(),progress:p})).progress;
+  assert.equal(restored.basket,'carried');assert.equal(restored.apples,3,'reload recovers every apple');
+  const table=destination('table'),parked={trailer:{...table,yaw:0},loading:{x:table.x,z:table.z-1.5},speed:0};
+  p=transferBasket(p,parked.loading,parked,true).progress;assert.equal(p.basket,'carried');assert.equal(p.usedTrailer,true);
+  const delivered=interact(p,'table',table,true).progress;
+  assert.equal(delivered.apples,0);assert.equal(delivered.delivery,'tractor');
+  assert.deepEqual(parseProfile(JSON.stringify({...freshProfile(),progress:delivered})).progress,delivered);
+});
+
+test('legacy journals migrate and malformed partial harvests cannot invent apples',()=>{
+  const base={completed:['studio','well','garden'],water:2,apples:1};
+  for(const patch of [{},{picked:[0,0]},{picked:[4]},{picked:[0,1]},{picked:[0],basket:'floating'},{picked:[0],delivery:'tractor'}]) {
+    assert.deepEqual(parseProfile(JSON.stringify({...freshProfile(),progress:{...base,...patch}})).progress,freshProgress());
+  }
+  const legacy={completed:['studio','well','garden','orchard'],water:2,apples:3};
+  assert.deepEqual(parseProfile(JSON.stringify({...freshProfile(),progress:legacy})).progress,legacy);
+  const done={completed:ACTIVITIES.map(a=>a.id),water:2,apples:0};
+  assert.deepEqual(parseProfile(JSON.stringify({...freshProfile(),progress:done})).progress,done);
+});
+
+test('farm dog turns before approaching, keeps its home leash and freezes with the clock',()=>{
+  const {animalPose,companionPose}=require('../src/components/farm/scene/object-motion.ts');
+  let p={...animalPose(0),x:0,z:0,heading:Math.PI};
+  const first=companionPose(p,1,.05,{x:4,z:0});assert.equal(first.x,0,'turn first instead of skating sideways');
+  for(let i=0;i<400;i++){p=companionPose(p,i*.05,.05,{x:4,z:0});assert.ok(Math.hypot(p.x,p.z)<=2.201);}
+  assert.ok(p.x>2,'notices and approaches a nearby visitor');
+  assert.equal(companionPose(p,100,0,{x:0,z:0}),p,'paused/reduced clock does not move or turn dog');
+  for(let i=0;i<400;i++)p=companionPose(p,20+i*.05,.05,{x:4,z:0},true);
+  assert.ok(Math.hypot(p.x,p.z)<.05,'rain returns dog to its home patch');
 });

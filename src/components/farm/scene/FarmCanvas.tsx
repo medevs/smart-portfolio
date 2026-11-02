@@ -15,7 +15,9 @@ import type { FarmData } from "@/farm/types";
 import type { Placed } from "@/farm/loadFarm";
 import { plateFor } from "@/farm/plates";
 import { CELL, plotPosition } from "@/farm/world";
-import { animalPose } from "./object-motion";
+import { safeSpawn } from "./yard-boundaries";
+import { animalPose, companionPose } from "./object-motion";
+import { JourneyProgress } from "./journey-state";
 import { Hay } from "./FarmObjects";
 import { MODELS, type ModelProps } from "./models";
 import { Surface, Textures } from "./materials";
@@ -109,7 +111,7 @@ function Scene(props: FarmCanvasProps & { onDecline: () => void }) {
   const hdri = night ? "/farm/hdri/night.hdr" : sunset ? "/farm/hdri/sunset.hdr" : "/farm/hdri/day.hdr";
 
   return (
-    <>
+    <JourneyProgress.Provider value={props.progress}>
       <WorldClock paused={props.paused} reduced={reducedMotion} cycle={props.cycle} onLight={props.onLight} />
       <GameWorld progress={props.progress} waypoint={props.waypoint} />
       <PerformanceMonitor onDecline={props.onDecline} />
@@ -157,7 +159,7 @@ function Scene(props: FarmCanvasProps & { onDecline: () => void }) {
       {props.plain || (quality === "low" && props.phase === "color") ? null : (
         <OptionalAsset><Effects night={night} phase={props.phase} reduced={reducedMotion} quality={quality} onSketchDone={props.onSketchDone} focused={!!activeId} /></OptionalAsset>
       )}
-    </>
+    </JourneyProgress.Provider>
   );
 }
 
@@ -550,6 +552,8 @@ function PlacedModel({
   const Model = MODELS[entry.item.sprite];
   const group = useRef<THREE.Group>(null);
   const [x, , z] = plotPosition(entry.plot, farm.grid);
+  const motion=useRef(animalPose(gameClock.seconds));
+  const dogTime=useRef(gameClock.seconds);
   const roam = ["cow", "sheep", "donkey", "chicken", "hen", "dog", "cat"].includes(entry.item.sprite);
   useFrame(() => {
     const node = group.current;
@@ -560,10 +564,16 @@ function PlacedModel({
       return;
     }
     if (!roam) return;
-    const pose = animalPose(gameClock.seconds, entry.plot.animDelay ?? 0, raining);
+    let pose = animalPose(gameClock.seconds, entry.plot.animDelay ?? 0, raining);
+    if(entry.item.sprite==="dog") {
+      const dt=Math.max(0,Math.min(.05,gameClock.seconds-dogTime.current));dogTime.current=gameClock.seconds;
+      const candidate=companionPose(motion.current,gameClock.seconds,dt,{x:walk.driving?100:walk.px-x,z:walk.pz-z},raining);
+      pose=safeSpawn({x:x+candidate.x,z:z+candidate.z})?candidate:{...candidate,x:motion.current.x,z:motion.current.z,gait:0};
+    }
+    motion.current=pose;
     node.position.set(x + pose.x, 0, z + pose.z);
     node.rotation.y = pose.heading + (entry.plot.flip ? Math.PI : 0);
-  });
+  }, -.5);
   const plate = plateFor(entry, farm);
   const golden = Boolean(plate?.golden);
   const interactive = Boolean(entry.item.interactive);
@@ -572,6 +582,7 @@ function PlacedModel({
   const props: ModelProps = {
     night,
     golden,
+    motion,
     phase: entry.plot.animDelay ?? 0,
     watered, raining, wind,
     cols: entry.plot.cols,

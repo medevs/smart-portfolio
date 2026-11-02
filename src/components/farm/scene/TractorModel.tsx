@@ -54,6 +54,7 @@ export function Tractor() {
     {[-1,1].map(side=><Rod key={side} a={[-.59,.7,side*.27]} b={[-.59,1.57,side*.27]} r={.03} metal/>)}
     <Metal position={[-.2,1.59,0]} size={[.9,.045,.85]} color="#a39c7c"/>
     <Rivets points={[-.15,.1,.35,.6].flatMap(x=>[-1,1].map(s=>[x,.94,s*.245] as V3))}/>
+    <Rod a={[-.77,.22,0]} b={[-1,.22,0]} r={.035} metal/>
     <Timber position={[-.77,.35,0]} size={[.12,.09,.2]} color="#827963"/>
     <group ref={driver} name="tractor-driver" position={[-.38,.18,0]} scale={.8} rotation={[0,Math.PI/2,0]} visible={false}>
       {[-1,1].map(side=><group key={side}>
