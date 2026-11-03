@@ -78,6 +78,7 @@ test('quiet walking HUD offers only useful actions and keeps tractor exit availa
   const render = () => renderToStaticMarkup(React.createElement(GameOverlay, { game, ready: true, exploring: true, onExplore: noop, light: 'day', onLight: noop, onToggleExplore: noop, onProduct: noop, onHelp: noop, raised: '$0' }));
   const idle = render();
   assert.match(idle,/aria-haspopup="dialog">Map &amp; travel/);
+  assert.match(idle,/aria-label="Walk to next task:/);
   assert.match(idle, /Open journal: 0 of 5 activities completed/);
   assert.doesNotMatch(idle, /Drive tractor|Exit tractor|Walk near a place|game-minimap/);
   assert.match(idle, /aria-haspopup="dialog">Menu/);
@@ -123,4 +124,12 @@ test('walking practice instructions are hidden in Orbit and shown after returnin
   const render=exploring=>renderToStaticMarkup(React.createElement(GameOverlay,{game,ready:true,exploring,onExplore:noop,light:'day',onLight:noop,onToggleExplore:noop,onProduct:noop,onHelp:noop,raised:'$0'}));
   assert.doesNotMatch(render(false),/aria-label="Guided farm visit"/);
   assert.match(render(true),/aria-label="Guided farm visit"/);
+});
+
+test('map destinations expose keyboard selection and retain the accessible destination names',()=>{
+  const {FarmMap}=require('../src/components/farm/game/GameOverlay.tsx');
+  const html=renderToStaticMarkup(React.createElement(FarmMap,{point:{x:0,z:8},waypoint:null,selected:'home',onSelect(){}}));
+  assert.match(html,/role="group" aria-label="Farm map:/);
+  assert.match(html,/role="button" tabindex="0" aria-label="Select The homestead" aria-pressed="true"/);
+  assert.match(html,/aria-label="Select The well"/);
 });

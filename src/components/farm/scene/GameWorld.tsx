@@ -7,6 +7,7 @@ import { nextActivity, type Progress } from "@/farm/game/progress";
 import { destination, type DestinationId } from "@/farm/game/world";
 import { guideMarker } from "./guide-state";
 import { HarvestScene, TeaSteam, SharedTableSetting } from "./HarvestScene";
+import { WalkingTrail } from "./WalkingTrail";
 import { TrailerModel } from "./TrailerModel";
 import { Crops, WateringCan, AppleBasket } from "./FarmObjects";
 import type { LightMode } from "./FarmCanvas";
@@ -30,6 +31,7 @@ export function GameWorld({ progress, waypoint }: { progress: Progress; waypoint
   useFrame(() => { if(marker.current){const point=guideMarker.point??target;if(point)marker.current.position.set(point.x,.12+Math.sin(gameClock.seconds*2)*.04,point.z);} });
   const watered = progress.completed.includes("garden"), delivered = progress.completed.includes("table");
   return <group name="farm-game-feedback">
+    <WalkingTrail/>
     <HarvestScene progress={progress}/>
     <TrailerModel progress={progress}/>
     {delivered && <><TeaSteam/><SharedTableSetting/></>}

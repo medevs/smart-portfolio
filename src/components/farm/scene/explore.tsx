@@ -6,8 +6,9 @@ import type { RapierRigidBody } from "@react-three/rapier";
 import { ORCHARD_TREES } from "@/farm/game/world";
 import { Visitor } from "./Visitor";
 import { GROUND_HALF, YARD_WALLS, YARD_BUILDINGS, safeSpawn } from "./yard-boundaries";
-import { resetWalkInput, TRACTOR, walk, walkingMovement, movementInput, isMovementKey } from "./walk-state";
+import { resetWalkInput, TRACTOR, walk, walkingMovement, movementInput, isMovementKey, cancelWalkRoute, routeMovement } from "./walk-state";
 import { cameraView } from "./camera-view";
+import { findWalkingRoute } from "./walking-route";
 import { tractorDrive } from "./tractor-drive";
 
 
@@ -26,9 +27,9 @@ export function PhysicsYard({ paused = false }: { paused?: boolean }) {
     const down = (event: KeyboardEvent) => {
       if (walk.paused || isEditing(event.target) || event.ctrlKey || event.metaKey || event.altKey) return;
       const key = event.key.toLowerCase();
-      if(isMovementKey(key)){keys[key]=true;if(key.startsWith("arrow"))event.preventDefault();}
+      if(isMovementKey(key)){cancelWalkRoute();keys[key]=true;if(key.startsWith("arrow"))event.preventDefault();}
       if (key === "shift") walk.sprinting = true;
-      if (key === "f" && !event.repeat) walk.toggleDrive = true;
+      if (key === "f" && !event.repeat) {cancelWalkRoute();walk.toggleDrive = true;}
     };
     const up = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
@@ -45,7 +46,7 @@ export function PhysicsYard({ paused = false }: { paused?: boolean }) {
     return () => {
       window.removeEventListener("blur", resetWalkInput);
       document.removeEventListener("visibilitychange", onVisibility);
-      resetWalkInput();
+      cancelWalkRoute();resetWalkInput();
       window.removeEventListener("keydown", down);
       window.removeEventListener("keyup", up);
       walk.driving = false;
@@ -78,6 +79,7 @@ function Player() {
   const { world } = useRapier();
   const controller = useRef<ReturnType<typeof world.createCharacterController> | null>(null);
   const velocityY = useRef(0);
+  const blockedSeconds = useRef(0);
 
   useEffect(() => {
     const next = world.createCharacterController(0.04);
@@ -99,6 +101,7 @@ function Player() {
     if (walk.paused) { resetWalkInput(); velocityY.current = 0; return; }
     let here = rigid.translation();
     if (walk.travel && !walk.paused) {
+      cancelWalkRoute();
       const target = walk.travel;
       walk.travel = null;
       if (safeSpawn(target)) {
@@ -116,6 +119,7 @@ function Player() {
     const tractorX = TRACTOR.x + walk.tx;
     const tractorZ = TRACTOR.z + walk.tz;
     if (walk.toggleDrive && !walk.paused) {
+      cancelWalkRoute();
       walk.toggleDrive = false;
       const near = Math.hypot(here.x - tractorX, here.z - tractorZ) < 2.4;
       if (walk.driving || near) {
@@ -133,13 +137,23 @@ function Player() {
     rigid.setEnabled(!walk.driving);
     if (walk.driving) return;
 
+    if(walk.routeRequest){
+      const request=walk.routeRequest;walk.routeRequest=null;walk.routeLabel=request.label;
+      walk.route=findWalkingRoute(here,request,[{x:tractorX,z:tractorZ,radius:1.35},{x:walk.trailerX,z:walk.trailerZ,radius:1.35}])??[];
+      walk.routeIndex=0;walk.routeStatus=walk.route.length?"walking":"blocked";blockedSeconds.current=0;
+    }
     const { forward, strafe } = input();
-    const { x: dx, z: dz } = walkingMovement(forward, strafe, dt, walk.sprinting, cameraView.turn);
+    if(forward||strafe)cancelWalkRoute();
+    const { x: dx, z: dz } = walk.routeStatus==="walking" ? routeMovement(here,dt) : walkingMovement(forward, strafe, dt, walk.sprinting, cameraView.turn);
 
     velocityY.current = Math.max(velocityY.current - 9.81 * dt, -20);
     const collider = rigid.collider(0);
     character.computeColliderMovement(collider, { x: dx, y: velocityY.current * dt, z: dz });
     const move = character.computedMovement();
+    if(walk.routeStatus==="walking"){
+      blockedSeconds.current=Math.hypot(move.x,move.z)<Math.hypot(dx,dz)*.15?blockedSeconds.current+dt:0;
+      if(blockedSeconds.current>1.2){walk.route=[];walk.routeIndex=0;walk.routeStatus="blocked";}
+    }
     if (character.computedGrounded() && velocityY.current < 0) velocityY.current = 0;
     const next = {
       x: here.x + move.x,
