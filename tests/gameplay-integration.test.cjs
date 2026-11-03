@@ -945,7 +945,7 @@ test('guided walking reaches the homestead through actual Rapier obstacles and y
   }
 });
 
-test('Map walking survives the real pause handoff, visits each apple and grants nothing until interaction', async () => {
+test('journal and map routes complete all five physical activities and grant nothing until interaction', async () => {
   const { useFarmGame } = require('../src/components/farm/game/useFarmGame.ts'),
     { useWalkingPause } = require('../src/components/farm/game/useWalkingPause.ts');
   const { freshProfile } = require('../src/farm/game/save.ts');
@@ -961,8 +961,7 @@ test('Map walking survives the real pause handoff, visits each apple and grants 
   let stored = JSON.stringify({
       ...freshProfile(),
       introduced: true,
-      position: { x: 13, z: 22 },
-      progress: { completed: ['studio', 'well', 'garden'], water: 2, apples: 0 },
+      position: { x: 0, z: 8 },
     }),
     game;
   Object.assign(window, {
@@ -990,7 +989,12 @@ test('Map walking survives the real pause handoff, visits each apple and grants 
       onProduct() {},
     });
     useWalkingPause(game.paused);
-    return React.createElement(PhysicsYard, { paused: game.paused });
+    const { JourneyProgress } = require('../src/components/farm/scene/journey-state.tsx');
+    return React.createElement(
+      JourneyProgress.Provider,
+      { value: game.profile.progress },
+      React.createElement(PhysicsYard, { paused: game.paused }),
+    );
   }
   const renderer = await create(
     React.createElement(React.Suspense, { fallback: null }, React.createElement(Harness)),
@@ -1005,6 +1009,32 @@ test('Map walking survives the real pause handoff, visits each apple and grants 
         await new Promise((resolve) => setTimeout(resolve, 10));
       });
     await frames(renderer, 30, 1 / 60);
+    for (const [index, id] of ['studio', 'well', 'garden'].entries()) {
+      await act(async () => game.setPanel('journal'));
+      await act(async () => game.walkTo(id));
+      assert.ok(walk.routeRequest, 'journal request survives the same pause handoff');
+      for (let i = 0; i < 1800 && (walk.routeRequest || walk.routeStatus === 'walking'); i++)
+        await frames(renderer, 1, 1 / 60);
+      assert.equal(walk.routeStatus, 'arrived', id);
+      assert.equal(
+        game.profile.progress.completed.length,
+        index,
+        'walking cannot award an activity',
+      );
+      await act(async () => game.act());
+      assert.equal(game.profile.progress.completed.length, index + 1, id);
+      assert.equal(
+        game.waypoint,
+        ['well', 'garden', 'orchard'][index],
+        'marker follows the next activity',
+      );
+      const cans = renderer.scene.findAll((n) => n.instance.name === 'carried-watering-can');
+      assert.equal(
+        cans.length,
+        id === 'well' ? 1 : 0,
+        'the full can is carried from well to garden',
+      );
+    }
     for (let apple = 0; apple < 3; apple++) {
       await act(async () => game.setPanel('map'));
       assert.equal(walk.paused, true);
@@ -1101,5 +1131,54 @@ test('trailer stays level through parking, acceleration, turning, braking and re
       await renderer.unmount();
       reset();
     }
+  }
+});
+
+test('actual character stops at fences, water, greenhouse, coop and benches; open gate passes', async () => {
+  const { cameraView } = require('../src/components/farm/scene/camera-view.ts');
+  const cases = [
+    { x: 4.4, z: 10, key: 'w', axis: 'pz', boundary: 8.02, greater: true },
+    { x: -16.5, z: 6.2, key: 'w', axis: 'pz', boundary: 4.42, greater: true },
+    { x: -19, z: -2.2, key: 'd', axis: 'px', boundary: -16.92, greater: false },
+    { x: -24.2, z: 4, key: 'w', axis: 'pz', boundary: 1.26, greater: true },
+    { x: -3, z: 22, key: 'w', axis: 'pz', boundary: 20.58, greater: true },
+  ];
+  for (const c of cases) {
+    reset();
+    cameraView.turn = 0;
+    walk.px = c.x;
+    walk.pz = c.z;
+    const renderer = await yard();
+    try {
+      await frames(renderer, 15, 1 / 60);
+      key('keydown', c.key);
+      await frames(renderer, 120, 1 / 60);
+      key('keyup', c.key);
+      assert.ok(
+        c.greater ? walk[c.axis] > c.boundary : walk[c.axis] < c.boundary,
+        `${JSON.stringify(c)} -> ${walk[c.axis]}`,
+      );
+      const visitor = renderer.scene.findByProps({ name: 'farm-visitor-body' }).instance;
+      assert.ok(visitor.position.y < 0.74, 'a solid obstacle cannot become a climbable shortcut');
+    } finally {
+      await renderer.unmount();
+      reset();
+    }
+  }
+  walk.px = 0;
+  walk.pz = 8.5;
+  // Park the vehicle away from this isolated gate-clearance test.
+  walk.tx = 30;
+  walk.tz = 20;
+  const renderer = await yard();
+  try {
+    await frames(renderer, 15, 1 / 60);
+    key('keydown', 'w');
+    await frames(renderer, 30, 1 / 60);
+    key('keyup', 'w');
+    assert.ok(walk.pz < 6.5, `gate must allow walking: ${walk.pz}`);
+  } finally {
+    await renderer.unmount();
+    reset();
   }
 });

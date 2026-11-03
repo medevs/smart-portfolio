@@ -7,6 +7,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { gameClock } from "@/farm/game/clock";
+import { fenceSections } from "@/farm/game/fixtures";
 import { CELL } from "@/farm/world";
 import { NaturalDetail } from "./MiddleAtlas";
 import { appleGeometry, randomSeed } from "./natural-geometry";
@@ -472,26 +473,36 @@ export function Sign({ golden = false }: Partial<ModelProps>) {
     </group>
   );
 }
-export function Fence({ cols = 2 }: ModelProps) {
-  const w = Math.max(CELL, cols * CELL * 0.92),
-    count = Math.max(2, Math.round(w / 1.1));
+export function Fence({ cols = 2, opening = 0 }: ModelProps) {
   return (
     <group name="mortised-pasture-fence">
-      {[0.4, 0.7].map((y) => (
-        <Timber key={y} position={[0, y, 0]} size={[w, 0.075, 0.06]} color="#9d9479" />
-      ))}
-      {Array.from({ length: count }, (_, i) => {
-        const x = -w / 2 + (i * w) / (count - 1);
+      {fenceSections(cols, opening).map((section) => {
+        const count = Math.max(2, Math.ceil(section.width / 1.1) + 1);
         return (
-          <group key={i}>
-            <Timber position={[x, 0.48, 0]} size={[0.1, 0.96, 0.1]} />
-            <Metal position={[x, 0.975, 0]} size={[0.12, 0.025, 0.12]} color="#727a68" />
-            <Rivets
-              points={[
-                [x, 0.4, 0.06],
-                [x, 0.7, 0.06],
-              ]}
-            />
+          <group key={section.x} position={[section.x, 0, 0]}>
+            {[0.4, 0.7].map((y) => (
+              <Timber
+                key={y}
+                position={[0, y, 0]}
+                size={[section.width, 0.075, 0.06]}
+                color="#9d9479"
+              />
+            ))}
+            {Array.from({ length: count }, (_, i) => {
+              const x = -section.width / 2 + (i * section.width) / (count - 1);
+              return (
+                <group key={i}>
+                  <Timber position={[x, 0.48, 0]} size={[0.1, 0.96, 0.1]} />
+                  <Metal position={[x, 0.975, 0]} size={[0.12, 0.025, 0.12]} color="#727a68" />
+                  <Rivets
+                    points={[
+                      [x, 0.4, 0.06],
+                      [x, 0.7, 0.06],
+                    ]}
+                  />
+                </group>
+              );
+            })}
           </group>
         );
       })}

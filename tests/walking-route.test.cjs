@@ -79,3 +79,48 @@ test('starting beside a vehicle steps outward before routing around it', () => {
   assert.ok(route[0].x > from.x, 'leave the conservative footprint on the starting side');
   check(route[0], to, [obstacle]);
 });
+
+test('solid farm fixtures reject spawns and direct shortcuts while the gate remains passable', () => {
+  for (const p of [
+    { x: 4.4, z: 7.7 }, // pasture fence
+    { x: -16.5, z: 2.2 }, // pond
+    { x: -15.4, z: -2.2 }, // greenhouse
+    { x: -24.2, z: 0 }, // coop
+    { x: -3, z: 20.1 }, // shared bench
+    { x: 24.7, z: 15 }, // beehive
+    { x: -11, z: 0.6 }, // workbench
+    { x: -28, z: -17 }, // cedar trunk
+  ])
+    assert.equal(safeSpawn(p), false, JSON.stringify(p));
+  assert.equal(walkingSegmentClear({ x: 4.4, z: 10 }, { x: 4.4, z: 6 }), false);
+  assert.equal(walkingSegmentClear({ x: -16.5, z: 6.2 }, { x: -16.5, z: -1 }), false);
+  assert.equal(walkingSegmentClear({ x: 0, z: 8.5 }, { x: 0, z: 6.5 }), true);
+  check({ x: 4.4, z: 10 }, { x: 4.4, z: 6 });
+});
+
+test('activity navigation advances through real fruit and a loaded basket instead of a generic area', () => {
+  const { activityTarget } = require('../src/farm/game/activity-target.ts');
+  const context = { trailer: { x: 2, z: 9 }, loading: { x: 2, z: 10.5 }, speed: 0 };
+  const progress = { completed: ['studio', 'well', 'garden'], water: 2, apples: 0, picked: [] };
+  for (let i = 0; i < 3; i++) {
+    const target = activityTarget(progress, 'orchard', context);
+    assert.equal(target.x, HARVEST_APPLES[i].x);
+    assert.equal(target.z, HARVEST_APPLES[i].z);
+    assert.equal(target.label, `Apple ${i + 1} of 3`);
+    progress.picked.push(i);
+    progress.apples++;
+  }
+  progress.completed.push('orchard');
+  progress.basket = 'trailer';
+  assert.deepEqual(activityTarget(progress, 'table', context), {
+    ...context.loading,
+    label: 'Your basket at the trailer',
+  });
+  progress.basket = 'carried';
+  const table = activityTarget(progress, 'table', context);
+  assert.equal(table.x, destinationForTest('table').x);
+  assert.equal(table.z, destinationForTest('table').z);
+});
+function destinationForTest(id) {
+  return DESTINATIONS.find((p) => p.id === id);
+}

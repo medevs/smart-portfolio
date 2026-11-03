@@ -5,6 +5,7 @@ import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeom
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
 import { ORCHARD_TREES } from "@/farm/game/world";
+import { CEDAR_TREES } from "@/farm/game/fixtures";
 import { YARD_WALLS } from "@/farm/game/collision";
 import { appleGeometry, cedarGeometry, landNoise } from "./natural-geometry";
 import { EarthPlaster } from "./EarthPlaster";
@@ -205,13 +206,9 @@ export function AtlasLandscape({ night = false }: { night?: boolean }) {
         <planeGeometry args={[0.56, 14]} />
         <meshStandardMaterial color="#648f88" roughness={0.22} metalness={0.1} />
       </mesh>
-      {Array.from({ length: 16 }, (_, i) => (
-        <group
-          key={i}
-          rotation={[0, i * 2.399, 0]}
-          position={[-28 + i * 3.8, 0, -17 - (i % 3) * 3]}
-        >
-          <AtlasCedar height={5.2 + (i % 4) * 0.6} />
+      {CEDAR_TREES.map((tree, i) => (
+        <group key={i} rotation={[0, tree.rotation, 0]} position={[tree.x, 0, tree.z]}>
+          <AtlasCedar height={tree.height} />
         </group>
       ))}
       <AtlasRidge />

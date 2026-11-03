@@ -694,3 +694,33 @@ migration is prepared but is not applied to any live database by this work.
 Builds never run indexing; no paid provider/database operations were performed.
 Require clean Node22 CI and Vercel; record release/browser results in the PR.
 Existing GPU/touch gates #20/#28 and development advisories #25 remain open.
+
+## Walkable farm and reachable activities · 2026-11-03
+
+User reports walking through everything and asks for easier, more realistic activities.
+Permanent fence runs, greenhouse, coop, pond, workbench, benches, pergola posts,
+beehives and cedar/ornamental trunks now participate in the same static footprint
+used by Rapier, saved-position validation and continuous walking-route clearance.
+The central fence has a visible 1.8-unit opening; gate leaves stay parked open.
+Fence section dimensions and cedar placements are shared with their rendered geometry.
+Optional downloaded props do not create invisible collision barriers when absent.
+Small decorative plants/rocks, animals and the shallow irrigation channel are not
+all individually simulated solid bodies; buildings still use simplified hulls.
+The pond is a non-swimming boundary rather than a simulated water volume.
+
+The journal highlights the next ordered activity with walking, fast-travel and
+lesson controls, readiness/driving explanations and explicit completed/next/later
+states. Successful actions advance the waypoint. A shared activity-target resolver
+keeps guided walking and the ground marker on the next individual apple or the
+loaded basket's actual trailer rear, rather than a generic orchard/table position.
+The full watering can follows the visitor's hand from well to garden; afterward it
+rests beside the garden. Existing inventory/save format and manual E/touch rewards
+remain unchanged. Tutorials explain solid boundaries and the journal controls.
+
+Regression checks use the actual Rapier/Three rig to walk from a fresh journal
+through studio, well, garden, all three fruit and shared table, including journal
+and map pause/resume. Arrival alone grants no rewards; actions advance progress.
+Physical forward/sideways input stops at fences, pond, greenhouse, coop and benches,
+keeps the visitor grounded, and passes through the open central gate. All-pairs
+routes and actual marker tracking remain checked. GPU appearance/performance,
+real-device full playthrough and physical touch still require #20/#28 verification.

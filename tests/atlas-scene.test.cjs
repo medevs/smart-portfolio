@@ -699,3 +699,38 @@ test('the maker has one visible body on foot or in the tractor, with no stationa
     Object.assign(walk, saved);
   }
 });
+
+test('the real activity marker follows each remaining apple and the moving trailer loading point', async () => {
+  const { HARVEST_APPLES } = require('../src/farm/game/journey.ts');
+  const { walk } = require('../src/components/farm/scene/walk-state.ts');
+  const { guideMarker } = require('../src/components/farm/scene/guide-state.ts');
+  const { deliveryContext } = require('../src/components/farm/scene/delivery-state.ts');
+  guideMarker.point = null;
+  let progress = { completed: ['studio', 'well', 'garden'], water: 2, apples: 0, picked: [] };
+  const renderer = await create(React.createElement(GameWorld, { progress, waypoint: 'orchard' }));
+  try {
+    for (let i = 0; i < 3; i++) {
+      await renderer.update(React.createElement(GameWorld, { progress, waypoint: 'orchard' }));
+      await renderer.advanceFrames(1, 1 / 60);
+      const marker = renderer.scene.findByProps({ name: 'activity-target-marker' }).instance;
+      assert.equal(marker.position.x, HARVEST_APPLES[i].x);
+      assert.equal(marker.position.z, HARVEST_APPLES[i].z);
+      progress = { ...progress, apples: i + 1, picked: [...progress.picked, i] };
+    }
+    progress = { ...progress, completed: [...progress.completed, 'orchard'], basket: 'trailer' };
+    await renderer.update(React.createElement(GameWorld, { progress, waypoint: 'table' }));
+    const saved = { trailerX: walk.trailerX, trailerZ: walk.trailerZ, trailerYaw: walk.trailerYaw };
+    try {
+      Object.assign(walk, { trailerX: 8, trailerZ: 18, trailerYaw: 0.6 });
+      await renderer.advanceFrames(1, 1 / 60);
+      const marker = renderer.scene.findByProps({ name: 'activity-target-marker' }).instance;
+      const loading = deliveryContext().loading;
+      assert.equal(marker.position.x, loading.x);
+      assert.equal(marker.position.z, loading.z);
+    } finally {
+      Object.assign(walk, saved);
+    }
+  } finally {
+    await renderer.unmount();
+  }
+});

@@ -1,4 +1,5 @@
 import { ORCHARD_TREES } from "./world";
+import { YARD_FIXTURES, YARD_ROUND_FIXTURES } from "./fixtures";
 
 /** Visible land and physical boundaries share one footprint for walking/driving. */
 export const GROUND_HALF = 45;
@@ -27,6 +28,12 @@ export const YARD_BUILDINGS: {
   { position: [-3, 0.5, 19], args: [3, 0.5, 0.65] },
 ];
 
+export const YARD_SOLIDS = [...YARD_BUILDINGS, ...YARD_FIXTURES];
+export const YARD_CIRCLES = [
+  ...ORCHARD_TREES.map((tree) => ({ ...tree, radius: 0.12, height: 1.6 })),
+  ...YARD_ROUND_FIXTURES,
+];
+
 export function safeSpawn(point: { x: number; z: number }) {
   if (
     !Number.isFinite(point.x) ||
@@ -36,11 +43,12 @@ export function safeSpawn(point: { x: number; z: number }) {
   )
     return false;
   if (
-    ORCHARD_TREES.some((tree) => Math.hypot(point.x - tree.x, point.z - tree.z) < 0.55) ||
-    (Math.abs(point.x + 12.5) < 1.18 && Math.abs(point.z - 3.4) < 1.18)
+    YARD_CIRCLES.some(
+      (circle) => Math.hypot(point.x - circle.x, point.z - circle.z) < circle.radius + 0.43,
+    )
   )
     return false;
-  return !YARD_BUILDINGS.some(
+  return !YARD_SOLIDS.some(
     (block) =>
       Math.abs(point.x - block.position[0]) < block.args[0] + 0.4 &&
       Math.abs(point.z - block.position[2]) < block.args[2] + 0.4,

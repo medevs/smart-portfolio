@@ -16,6 +16,7 @@ export type ModelProps = {
   watered?: boolean;
   raining?: boolean;
   wind?: number;
+  opening?: number;
 };
 export function Barn(props: ModelProps) {
   return (

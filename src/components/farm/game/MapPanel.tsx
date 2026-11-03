@@ -66,9 +66,9 @@ export function MapPanel({
           </p>
         )}
         <p className="game-muted">
-          Select a numbered place on the map. Walk me there follows a path around buildings and
-          orchard trunks. Move the controls or open a menu to stop. Fast travel skips the walk.
-          Activities still need an interaction when you arrive.
+          Select a numbered place on the map. Walk me there follows a clear path around buildings,
+          fences, the pond and tree trunks. Move the controls or open a menu to stop. Fast travel
+          skips the walk. Activities still need an interaction when you arrive.
         </p>
       </div>
     </div>

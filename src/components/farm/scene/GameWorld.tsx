@@ -1,10 +1,13 @@
 "use client";
 import { useLayoutEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
+import { Html } from "@react-three/drei";
 import type * as THREE from "three";
 import { advanceWorld, cycleLighting, gameClock } from "@/farm/game/clock";
 import { nextActivity, type Progress } from "@/farm/game/progress";
-import { destination, type DestinationId } from "@/farm/game/world";
+import { type DestinationId } from "@/farm/game/world";
+import { activityTarget } from "@/farm/game/activity-target";
+import { deliveryContext } from "./delivery-state";
 import { guideMarker } from "./guide-state";
 import { HarvestScene, TeaSteam, SharedTableSetting } from "./HarvestScene";
 import { WalkingTrail } from "./WalkingTrail";
@@ -52,10 +55,11 @@ export function GameWorld({
 }) {
   const marker = useRef<THREE.Group>(null);
   const next = nextActivity(progress);
-  const target = destination(waypoint ?? next?.id ?? "gate");
+  const targetId = waypoint ?? next?.id ?? "gate";
+  const target = activityTarget(progress, targetId, deliveryContext());
   useFrame(() => {
     if (marker.current) {
-      const point = guideMarker.point ?? target;
+      const point = guideMarker.point ?? activityTarget(progress, targetId, deliveryContext());
       if (point)
         marker.current.position.set(
           point.x,
@@ -78,7 +82,16 @@ export function GameWorld({
         </>
       )}
       {target && (
-        <group ref={marker} position={[target.x, 0.12, target.z]}>
+        <group name="activity-target-marker" ref={marker} position={[target.x, 0.12, target.z]}>
+          <Html
+            position={[0, 1.35, 0]}
+            center
+            distanceFactor={16}
+            zIndexRange={[2, 0]}
+            style={{ pointerEvents: "none" }}
+          >
+            <span className="activity-world-label">{target.label}</span>
+          </Html>
           <mesh rotation={[-Math.PI / 2, 0, 0]}>
             <ringGeometry args={[0.65, 0.76, 32]} />
             <meshBasicMaterial color="#f6d286" transparent opacity={0.85} depthWrite={false} />
@@ -94,8 +107,8 @@ export function GameWorld({
           <Crops night={false} cols={1} rows={1} watered />
         </group>
       )}
-      {progress.completed.includes("well") && (
-        <group name="watering-can" position={[-11.2, 0.2, 4.2]}>
+      {watered && (
+        <group name="watering-can" position={[11.8, 0.2, 22]}>
           <WateringCan />
         </group>
       )}
