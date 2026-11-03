@@ -342,3 +342,16 @@ test('apples and weathered metal have deterministic finite shape/colour detail a
     assert.ok(a.elements[14]*b.elements[14]<0,'chevrons occupy both halves of the tyre');assert.notEqual(a.elements[2],b.elements[2],'the lugs slant in opposite directions');
   }finally{await renderer.unmount();apple.dispose();again.dispose();metal.dispose();}
 });
+
+test('the maker has one visible body on foot or in the tractor, with no stationary studio duplicate',async()=>{
+  const {walk}=require('../src/components/farm/scene/walk-state.ts'),saved={...walk};
+  const {MODELS}=require('../src/components/farm/scene/models.tsx');
+  const camera=new THREE.PerspectiveCamera(45,1,.1,240);camera.position.set(0,3.2,14.2);
+  Object.assign(walk,{px:0,pz:8,driving:false});
+  const renderer=await create(React.createElement(React.Fragment,null,React.createElement(AtlasLandscape,{night:false}),React.createElement(Visitor),React.createElement(MODELS.tractor,{night:false})),{camera});
+  const visibleHeads=()=>renderer.scene.findAll(n=>n.instance.name==='maker-head').filter(n=>{for(let object=n.instance;object;object=object.parent)if(!object.visible)return false;return true;}).length;
+  try{
+    assert.equal(renderer.scene.findAll(n=>n.instance.name==='makers-workbench').length,1,'studio furniture remains');
+    for(const driving of [false,true,false]){walk.driving=driving;await renderer.advanceFrames(2,1/60);assert.equal(visibleHeads(),1,`exactly one visible maker when driving=${driving}`);}
+  }finally{await renderer.unmount();Object.assign(walk,saved);}
+});
