@@ -38,6 +38,7 @@ not inferred from literal-reference searches alone.
 | P3 | Large files mixed scene composition, terrain, effects, maps and settings | Separate these responsibilities and move collision rules into the game domain. Persistence no longer imports a component-layer module. |
 | P3 | Test module loaders were duplicated and custom declarations hid real types | Shared test registration; use installed syntax-highlighter types. Enforce unused locals/parameters in TypeScript. |
 | P3 | Vercel installed dependencies twice using mutable installs | Install once with `npm ci --legacy-peer-deps --no-audit`, then build. Indexing remains outside all build chains. |
+| P3 | Live contents links exposed the label twice through a visually hidden tooltip | Remove the duplicate tooltip text and unused positioning classes; native title tooltips remain. |
 | P3 | Formatting had no installed formatter and referenced a missing plugin | Pin Prettier, format maintained source/config/tests and add `format:check` to CI plus `npm run check`. |
 
 ## Structure after refactoring
