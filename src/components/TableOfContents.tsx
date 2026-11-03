@@ -103,7 +103,7 @@ export default function TableOfContents({ className, articleId }: TableOfContent
                 <a
                   href={`#${heading.id}`}
                   className={cn(
-                    "block hover:text-blue-600 dark:hover:text-blue-400 text-xs truncate group relative",
+                    "block hover:text-blue-600 dark:hover:text-blue-400 text-xs truncate",
                     activeId === heading.id
                       ? "text-blue-600 dark:text-blue-400 font-medium"
                       : "text-gray-700 dark:text-gray-300",
@@ -111,9 +111,6 @@ export default function TableOfContents({ className, articleId }: TableOfContent
                   title={heading.text}
                 >
                   <span>{heading.text}</span>
-                  <span className="absolute left-0 top-full bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 pointer-events-none w-48 whitespace-normal">
-                    {heading.text}
-                  </span>
                 </a>
               </li>
             ))}
