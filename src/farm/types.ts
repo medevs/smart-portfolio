@@ -3,7 +3,7 @@ import type { LandmarkId, ShopSku } from "@/config/shop";
 /**
  * FarmData is the contract a future /api/farm payload should return.
  * Plots sit on the ground grid. Items are the catalog.
- * Payments are not processed here — shop.ts holds PayPal links,
+ * Payments and online requests are not enabled — shop.ts holds planned prices,
  * and approved placements land in the sponsors file (later Supabase).
  */
 

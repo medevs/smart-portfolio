@@ -21,7 +21,8 @@ export const projects: Project[] = [
   },
   {
     name: "Your Daily Way",
-    description: "High-performance blog platform built with modern web technologies for optimal speed and SEO.",
+    description:
+      "High-performance blog platform built with modern web technologies for optimal speed and SEO.",
     status: "active",
     url: "http://yourdailyway.com",
     tech: ["Astro", "React", "TypeScript", "Markdown"],

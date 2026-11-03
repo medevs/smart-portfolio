@@ -1,39 +1,49 @@
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase";
 
-let client: SupabaseClient | null = null;
+let reader: SupabaseClient | null = null;
+let administrator: SupabaseClient | null = null;
 
-function getSupabaseClient(): SupabaseClient {
-  if (client) return client;
-
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseKey) {
+function clientFor(admin: boolean): SupabaseClient {
+  const cached = admin ? administrator : reader;
+  if (cached) return cached;
+  const url = process.env.SUPABASE_URL;
+  const key = admin
+    ? process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
+    : process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY;
+  if (!url || !key)
     throw new Error(
-      "Please set SUPABASE_URL and SUPABASE_ANON_KEY environment variables."
+      admin
+        ? "Indexing requires SUPABASE_URL and a server-only SUPABASE_SECRET_KEY (or legacy SUPABASE_SERVICE_ROLE_KEY)."
+        : "Knowledge retrieval requires SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY (or legacy SUPABASE_ANON_KEY).",
     );
-  }
-
-  client = createClient(supabaseUrl, supabaseKey);
+  const client = createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  });
+  if (admin) administrator = client;
+  else reader = client;
   return client;
 }
 
-// Function to get a vector store instance from an existing index
-export async function getVectorStore() {
-  return new SupabaseVectorStore(
-    new OpenAIEmbeddings({ modelName: "text-embedding-3-small" }),
-    {
-      client: getSupabaseClient(),
-      tableName: "documents",
-      queryName: "match_documents",
-      filter: {},
-    }
-  );
+function vectorStore(client: SupabaseClient) {
+  return new SupabaseVectorStore(new OpenAIEmbeddings({ modelName: "text-embedding-3-small" }), {
+    client,
+    tableName: "documents",
+    queryName: "match_documents",
+    filter: {},
+  });
 }
 
-// Function to get a reference to the embeddings collection
+/** Read-only knowledge retrieval uses the publishable/anonymous key and RLS. */
+export async function getVectorStore() {
+  return vectorStore(clientFor(false));
+}
+
+/** The indexer alone requires an explicitly supplied server-only administrator key. */
+export async function getIndexingStore() {
+  return vectorStore(clientFor(true));
+}
 export async function getEmbeddingsCollection() {
-  return getSupabaseClient().from("documents");
+  return clientFor(true).from("documents");
 }

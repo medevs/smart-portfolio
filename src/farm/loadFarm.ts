@@ -2,7 +2,7 @@ import { isSpriteId } from "./spriteIds";
 import { items } from "./items";
 import { plots } from "./plots";
 import { FARM_WORLD, GROUND_GRID, plotAnchor } from "./grid";
-import { shop } from "@/config/shop";
+import { shop, landmarkPrice } from "@/config/shop";
 import sponsorsJson from "@/data/sponsors.json";
 import fundJson from "@/data/fund.json";
 import type { FarmData, FarmItem, Plot, PlacedSponsor, SponsorsFile, FundFile } from "./types";
@@ -16,8 +16,7 @@ export interface Placed {
   anchor: ReturnType<typeof plotAnchor>;
 }
 
-function placedFromSponsor(entry: PlacedSponsor, itemsById: Map<string, FarmItem>): Plot {
-  const item = itemsById.get(entry.itemId);
+function placedFromSponsor(entry: PlacedSponsor): Plot {
   return {
     id: entry.id,
     col: entry.col,
@@ -28,13 +27,14 @@ function placedFromSponsor(entry: PlacedSponsor, itemsById: Map<string, FarmItem
     flip: entry.flip,
     sponsor: entry.sponsor,
     sponsorable: false,
-    ...(item ? {} : {}),
   };
 }
 
-export function placePlots(data: Pick<FarmData, "items" | "plots" | "grid" | "sponsors">): Placed[] {
+export function placePlots(
+  data: Pick<FarmData, "items" | "plots" | "grid" | "sponsors">,
+): Placed[] {
   const itemsById = new Map(data.items.map((item) => [item.id, item]));
-  const extra: Plot[] = data.sponsors.placed.map((entry) => placedFromSponsor(entry, itemsById));
+  const extra: Plot[] = data.sponsors.placed.map((entry) => placedFromSponsor(entry));
   const all = [...data.plots, ...extra];
   const placed: Placed[] = [];
 
@@ -47,7 +47,8 @@ export function placePlots(data: Pick<FarmData, "items" | "plots" | "grid" | "sp
   }
 
   placed.sort(
-    (a, b) => a.plot.row - b.plot.row || a.plot.col - b.plot.col || a.plot.id.localeCompare(b.plot.id)
+    (a, b) =>
+      a.plot.row - b.plot.row || a.plot.col - b.plot.col || a.plot.id.localeCompare(b.plot.id),
   );
   return placed;
 }
@@ -65,19 +66,40 @@ export function assertFarm(data: FarmData) {
     }
   }
 
+  if (![data.grid.cols, data.grid.rows].every((value) => Number.isSafeInteger(value) && value > 0))
+    throw new Error("Grid dimensions must be positive integers");
   const plotIds = new Set<string>();
-  for (const plot of data.plots) {
+  for (const plot of [...data.plots, ...data.sponsors.placed.map(placedFromSponsor)]) {
     if (plotIds.has(plot.id)) throw new Error(`Duplicate plot id "${plot.id}"`);
     plotIds.add(plot.id);
-    if (!ids.has(plot.itemId)) throw new Error(`Plot "${plot.id}" references unknown item "${plot.itemId}"`);
-    if (plot.col < 0 || plot.row < 0 || plot.col >= data.grid.cols || plot.row >= data.grid.rows) {
+    if (!ids.has(plot.itemId))
+      throw new Error(`Plot "${plot.id}" references unknown item "${plot.itemId}"`);
+    const cols = plot.cols ?? 1,
+      rows = plot.rows ?? 1;
+    if (
+      ![plot.col, plot.row, cols, rows].every(Number.isSafeInteger) ||
+      cols < 1 ||
+      rows < 1 ||
+      plot.col < 0 ||
+      plot.row < 0 ||
+      plot.col + cols > data.grid.cols ||
+      plot.row + rows > data.grid.rows
+    ) {
       throw new Error(`Plot "${plot.id}" is outside the grid`);
     }
   }
 
-  if (data.sponsors.plotsSold > shop.limits.plots) {
-    throw new Error("plotsSold exceeds the plot limit");
+  if (
+    !Number.isSafeInteger(data.sponsors.plotsSold) ||
+    data.sponsors.plotsSold < 0 ||
+    data.sponsors.plotsSold > shop.limits.plots
+  ) {
+    throw new Error("plotsSold must be an integer within the plot limit");
   }
+  for (const id of ["windmill", "silo", "waterTower"] as const)
+    landmarkPrice(data.sponsors.landmarks[id].takeovers);
+  if ([...data.fund.entries, ...data.fund.spent].some((entry) => !Number.isFinite(entry.amount)))
+    throw new Error("Ledger amounts must be finite numbers");
 }
 
 /**
@@ -98,7 +120,11 @@ export async function loadFarm(): Promise<FarmData> {
 }
 
 export function findSpot(placed: Placed[], id: string) {
-  return placed.find((entry) => entry.plot.id === id || entry.item.id === id || entry.item.landmark === id) ?? null;
+  return (
+    placed.find(
+      (entry) => entry.plot.id === id || entry.item.id === id || entry.item.landmark === id,
+    ) ?? null
+  );
 }
 
 export function fundRaised(file: FundFile) {

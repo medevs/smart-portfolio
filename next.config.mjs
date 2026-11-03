@@ -8,7 +8,13 @@ const nextConfig = {
       { protocol: "https", hostname: "github-readme-stats.vercel.app", pathname: "**" },
     ],
   },
-  transpilePackages: ["three", "@react-three/fiber", "@react-three/drei", "@react-three/postprocessing", "@react-three/rapier"],
+  transpilePackages: [
+    "three",
+    "@react-three/fiber",
+    "@react-three/drei",
+    "@react-three/postprocessing",
+    "@react-three/rapier",
+  ],
 };
 
 export default nextConfig;

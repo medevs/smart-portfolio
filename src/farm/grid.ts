@@ -22,7 +22,10 @@ export interface Anchor {
   footH: number;
 }
 
-export function plotAnchor(plot: Pick<Plot, "col" | "row" | "cols" | "rows">, grid: GridSpec = GROUND_GRID): Anchor {
+export function plotAnchor(
+  plot: Pick<Plot, "col" | "row" | "cols" | "rows">,
+  grid: GridSpec = GROUND_GRID,
+): Anchor {
   const cols = plot.cols ?? 1;
   const rows = plot.rows ?? 1;
   return {
@@ -33,7 +36,11 @@ export function plotAnchor(plot: Pick<Plot, "col" | "row" | "cols" | "rows">, gr
   };
 }
 
-export function hotspotBox(anchor: Anchor, visual: { w: number; h: number }, world: WorldSize = FARM_WORLD) {
+export function hotspotBox(
+  anchor: Anchor,
+  visual: { w: number; h: number },
+  world: WorldSize = FARM_WORLD,
+) {
   const left = anchor.x - visual.w / 2;
   const top = anchor.y - visual.h;
   return {

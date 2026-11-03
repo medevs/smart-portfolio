@@ -10,21 +10,40 @@ import { routeShaderFailure } from "./shader-failure";
 
 extend(THREE as unknown as Parameters<typeof extend>[0]);
 
-class SceneBoundary extends Component<{ children: ReactNode; onFailure: () => void }, { failed: boolean }> {
+class SceneBoundary extends Component<
+  { children: ReactNode; onFailure: () => void },
+  { failed: boolean }
+> {
   state = { failed: false };
-  static getDerivedStateFromError() { return { failed: true }; }
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
   componentDidCatch(error: Error) {
     console.error("Farm scene failed:", error);
     this.props.onFailure();
   }
-  render() { return this.state.failed ? null : this.props.children; }
+  render() {
+    return this.state.failed ? null : this.props.children;
+  }
 }
 
 /** Own the async renderer setup so a rejected WebGL configuration is handled too.
  * React error boundaries alone cannot catch a rejection in Canvas's async effect.
  * https://r3f.docs.pmnd.rs/api/canvas#custom-canvas
  */
-export function SceneRoot({ children, low, conserve=false, onFailure, onShaderFailure }: { children: ReactNode; low: boolean; conserve?:boolean; onFailure: () => void; onShaderFailure: () => void }) {
+export function SceneRoot({
+  children,
+  low,
+  conserve = false,
+  onFailure,
+  onShaderFailure,
+}: {
+  children: ReactNode;
+  low: boolean;
+  conserve?: boolean;
+  onFailure: () => void;
+  onShaderFailure: () => void;
+}) {
   const host = useRef<HTMLDivElement>(null);
   const root = useRef<ReturnType<typeof createRoot<HTMLCanvasElement>> | null>(null);
   const configured = useRef(false);
@@ -38,10 +57,17 @@ export function SceneRoot({ children, low, conserve=false, onFailure, onShaderFa
     const container = host.current;
     if (!container) return;
     const element = document.createElement("canvas");
-    element.setAttribute("aria-label", "Interactive 3D Middle Atlas farm. Wheel or pinch to zoom; drag to look around. Use WASD or arrow keys to walk; Map & travel skips long walks.");
+    element.setAttribute(
+      "aria-label",
+      "Interactive 3D Middle Atlas farm. Wheel or pinch to zoom; drag to look around. Use WASD or arrow keys to walk; Map & travel skips long walks.",
+    );
     container.appendChild(element);
     const context = farmContext(element, current.current.low);
-    if (!context) { element.remove(); current.current.onFailure(); return; }
+    if (!context) {
+      element.remove();
+      current.current.onFailure();
+      return;
+    }
     let disposed = false;
     let starting = false;
     let unbindVisibility: (() => void) | undefined;
@@ -65,15 +91,25 @@ export function SceneRoot({ children, low, conserve=false, onFailure, onShaderFa
         size: { width, height, top, left },
         events,
         shadows: true,
-        dpr: current.current.low ? current.current.conserve ? [.75,1] : [1,1.2] : [1,1.5],
+        dpr: current.current.low ? (current.current.conserve ? [0.75, 1] : [1, 1.2]) : [1, 1.5],
         camera: { position: [34, 25, 39], fov: 45, near: 0.1, far: 240 },
-        gl: { context, antialias: !current.current.low, powerPreference: "default", preserveDrawingBuffer: false },
-        onCreated: created => {
+        gl: {
+          context,
+          antialias: !current.current.low,
+          powerPreference: "default",
+          preserveDrawingBuffer: false,
+        },
+        onCreated: (created) => {
           if (disposed) return;
           state.current = created;
           unbindVisibility = bindRenderVisibility(document, created.setFrameloop, resetWalkInput);
           created.gl.debug.onShaderError = (gl, program, vertex, fragment) => {
-            console.error("Farm shader compilation failed:", gl.getProgramInfoLog(program), gl.getShaderInfoLog(vertex), gl.getShaderInfoLog(fragment));
+            console.error(
+              "Farm shader compilation failed:",
+              gl.getProgramInfoLog(program),
+              gl.getShaderInfoLog(vertex),
+              gl.getShaderInfoLog(fragment),
+            );
             routeShaderFailure(gl.getShaderSource(fragment), {
               effects: () => current.current.onShaderFailure(),
               scene: () => current.current.onFailure(),
@@ -82,20 +118,28 @@ export function SceneRoot({ children, low, conserve=false, onFailure, onShaderFa
           created.events.connect?.(element);
           const bounds = container.getBoundingClientRect();
           created.setSize(bounds.width, bounds.height, bounds.top, bounds.left);
-          created.setDpr(current.current.low ? current.current.conserve ? [.75,1] : [1,1.2] : [1,1.5]);
+          created.setDpr(
+            current.current.low ? (current.current.conserve ? [0.75, 1] : [1, 1.2]) : [1, 1.5],
+          );
         },
       });
       starting = false;
       if (disposed) return;
       configured.current = true;
-      renderer.render(<SceneBoundary onFailure={() => current.current.onFailure()}>{current.current.children}</SceneBoundary>);
+      renderer.render(
+        <SceneBoundary onFailure={() => current.current.onFailure()}>
+          {current.current.children}
+        </SceneBoundary>,
+      );
     };
     const lost = (event: Event) => {
       event.preventDefault();
       fail(new Error("WebGL context lost"));
     };
     element.addEventListener("webglcontextlost", lost);
-    const observer = new ResizeObserver(() => { void resize().catch(fail); });
+    const observer = new ResizeObserver(() => {
+      void resize().catch(fail);
+    });
     observer.observe(container);
     void resize().catch(fail);
     return () => {
@@ -114,7 +158,7 @@ export function SceneRoot({ children, low, conserve=false, onFailure, onShaderFa
   useEffect(() => {
     if (!configured.current || !root.current) return;
     root.current.render(<SceneBoundary onFailure={onFailure}>{children}</SceneBoundary>);
-    state.current?.setDpr(low ? conserve ? [.75,1] : [1,1.2] : [1,1.5]);
+    state.current?.setDpr(low ? (conserve ? [0.75, 1] : [1, 1.2]) : [1, 1.5]);
   }, [children, low, conserve, onFailure, onShaderFailure]);
 
   return <div ref={host} className="world-renderer" />;

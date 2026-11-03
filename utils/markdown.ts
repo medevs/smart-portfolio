@@ -1,10 +1,10 @@
-// File: utils/markdown.ts
-import fs from 'fs/promises';
-import path from 'path';
-import matter from 'gray-matter';
-import readingTime from 'reading-time';
+import fs from "node:fs/promises";
+import path from "node:path";
+import matter from "gray-matter";
+import readingTime from "reading-time";
 
-const postsDirectory = path.join(process.cwd(), 'posts');
+const postsDirectory = path.join(process.cwd(), "posts");
+const validId = (id: string) => /^[a-z0-9][a-z0-9_-]*$/i.test(id);
 
 export interface PostData {
   id: string;
@@ -16,67 +16,55 @@ export interface PostData {
   description: string;
   author: string;
 }
-
 export interface PostContent extends PostData {
   content: string;
 }
 
-export async function getSortedPostsData(): Promise<PostData[]> {
-  const fileNames = await fs.readdir(postsDirectory);
-  const allPostsData = await Promise.all(fileNames.map(async (fileName) => {
-    const id = fileName.replace(/\.md$/, '');
-    const fullPath = path.join(postsDirectory, fileName);
-    const fileContents = await fs.readFile(fullPath, 'utf8');
-    const matterResult = matter(fileContents);
-    const readTime = readingTime(matterResult.content).text;
-
-    return {
-      id,
-      readTime,
-      ...(matterResult.data as Omit<PostData, 'id' | 'readTime'>),
-    };
-  }));
-
-  return allPostsData.sort((a, b) => (a.date < b.date ? 1 : -1));
+async function postIds(): Promise<string[]> {
+  const entries = await fs.readdir(postsDirectory, { withFileTypes: true });
+  return entries
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".md"))
+    .map((entry) => entry.name.slice(0, -3))
+    .filter(validId)
+    .sort();
 }
 
-export async function getPostData(id: string): Promise<PostContent> {
-  const fullPath = path.join(postsDirectory, `${id}.md`);
-  const fileContents = await fs.readFile(fullPath, 'utf8');
-  const matterResult = matter(fileContents);
-  const readTime = readingTime(matterResult.content).text;
-
+export async function getPostData(id: string): Promise<PostContent | null> {
+  if (!validId(id)) return null;
+  let source: string;
+  try {
+    source = await fs.readFile(path.join(postsDirectory, `${id}.md`), "utf8");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
+    throw error;
+  }
+  const { data, content } = matter(source);
+  const text = (key: string, fallback = "") =>
+    typeof data[key] === "string" ? data[key] : fallback;
   return {
     id,
-    content: matterResult.content,
-    readTime,
-    ...(matterResult.data as Omit<PostData, 'id' | 'readTime'>),
+    content,
+    readTime: readingTime(content).text,
+    title: text("title", id),
+    date: text("date"),
+    category: text("category", "Journal"),
+    description: text("description"),
+    author: text("author", "medevsmaker"),
+    tags: Array.isArray(data.tags)
+      ? data.tags.filter((tag): tag is string => typeof tag === "string")
+      : [],
   };
 }
 
-export async function getAllPostIds(): Promise<{ params: { id: string } }[]> {
-  const fileNames = await fs.readdir(postsDirectory);
-  return fileNames.map((fileName) => ({
-    params: {
-      id: fileName.replace(/\.md$/, ''),
-    },
-  }));
+export async function getSortedPostsData(): Promise<PostData[]> {
+  const posts = await Promise.all((await postIds()).map(getPostData));
+  return posts
+    .filter((post): post is PostContent => post !== null)
+    .map(({ content: _content, ...post }) => post)
+    .sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id));
 }
 
-export async function getAllTags(): Promise<string[]> {
-  const posts = await getSortedPostsData();
-  const tags = new Set<string>();
-  posts.forEach((post) => {
-    post.tags.forEach((tag: string) => tags.add(tag));
-  });
-  return Array.from(tags);
-}
-
-export async function getAllCategories(): Promise<string[]> {
-  const posts = await getSortedPostsData();
-  const categories = new Set<string>();
-  posts.forEach((post) => {
-    categories.add(post.category);
-  });
-  return Array.from(categories);
+/** App Router expects segment objects, not the Pages Router's nested params. */
+export async function getAllPostIds(): Promise<{ id: string }[]> {
+  return (await postIds()).map((id) => ({ id }));
 }

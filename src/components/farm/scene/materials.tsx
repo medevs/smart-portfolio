@@ -21,12 +21,16 @@ type Set = { diff: THREE.Texture; nor: THREE.Texture; arm: THREE.Texture };
 const Ctx = createContext<Record<SurfaceName, Set> | null>(null);
 
 const URLS = (Object.keys(FILES) as SurfaceName[]).flatMap((name) =>
-  FILES[name].map((file) => `/farm/tex/${file}.webp`)
+  FILES[name].map((file) => `/farm/tex/${file}.webp`),
 );
 
 /** Loads the CC0 surface set once. Suspends until every map is in. */
 export function Textures({ children }: { children: ReactNode }) {
-  return <OptionalAsset fallback={children}><LoadedTextures>{children}</LoadedTextures></OptionalAsset>;
+  return (
+    <OptionalAsset fallback={children}>
+      <LoadedTextures>{children}</LoadedTextures>
+    </OptionalAsset>
+  );
 }
 
 function LoadedTextures({ children }: { children: ReactNode }) {
@@ -49,9 +53,13 @@ function LoadedTextures({ children }: { children: ReactNode }) {
     }
     return out;
   }, [loaded]);
-  useEffect(() => () => {
-    for (const set of Object.values(lib)) for (const texture of Object.values(set)) texture.dispose();
-  }, [lib]);
+  useEffect(
+    () => () => {
+      for (const set of Object.values(lib))
+        for (const texture of Object.values(set)) texture.dispose();
+    },
+    [lib],
+  );
   return <Ctx.Provider value={lib}>{children}</Ctx.Provider>;
 }
 
@@ -98,7 +106,7 @@ export function Surface({
     mat.map = set.diff;
     mat.normalMap = set.nor;
     mat.aoMap = set.arm;
-    mat.aoMapIntensity = .55;
+    mat.aoMapIntensity = 0.55;
     mat.roughnessMap = set.arm;
     mat.metalnessMap = set.arm;
     mat.normalScale = new THREE.Vector2(0.85, 0.85);
@@ -124,7 +132,7 @@ export function Surface({
            #endif
            #ifdef USE_METALNESSMAP
              vMetalnessMapUv *= uRepeat;
-           #endif`
+           #endif`,
         );
     };
     return mat;

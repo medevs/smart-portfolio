@@ -1,4 +1,4 @@
-import type { AboutConfig, Language } from "./types";
+import type { AboutConfig } from "./types";
 
 export const aboutConfig: AboutConfig = {
   languages: [

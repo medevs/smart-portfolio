@@ -10,7 +10,12 @@ export function Rain({ low }: { low: boolean }) {
   const mesh = useRef<THREE.LineSegments>(null);
   const geometry = useMemo(() => {
     const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.BufferAttribute(new Float32Array((low ? 120 : 420) * 6), 3).setUsage(THREE.DynamicDrawUsage));
+    g.setAttribute(
+      "position",
+      new THREE.BufferAttribute(new Float32Array((low ? 120 : 420) * 6), 3).setUsage(
+        THREE.DynamicDrawUsage,
+      ),
+    );
     g.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 9, 0), 66);
     return g;
   }, [low]);
@@ -24,7 +29,9 @@ export function Rain({ low }: { low: boolean }) {
     }
     positions.needsUpdate = true;
   });
-  return <lineSegments ref={mesh} name="gentle-rain" geometry={geometry}>
-    <lineBasicMaterial color="#c2d5dd" transparent opacity={.4} depthWrite={false} />
-  </lineSegments>;
+  return (
+    <lineSegments ref={mesh} name="gentle-rain" geometry={geometry}>
+      <lineBasicMaterial color="#c2d5dd" transparent opacity={0.4} depthWrite={false} />
+    </lineSegments>
+  );
 }

@@ -3,11 +3,7 @@ import MarkdownContent from "@/components/MarkdownContent";
 import TableOfContents from "@/components/TableOfContents";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
-import {
-  getSortedPostsData,
-  getPostData,
-  getAllPostIds,
-} from "../../../../utils/markdown";
+import { getSortedPostsData, getPostData, getAllPostIds } from "../../../../utils/markdown";
 import Link from "next/link";
 import { ArrowLeft, Calendar, Clock, Tag, User, Terminal } from "lucide-react";
 const heroImage = "/images/profile.jpeg";
@@ -43,11 +39,7 @@ async function getRelatedPosts(currentPostId: string, category: string) {
     .slice(0, 3);
 }
 
-export default async function BlogPost({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function BlogPost({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const postData = await getPostData(id);
 
@@ -117,7 +109,10 @@ export default async function BlogPost({
 
           {/* Table of Contents - Mobile */}
           <div className="block lg:hidden mb-8">
-            <TableOfContents className="bg-terminal-bg-alt p-4 rounded-lg border border-terminal-border" />
+            <TableOfContents
+              articleId={postData.id}
+              className="bg-terminal-bg-alt p-4 rounded-lg border border-terminal-border"
+            />
           </div>
 
           {/* Article content */}
@@ -128,9 +123,7 @@ export default async function BlogPost({
 
             {/* Tags */}
             <div className="mt-12 pt-8 border-t border-terminal-border">
-              <h3 className="text-lg font-semibold mb-4 text-terminal-text font-mono">
-                # Tags
-              </h3>
+              <h3 className="text-lg font-semibold mb-4 text-terminal-text font-mono"># Tags</h3>
               <div className="flex flex-wrap gap-2">
                 {postData.tags.map((tag) => (
                   <span
@@ -163,9 +156,7 @@ export default async function BlogPost({
                       <h4 className="font-semibold text-terminal-green mb-2 line-clamp-2">
                         {post.title}
                       </h4>
-                      <p className="text-sm text-terminal-muted line-clamp-2">
-                        {post.description}
-                      </p>
+                      <p className="text-sm text-terminal-muted line-clamp-2">{post.description}</p>
                     </Link>
                   ))}
                 </div>
@@ -174,9 +165,7 @@ export default async function BlogPost({
 
             {/* Author */}
             <div className="mt-12 pt-8 border-t border-terminal-border">
-              <h3 className="text-lg font-semibold mb-4 text-terminal-text font-mono">
-                # Author
-              </h3>
+              <h3 className="text-lg font-semibold mb-4 text-terminal-text font-mono"># Author</h3>
               <div className="flex items-center gap-4 p-4 rounded-lg bg-terminal-bg-alt border border-terminal-border">
                 <Image
                   src={heroImage}
@@ -186,12 +175,10 @@ export default async function BlogPost({
                   className="rounded-lg"
                 />
                 <div>
-                  <h4 className="font-semibold text-terminal-green">
-                    {postData.author}
-                  </h4>
+                  <h4 className="font-semibold text-terminal-green">{postData.author}</h4>
                   <p className="text-sm text-terminal-muted mt-1">
-                    Full Stack Developer & AI Engineer exploring the
-                    intersections of code and creativity.
+                    Full Stack Developer & AI Engineer exploring the intersections of code and
+                    creativity.
                   </p>
                 </div>
               </div>
@@ -202,7 +189,10 @@ export default async function BlogPost({
         {/* Sidebar - Desktop */}
         <aside className="hidden lg:block">
           <div className="sticky top-20">
-            <TableOfContents className="bg-terminal-bg-alt p-4 rounded-lg border border-terminal-border" />
+            <TableOfContents
+              articleId={postData.id}
+              className="bg-terminal-bg-alt p-4 rounded-lg border border-terminal-border"
+            />
           </div>
         </aside>
       </div>

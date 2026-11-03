@@ -4,9 +4,14 @@ export async function copyChapterLink(write: () => Promise<void>, timeoutMs = 18
   try {
     await Promise.race([
       write(),
-      new Promise<never>((_, reject) => { timer = setTimeout(() => reject(new Error("Clipboard unavailable")), timeoutMs); }),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new Error("Clipboard unavailable")), timeoutMs);
+      }),
     ]);
     return true;
-  } catch { return false; }
-  finally { if (timer !== undefined) clearTimeout(timer); }
+  } catch {
+    return false;
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
 }
