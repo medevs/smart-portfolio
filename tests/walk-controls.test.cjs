@@ -62,10 +62,10 @@ test('touch pad starts at rest, clamps drag and releases without cancelling spri
   const host=new EventTarget(),doc=Object.assign(new EventTarget(),{defaultView:host,hidden:false});
   const captured=new Set();
   const element=Object.assign(new EventTarget(),{ownerDocument:doc,style:{setProperty(){}},setAttribute(){},removeAttribute(){},getBoundingClientRect:()=>({left:0,top:0}),setPointerCapture:id=>captured.add(id),hasPointerCapture:id=>captured.has(id),releasePointerCapture:id=>captured.delete(id)});
-  const stick={stickX:0,stickY:0,sprinting:true};const dispose=exports.bindMovementPad(element,stick);
+  let takeovers=0;const stick={stickX:0,stickY:0,sprinting:true};const dispose=exports.bindMovementPad(element,stick,()=>takeovers++);
   const pointer=(type,id,x,y)=>{const event=new Event(type,{cancelable:true});Object.assign(event,{pointerId:id,button:0,clientX:x,clientY:y});element.dispatchEvent(event)};
   pointer('pointerdown',1,12,12);assert.equal(stick.stickY,0);
-  pointer('pointermove',2,12,200);assert.equal(stick.stickY,0);
+  pointer('pointerdown',2,12,200);pointer('pointermove',2,12,200);assert.equal(stick.stickY,0);assert.equal(takeovers,1,'only the controlling finger takes over walking');
   pointer('pointermove',1,12,-7);assert.equal(stick.stickY,-.5);
   pointer('pointermove',1,200,-200);assert.ok(Math.abs(Math.hypot(stick.stickX,stick.stickY)-1)<1e-9);
   pointer('pointerup',1,200,-200);assert.equal(stick.stickY,0);assert.equal(stick.sprinting,true);assert.equal(captured.size,0);

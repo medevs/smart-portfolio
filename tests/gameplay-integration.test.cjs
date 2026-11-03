@@ -198,6 +198,7 @@ test('real game hook opens a shared chapter without awarding progress and respec
     await act(async()=>game.tourStep(4));assert.equal(game.tourIndex,4);
     await act(async()=>game.tourStep(999));assert.equal(game.tourIndex,4);
     await act(async()=>game.travel('table'));assert.equal(explored,false);
+    await act(async()=>game.walkTo('table'));assert.equal(explored,false);assert.equal(walk.routeRequest,null);
     assert.deepEqual(game.profile.progress.completed,[]);assert.deepEqual(game.profile.discoveries,[]);
     await act(async()=>game.close());assert.equal(game.panel,null);
   } finally {await renderer.unmount();for(const key of keys){if(saved[key]===undefined)delete window[key];else window[key]=saved[key];}}
@@ -382,4 +383,51 @@ test('practice started while driving teaches exit first and measures walking fro
   await frames(renderer,30,1/60);assert.ok(walk.px<28,'forward follows turned camera');assert.ok(Math.abs(walk.pz-30)<.01);
   key('keyup','ArrowUp');const x=walk.px;await frames(renderer,20,1/60);assert.ok(Math.abs(walk.px-x)<.01);
   cameraView.turn=0;await renderer.unmount();
+});
+
+test('guided walking reaches the homestead through actual Rapier obstacles and yields to manual controls',async()=>{
+  reset();const renderer=await yard();
+  try{
+    await frames(renderer,30,1/60);
+    walk.routeRequest={x:0,z:-12.8,label:'The homestead'};
+    for(let i=0;i<1200&&(walk.routeRequest||walk.routeStatus==='walking');i++)await frames(renderer,1,1/60);
+    assert.equal(walk.routeStatus,'arrived');assert.ok(Math.hypot(walk.px,walk.pz+12.8)<.12);
+    walk.routeRequest={x:13,z:22,label:'Kitchen garden'};await frames(renderer,15,1/60);
+    assert.equal(walk.routeStatus,'walking');
+    key('keydown','ArrowRight');await frames(renderer,2,1/60);key('keyup','ArrowRight');
+    assert.equal(walk.routeStatus,'idle');assert.equal(walk.routeRequest,null);
+    const position={x:walk.px,z:walk.pz};await frames(renderer,20,1/60);
+    assert.ok(Math.hypot(walk.px-position.x,walk.pz-position.z)<.01,'route does not resume after manual release');
+  }finally{await renderer.unmount();reset();}
+});
+
+test('Map walking survives the real pause handoff, visits each apple and grants nothing until interaction',async()=>{
+  const {useFarmGame}=require('../src/components/farm/game/useFarmGame.ts'),{useWalkingPause}=require('../src/components/farm/game/useWalkingPause.ts');
+  const {freshProfile}=require('../src/farm/game/save.ts');
+  const keys=['location','localStorage','setTimeout','clearTimeout','setInterval','clearInterval'],saved=Object.fromEntries(keys.map(key=>[key,window[key]]));
+  let stored=JSON.stringify({...freshProfile(),introduced:true,position:{x:13,z:22},progress:{completed:['studio','well','garden'],water:2,apples:0}}),game;
+  Object.assign(window,{location:{search:''},localStorage:{getItem(){return stored},setItem(key,value){stored=value}},setTimeout,clearTimeout,setInterval,clearInterval});
+  reset();
+  function Harness(){game=useFarmGame({ready:true,exploring:true,externalPaused:false,onExplore(){},onProduct(){}});useWalkingPause(game.paused);return React.createElement(PhysicsYard,{paused:game.paused});}
+  const renderer=await create(React.createElement(React.Suspense,{fallback:null},React.createElement(Harness)));
+  try{
+    for(let i=0;i<100&&!renderer.scene.findAll(n=>n.instance.name==='farm-visitor-body').length;i++)await act(async()=>{await new Promise(resolve=>setTimeout(resolve,10))});
+    await frames(renderer,30,1/60);
+    for(let apple=0;apple<3;apple++){
+      await act(async()=>game.setPanel('map'));assert.equal(walk.paused,true);
+      await act(async()=>game.walkTo('orchard'));assert.equal(game.panel,null);assert.ok(walk.routeRequest,'request survives host input reset');
+      for(let i=0;i<1500&&(walk.routeRequest||walk.routeStatus==='walking');i++)await frames(renderer,1,1/60);
+      assert.equal(walk.routeStatus,'arrived');assert.equal(game.profile.progress.apples,apple,'arrival grants no apples');
+      await act(async()=>game.act());assert.equal(game.profile.progress.apples,apple+1,'manual action harvests the next fruit');
+    }
+    await act(async()=>game.walkTo('table'));
+    for(let i=0;i<1200&&(walk.routeRequest||walk.routeStatus==='walking');i++)await frames(renderer,1,1/60);
+    assert.equal(walk.routeStatus,'arrived');assert.equal(game.profile.progress.completed.length,4);
+    await act(async()=>game.act());assert.equal(game.profile.progress.completed.length,5);
+    await act(async()=>game.walkTo('home'));await frames(renderer,10,1/60);
+    await act(async()=>game.setPanel('pause'));assert.equal(walk.routeStatus,'idle');
+    const x=walk.px,z=walk.pz;await act(async()=>game.close());await frames(renderer,20,1/60);
+    assert.ok(Math.hypot(walk.px-x,walk.pz-z)<.01,'closing a menu cannot restart guided walking');
+    walk.driving=true;await act(async()=>game.walkTo('gate'));assert.equal(walk.routeRequest,null);assert.match(game.message,/exit the tractor/);
+  }finally{await renderer.unmount();reset();for(const key of keys){if(saved[key]===undefined)delete window[key];else window[key]=saved[key];}}
 });

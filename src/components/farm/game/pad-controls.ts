@@ -1,7 +1,7 @@
 type Stick = {stickX:number;stickY:number};
 
 /** Drag from the first finger position; touching the pad never jumps to full speed. */
-export function bindMovementPad(element:HTMLElement,stick:Stick) {
+export function bindMovementPad(element:HTMLElement,stick:Stick,onTakeover:()=>void=()=>{}) {
   let active:number|null=null,originX=0,originY=0;
   const host=element.ownerDocument.defaultView,document=element.ownerDocument;
   const clear=()=>{
@@ -12,7 +12,7 @@ export function bindMovementPad(element:HTMLElement,stick:Stick) {
   };
   const down=(event:PointerEvent)=>{
     if(active!==null||event.button!==0)return;
-    event.preventDefault();active=event.pointerId;originX=event.clientX;originY=event.clientY;
+    event.preventDefault();onTakeover();active=event.pointerId;originX=event.clientX;originY=event.clientY;
     const rect=element.getBoundingClientRect();
     element.style.setProperty("--pad-origin-x",`${originX-rect.left}px`);element.style.setProperty("--pad-origin-y",`${originY-rect.top}px`);
     element.setAttribute("data-active","");stick.stickX=stick.stickY=0;element.setPointerCapture(active);

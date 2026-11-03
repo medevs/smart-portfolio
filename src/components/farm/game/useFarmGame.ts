@@ -8,11 +8,11 @@ import { freshPractice, practiceStep } from "@/farm/game/tutorial";
 import { guideMarker } from "../scene/guide-state";
 import { cameraView } from "../scene/camera-view";
 import { zoomCamera } from "../scene/camera-view";
-import { canTransferBasket, nearbyApple, transferBasket, harvestApple } from "@/farm/game/journey";
-import { interact } from "@/farm/game/progress";
+import { canTransferBasket, nearbyApple, transferBasket, harvestApple, HARVEST_APPLES, pickedApples } from "@/farm/game/journey";
+import { interact, nextActivity } from "@/farm/game/progress";
 import { destination, nearestPlace, SPAWN, type DestinationId } from "@/farm/game/world";
 import { safeSpawn } from "../scene/yard-boundaries";
-import { resetWalkInput, walk } from "../scene/walk-state";
+import { resetWalkInput, walk, cancelWalkRoute } from "../scene/walk-state";
 
 export type Panel = "welcome" | "map" | "journal" | "settings" | "pause" | "controls" | "notes" | "reset" | "tour" | "tutorial" | null;
 export function useFarmGame({ ready, exploring, externalPaused, onExplore, onProduct }: {
@@ -94,6 +94,7 @@ export function useFarmGame({ ready, exploring, externalPaused, onExplore, onPro
   }, []);
   const act = useCallback(() => {
     if (!ready || !exploring || paused || walk.driving) return;
+    cancelWalkRoute();
     const point = { x: walk.px, z: walk.pz };
     const place = nearestPlace(point);
     const progress = current.current.progress;
@@ -132,29 +133,44 @@ export function useFarmGame({ ready, exploring, externalPaused, onExplore, onPro
   function travel(id: DestinationId) {
     const target = destination(id);
     if (!ready || !target || !safeSpawn(target)) return;
+    cancelWalkRoute();
     walk.travel = { x: target.x, z: target.z };
     resetWalkInput(); onExplore(); close(); setWaypoint(id);
     setMessage(`Travelling to ${target.name.toLowerCase()}.`);
   }
+  function walkTo(id:DestinationId) {
+    const place=destination(id);
+    if(!ready||externalPaused||!place)return;
+    if(walk.driving){setMessage("Park and exit the tractor before choosing a walking route.");return;}
+    const progress=current.current.progress;
+    const apple=id==="orchard"&&nextActivity(progress)?.id==="orchard" ? HARVEST_APPLES.find((_,i)=>!pickedApples(progress).includes(i)) : null;
+    const loading=id==="table"&&progress.basket==="trailer" ? deliveryContext().loading : null;
+    const point=apple??loading??place;
+    const label=apple?`Apple ${progress.apples+1} of 3`:loading?"Your basket at the trailer":place.name;
+    cancelWalkRoute();resetWalkInput();walk.travel=null;
+    walk.routeRequest={x:point.x,z:point.z,label};
+    onExplore();close();setWaypoint(id);setMessage("");
+  }
+  function stopWalking(){cancelWalkRoute();setMessage("Walking stopped. You have the controls.");}
   function tourStep(index: number) {
     if (!Number.isInteger(index) || index < 0 || index >= TOUR_STOPS.length) return;
-    resetWalkInput(); setTourIndex(index); setPanel("tour");
+    cancelWalkRoute();resetWalkInput(); setTourIndex(index); setPanel("tour");
   }
   function startPractice() {
     if(!ready)return;
     practiceStart.current={x:walk.px,z:walk.pz,distance:cameraView.distance,turn:cameraView.turn};
-    setPractice({...freshPractice(),needsExit:walk.driving});setPracticing(true);resetWalkInput();onExplore();close();
+    setPractice({...freshPractice(),needsExit:walk.driving});setPracticing(true);cancelWalkRoute();resetWalkInput();onExplore();close();
   }
   function stopPractice(){setPracticing(false);guideMarker.point=null;}
   function carryOnFoot(){setPractice(value=>({...value,route:"walk"}));}
   function preferences(patch: Partial<Preferences>) { setProfile(value => ({ ...value, preferences: { ...value.preferences, ...patch } })); }
   function reset() {
     const fresh = freshProfile();
-    stopPractice();
+    stopPractice();cancelWalkRoute();
     setProfile(value => ({ ...fresh, preferences: value.preferences, introduced: true }));
     setWaypoint(null); setMessage("A fresh journal. Your settings are kept.");
     walk.travel = { ...SPAWN }; close();
   }
-  return { practicing, practice, startPractice, stopPractice, carryOnFoot, tourIndex, tourStep, profile, panel: visiblePanel, setPanel, close, waypoint, setWaypoint, message, storageAvailable, paused, act, travel, preferences, reset };
+  return { practicing, practice, startPractice, stopPractice, carryOnFoot, tourIndex, tourStep, profile, panel: visiblePanel, setPanel, close, waypoint, setWaypoint, message, storageAvailable, paused, act, travel, walkTo, stopWalking, preferences, reset };
 }
 export type FarmGame = ReturnType<typeof useFarmGame>;

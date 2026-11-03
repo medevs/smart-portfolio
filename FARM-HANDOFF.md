@@ -627,3 +627,31 @@ before/after rerender rather than next-step walk state (one frame ahead).
 Direct build remains blocked by host uv_resident_set_memory ENOENT; require
 Node22 CI and Vercel before merge. GPU FPS/full playthrough and physical touch
 remain unverified under #20/#28.
+
+## Guided walking and selectable map · 2026-11-03
+
+Add Walk beside the journal and Walk me there in Map & travel. Numbered map
+markers support pointer, Enter and Space selection; the destination selector
+remains available. Routes lead to the next individual apple during harvest and
+to the loaded basket when unloading is needed. Arrival is announced; players
+still interact manually for all rewards. Exit the tractor before requesting a
+walking route. Keyboard/pad input, Stop, interactions, menus and fast travel
+interrupt walking. Requests made in Map survive the real pause/resume handoff.
+
+Use a bounded deterministic A* search over existing physical footprints. Exact
+expanded-box/segment and tree-circle tests prevent corner clipping; initial
+sampled checks failed the continuous-clearance test and were replaced. Dynamic
+tractor/trailer footprints participate in each search. Physics executes the
+route through the same Rapier character controller as manual movement, and
+stops a blocked route. No per-frame searches or React position updates are
+added. A single instanced draw shows a quiet dotted trail, rebuilt at corners.
+HUD remains one row with truncated task text and full accessible labels.
+
+New checks cover all destination pairs, low apple targets, unsafe targets,
+parked vehicles, deterministic results, continuous corner clearance, actual
+Rapier arrival/manual takeover, real Map→resume→three-apple harvest→table
+arrival without automatic rewards, pause cancellation, driving/readiness
+guards, touch takeover and accessible controls. Types/lint and the full suite
+run locally; direct Next build still hits host uv_resident_set_memory ENOENT.
+Require clean Node22 CI and Vercel before promotion. GPU trail appearance, FPS
+and physical touch remain open under #20/#28.

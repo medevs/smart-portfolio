@@ -3,6 +3,11 @@ import type { Point } from "@/farm/game/world";
 /** Shared by the walk controls, the physics bodies, and the tractor mesh. */
 export const walk = {
   keys: { w: false, a: false, s: false, d: false, arrowup:false, arrowdown:false, arrowleft:false, arrowright:false },
+  routeRequest: null as (Point & {label:string}) | null,
+  route: [] as Point[],
+  routeIndex: 0,
+  routeLabel: "",
+  routeStatus: "idle" as "idle" | "walking" | "arrived" | "blocked",
   cameraCut: true,
   driving: false,
   trailerX: -2.25,
@@ -37,6 +42,8 @@ export function resetWalkInput() {
   walk.toggleDrive = false;
   walk.sprinting = false;
   walk.moving = 0;
+  // An explicit request made inside Map survives the pause → resume handoff, like travel.
+  walk.route = []; walk.routeIndex = 0; walk.routeStatus = "idle";
 }
 
 export const WALK_SPEED=4.5;
@@ -63,4 +70,20 @@ export function movementInput() {
 }
 export function isMovementKey(key:string):key is keyof typeof walk.keys {
   return Object.hasOwn(walk.keys,key);
+}
+
+export function cancelWalkRoute() {
+  walk.routeRequest=null;walk.route=[];walk.routeIndex=0;walk.routeStatus="idle";
+}
+
+/** World-space steering keeps guided walking independent of camera gestures. */
+export function routeMovement(here:Point,dt:number) {
+  while(walk.routeIndex<walk.route.length){
+    const target=walk.route[walk.routeIndex],x=target.x-here.x,z=target.z-here.z,length=Math.hypot(x,z);
+    if(length<.1){walk.routeIndex++;continue;}
+    const step=Math.min(length,WALK_SPEED*(walk.sprinting?SPRINT_MULTIPLIER:1)*Math.min(Math.max(dt,0),.05));
+    return {x:x/length*step,z:z/length*step};
+  }
+  if(walk.routeStatus==="walking"){walk.route=[];walk.routeIndex=0;walk.routeStatus="arrived";}
+  return {x:0,z:0};
 }
