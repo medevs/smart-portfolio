@@ -29,8 +29,7 @@ export const experiences: Experience[] = [
     startDate: "Jan 2023",
     endDate: "Present",
     location: "Remote",
-    description:
-      "Building custom web applications and AI-powered solutions for clients worldwide.",
+    description: "Building custom web applications and AI-powered solutions for clients worldwide.",
     achievements: [
       "Developed AI-powered portfolio with RAG chatbot",
       "Built Blog Genius - AI tool for content generation",

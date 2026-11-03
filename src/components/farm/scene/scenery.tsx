@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef } from "react";
-import { gameClock, animationDelta } from "@/farm/game/clock";
+import { gameClock } from "@/farm/game/clock";
 import { useFrame } from "@react-three/fiber";
 import { OptionalAsset } from "./OptionalAsset";
 import { groundedModel } from "./prop-geometry";
@@ -66,7 +66,7 @@ function Prop({ spot }: { spot: Spot }) {
   const url = `/farm/models/${spot.file}.glb`;
   const { scene } = useGLTF(url);
   const object = useMemo(() => {
-    const root = groundedModel(scene,spot.height);
+    const root = groundedModel(scene, spot.height);
     root.position.set(...spot.position);
     root.rotation.y = spot.rotation ?? 0;
     return root;
@@ -78,10 +78,16 @@ export function Scenery({ detail }: { detail: boolean }) {
   return (
     <group>
       {CORE_PROPS.map((spot, index) => (
-        <OptionalAsset key={`core-${spot.file}-${index}`}><Prop spot={spot} /></OptionalAsset>
+        <OptionalAsset key={`core-${spot.file}-${index}`}>
+          <Prop spot={spot} />
+        </OptionalAsset>
       ))}
       {detail
-        ? EXTRA_PROPS.map((spot, index) => <OptionalAsset key={`extra-${spot.file}-${index}`}><Prop spot={spot} /></OptionalAsset>)
+        ? EXTRA_PROPS.map((spot, index) => (
+            <OptionalAsset key={`extra-${spot.file}-${index}`}>
+              <Prop spot={spot} />
+            </OptionalAsset>
+          ))
         : null}
     </group>
   );
@@ -89,65 +95,84 @@ export function Scenery({ detail }: { detail: boolean }) {
 
 export function Horizon() {
   const ground = useMemo(() => foothillGeometry(), []);
-  return <mesh name="middle-atlas-foothills" geometry={ground} receiveShadow><meshStandardMaterial vertexColors roughness={1} metalness={0}/></mesh>;
+  return (
+    <mesh name="middle-atlas-foothills" geometry={ground} receiveShadow>
+      <meshStandardMaterial vertexColors roughness={1} metalness={0} />
+    </mesh>
+  );
 }
 
-export function MillWorks({ waterCollected = false }: {waterCollected?: boolean}) {
+export function MillWorks({ waterCollected = false }: { waterCollected?: boolean }) {
   return (
     <group>
-
       <Well waterCollected={waterCollected} />
       <Gate />
     </group>
   );
 }
 
-function MillWheel() {
-  const ref = useRef<THREE.Group>(null);
-  useFrame((_, frameDelta) => {
-    const dt = animationDelta(frameDelta);
-    if (ref.current) ref.current.rotation.x -= dt * 0.55;
-  });
+export function Well({ waterCollected = false }: { waterCollected?: boolean }) {
+  const bucketY = waterCollected ? 1.2 : 0.25;
   return (
-    <group position={[-14.2, 0.75, 2.2]}>
-      <group ref={ref}>
-        <mesh rotation={[0, 0, Math.PI / 2]}>
-          <torusGeometry args={[0.7, 0.06, 8, 18]} />
-          <meshStandardMaterial color="#6b5344" roughness={0.8} />
-        </mesh>
-        {Array.from({ length: 8 }, (_, i) => (
-          <mesh key={i} rotation={[0, 0, (i / 8) * Math.PI * 2]}>
-            <boxGeometry args={[1.35, 0.08, 0.22]} />
-            <meshStandardMaterial color="#7d624e" roughness={0.75} />
+    <group name="stone-well-mechanism" position={[-12.5, 0, 3.4]}>
+      <mesh position={[0, 0.36, 0]} receiveShadow castShadow>
+        <cylinderGeometry args={[0.72, 0.8, 0.72, 24, 1, true]} />
+        <Surface name="rock" color="#a29881" repeat={[4, 1]} metalness={0} />
+      </mesh>
+      <mesh position={[0, 0.36, 0]}>
+        <cylinderGeometry args={[0.5, 0.56, 0.68, 24, 1, true]} />
+        <meshStandardMaterial color="#5e5a4b" side={THREE.BackSide} roughness={1} />
+      </mesh>
+      <mesh position={[0, 0.74, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+        <torusGeometry args={[0.61, 0.115, 6, 28]} />
+        <Surface name="rock" color="#b1a78f" repeat={[4, 1]} metalness={0} />
+      </mesh>
+      <mesh position={[0, 0.12, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[0.61, 24]} />
+        <meshStandardMaterial color="#263f3e" roughness={0.2} metalness={0} />
+      </mesh>
+      {[-0.85, 0.85].map((x) => (
+        <group key={x} position={[x, 0, 0]}>
+          <mesh position={[0, 1.05, 0]} castShadow>
+            <boxGeometry args={[0.12, 2.1, 0.14]} />
+            <Surface name="wood" color="#77684d" repeat={[0.3, 3]} metalness={0} />
           </mesh>
-        ))}
+          <mesh position={[0, 0.05, 0]}>
+            <boxGeometry args={[0.3, 0.1, 0.34]} />
+            <Surface name="rock" color="#aaa18c" metalness={0} />
+          </mesh>
+        </group>
+      ))}
+      <mesh position={[0, 1.85, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
+        <cylinderGeometry args={[0.09, 0.09, 1.95, 12]} />
+        <Surface name="wood" color="#6e5f45" repeat={[1, 2]} metalness={0} />
+      </mesh>
+      <mesh position={[0.1, (1.85 + bucketY + 0.295) / 2, 0]}>
+        <cylinderGeometry args={[0.012, 0.012, 1.85 - bucketY - 0.295, 6]} />
+        <meshStandardMaterial color="#b8a786" roughness={1} />
+      </mesh>
+      <group name="well-bucket" position={[0.1, bucketY, 0]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.16, 0.12, 0.27, 12, 1, true]} />
+          <Surface name="wood" color="#958063" repeat={[1, 1]} metalness={0} />
+        </mesh>
+        <mesh position={[0, 0.135, 0]}>
+          <torusGeometry args={[0.15, 0.012, 6, 16, Math.PI]} />
+          <meshStandardMaterial color="#54584f" metalness={0.5} roughness={0.65} />
+        </mesh>
+      </group>
+      <group position={[1.03, 1.85, 0]} rotation={[waterCollected ? 0.8 : 0, 0, 0]}>
+        <mesh position={[0, -0.18, 0]}>
+          <boxGeometry args={[0.045, 0.36, 0.045]} />
+          <meshStandardMaterial color="#53564b" metalness={0.5} roughness={0.7} />
+        </mesh>
+        <mesh position={[0.12, -0.35, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.035, 0.035, 0.24, 8]} />
+          <Surface name="wood" color="#6d5a40" metalness={0} />
+        </mesh>
       </group>
     </group>
   );
-}
-
-export function Well({waterCollected = false}:{waterCollected?:boolean}) {
-  const bucketY = waterCollected ? 1.2 : .25;
-  return <group name="stone-well-mechanism" position={[-12.5,0,3.4]}>
-    <mesh position={[0,.36,0]} receiveShadow castShadow><cylinderGeometry args={[.72,.8,.72,24,1,true]}/><Surface name="rock" color="#a29881" repeat={[4,1]} metalness={0}/></mesh>
-    <mesh position={[0,.36,0]}><cylinderGeometry args={[.5,.56,.68,24,1,true]}/><meshStandardMaterial color="#5e5a4b" side={THREE.BackSide} roughness={1}/></mesh>
-    <mesh position={[0,.74,0]} rotation={[Math.PI/2,0,0]} castShadow><torusGeometry args={[.61,.115,6,28]}/><Surface name="rock" color="#b1a78f" repeat={[4,1]} metalness={0}/></mesh>
-    <mesh position={[0,.12,0]} rotation={[-Math.PI/2,0,0]}><circleGeometry args={[.61,24]}/><meshStandardMaterial color="#263f3e" roughness={.2} metalness={0}/></mesh>
-    {[-.85,.85].map(x=><group key={x} position={[x,0,0]}>
-      <mesh position={[0,1.05,0]} castShadow><boxGeometry args={[.12,2.1,.14]}/><Surface name="wood" color="#77684d" repeat={[.3,3]} metalness={0}/></mesh>
-      <mesh position={[0,.05,0]}><boxGeometry args={[.3,.1,.34]}/><Surface name="rock" color="#aaa18c" metalness={0}/></mesh>
-    </group>)}
-    <mesh position={[0,1.85,0]} rotation={[0,0,Math.PI/2]} castShadow><cylinderGeometry args={[.09,.09,1.95,12]}/><Surface name="wood" color="#6e5f45" repeat={[1,2]} metalness={0}/></mesh>
-    <mesh position={[.1,(1.85+bucketY+.295)/2,0]}><cylinderGeometry args={[.012,.012,1.85-bucketY-.295,6]}/><meshStandardMaterial color="#b8a786" roughness={1}/></mesh>
-    <group name="well-bucket" position={[.1,bucketY,0]}>
-      <mesh castShadow><cylinderGeometry args={[.16,.12,.27,12,1,true]}/><Surface name="wood" color="#958063" repeat={[1,1]} metalness={0}/></mesh>
-      <mesh position={[0,.135,0]}><torusGeometry args={[.15,.012,6,16,Math.PI]}/><meshStandardMaterial color="#54584f" metalness={.5} roughness={.65}/></mesh>
-    </group>
-    <group position={[1.03,1.85,0]} rotation={[waterCollected ? .8 : 0,0,0]}>
-      <mesh position={[0,-.18,0]}><boxGeometry args={[.045,.36,.045]}/><meshStandardMaterial color="#53564b" metalness={.5} roughness={.7}/></mesh>
-      <mesh position={[.12,-.35,0]} rotation={[0,0,Math.PI/2]}><cylinderGeometry args={[.035,.035,.24,8]}/><Surface name="wood" color="#6d5a40" metalness={0}/></mesh>
-    </group>
-  </group>;
 }
 
 function Gate() {

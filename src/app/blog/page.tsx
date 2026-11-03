@@ -1,6 +1,6 @@
 import { getSortedPostsData } from "../../../utils/markdown";
 import Link from "next/link";
-import { Calendar, Clock, ArrowLeft, Tag, FileText } from "lucide-react";
+import { Calendar, Clock, ArrowLeft, FileText } from "lucide-react";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -8,10 +8,17 @@ export const metadata: Metadata = {
   description: "Notes on web development, AI, and shipping software.",
 };
 
-export default async function BlogPage() {
-  const posts = await getSortedPostsData();
+export default async function BlogPage({
+  searchParams,
+}: { searchParams?: Promise<{ category?: string | string[] }> } = {}) {
+  const allPosts = await getSortedPostsData();
+  const categories = [...new Set(allPosts.map((post) => post.category))];
+  const query = (await searchParams)?.category;
+  const selected = typeof query === "string" && categories.includes(query) ? query : null;
+  const posts = selected ? allPosts.filter((post) => post.category === selected) : allPosts;
 
-  const categories = [...new Set(posts.map(post => post.category))];
+  const categoryClass = (active: boolean) =>
+    `px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${active ? "bg-terminal-green/20 text-terminal-green border-terminal-green/30" : "bg-white/5 text-terminal-muted border-card-theme-border hover:border-terminal-cyan/30 hover:text-terminal-cyan"}`;
 
   return (
     <div>
@@ -26,35 +33,36 @@ export default async function BlogPage() {
             <span>Back to the farm</span>
           </Link>
 
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Blog
-          </h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Blog</h1>
           <p className="text-terminal-muted max-w-2xl">
             Thoughts on web development, AI/ML, and building software that matters.
           </p>
         </div>
 
         {/* Categories */}
-        <div className="flex flex-wrap gap-2 mb-8">
-          <span className="px-3 py-1.5 rounded-full text-sm font-medium bg-terminal-green/20 text-terminal-green border border-terminal-green/30">
-            All ({posts.length})
-          </span>
+        <nav aria-label="Article categories" className="flex flex-wrap gap-2 mb-8">
+          <Link
+            href="/blog"
+            aria-current={!selected ? "page" : undefined}
+            className={categoryClass(!selected)}
+          >
+            All ({allPosts.length})
+          </Link>
           {categories.map((category) => (
-            <span
+            <Link
+              href={`/blog?category=${encodeURIComponent(category)}`}
+              aria-current={selected === category ? "page" : undefined}
               key={category}
-              className="px-3 py-1.5 rounded-full text-sm font-medium bg-white/5 text-terminal-muted border border-card-theme-border hover:border-terminal-cyan/30 hover:text-terminal-cyan transition-colors cursor-pointer"
+              className={categoryClass(selected === category)}
             >
-              {category} ({posts.filter(p => p.category === category).length})
-            </span>
+              {category} ({allPosts.filter((p) => p.category === category).length})
+            </Link>
           ))}
-        </div>
+        </nav>
 
         {/* Featured Post */}
         {posts.length > 0 && (
-          <Link
-            href={`/blog/${posts[0].id}`}
-            className="block mb-8 group"
-          >
+          <Link href={`/blog/${posts[0].id}`} className="block mb-8 group">
             <div className="relative rounded-2xl overflow-hidden bg-card-theme-bg border border-card-theme-border hover:border-terminal-green/30 transition-all duration-300">
               <div className="absolute inset-0 bg-gradient-to-br from-terminal-green/5 to-terminal-cyan/5 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative p-6 md:p-8">
@@ -98,7 +106,10 @@ export default async function BlogPage() {
             >
               <div className="p-5">
                 <div className="flex items-center gap-2 mb-3">
-                  <FileText size={16} className="text-terminal-cyan group-hover:text-terminal-green transition-colors" />
+                  <FileText
+                    size={16}
+                    className="text-terminal-cyan group-hover:text-terminal-green transition-colors"
+                  />
                   <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-foreground/10 text-terminal-muted">
                     {post.category}
                   </span>
@@ -106,9 +117,7 @@ export default async function BlogPage() {
                 <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-terminal-green transition-colors line-clamp-2">
                   {post.title}
                 </h3>
-                <p className="text-sm text-terminal-muted mb-4 line-clamp-2">
-                  {post.description}
-                </p>
+                <p className="text-sm text-terminal-muted mb-4 line-clamp-2">{post.description}</p>
                 <div className="flex items-center gap-3 text-xs text-terminal-muted">
                   <span className="flex items-center gap-1">
                     <Calendar size={12} />

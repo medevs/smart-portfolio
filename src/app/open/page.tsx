@@ -21,8 +21,8 @@ export default async function OpenPage() {
         </p>
         <h1>Dream Home Fund</h1>
         <p>
-          Money in, and what it was spent on. The figures are the public ledger in the site data file — nothing here
-          is estimated. Currency: {shop.currency}.
+          Money in, and what it was spent on. The figures are the public ledger in the site data
+          file — nothing here is estimated. Currency: {shop.currency}.
         </p>
         <p>
           In: <strong>{formatMoney(raised)}</strong>

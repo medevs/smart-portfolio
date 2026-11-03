@@ -5,14 +5,7 @@ export const seoConfig: SEOConfig = {
   siteUrl: "https://medevsmaker.vercel.app",
   description:
     "Wander medevsmaker's farm. The courtyard workshop is ReelStyles — style packs for Claude Code that make videos in code with HyperFrames and Remotion.",
-  keywords: [
-    "medevsmaker",
-    "ReelStyles",
-    "HyperFrames",
-    "Remotion",
-    "MentorClone",
-    "TalkTheDoc",
-  ],
+  keywords: ["medevsmaker", "ReelStyles", "HyperFrames", "Remotion", "MentorClone", "TalkTheDoc"],
   author: {
     name: "medevsmaker",
     url: "https://medevsmaker.vercel.app",

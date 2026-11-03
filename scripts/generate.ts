@@ -3,9 +3,10 @@ import dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 dotenv.config({ path: ".env" });
 
+import { replaceKnowledgeIndex } from "../src/lib/knowledge-index";
 import { Document } from "@langchain/core/documents";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
-import { getEmbeddingsCollection, getVectorStore } from "../src/lib/supabase";
+import { getEmbeddingsCollection, getIndexingStore } from "../src/lib/supabase";
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
@@ -72,7 +73,7 @@ ${content}
           tags: frontmatter.tags || [],
           importance: "medium",
         },
-      })
+      }),
     );
   }
 
@@ -85,17 +86,6 @@ ${content}
 async function generateEmbeddings() {
   try {
     console.log("Starting embeddings generation...\n");
-
-    // Get the vector store
-    const vectorStore = await getVectorStore();
-
-    // Clear existing documents
-    console.log("Clearing existing documents...");
-    const { error } = await (await getEmbeddingsCollection()).delete().neq("id", 0);
-    if (error) {
-      console.error("Error clearing documents:", error);
-      return;
-    }
 
     const allDocuments: Document[] = [];
 
@@ -138,7 +128,7 @@ ${aboutConfig.interests.map((i) => `- ${i}`).join("\n")}
           section: "personalInfo",
           importance: "high",
         },
-      })
+      }),
     );
 
     // === WORK EXPERIENCE DOCUMENTS ===
@@ -175,7 +165,7 @@ ${exp.tech.join(", ")}
             role: exp.role,
             importance: "high",
           },
-        })
+        }),
       );
     }
 
@@ -201,7 +191,7 @@ ${category.skills.map((s) => `- ${s.name}: ${s.level}% proficiency`).join("\n")}
             category: category.name,
             importance: "medium",
           },
-        })
+        }),
       );
     }
 
@@ -226,7 +216,7 @@ ${skillCategories.map((c) => `- ${c.name}: ${c.skills.map((s) => s.name).join(",
           section: "skills",
           importance: "high",
         },
-      })
+      }),
     );
 
     // === PROJECT DOCUMENTS ===
@@ -257,7 +247,7 @@ ${project.tech.join(", ")}
             projectName: project.name,
             importance: "medium",
           },
-        })
+        }),
       );
     }
 
@@ -287,7 +277,7 @@ ${edu.description}
             institution: edu.institution,
             importance: "medium",
           },
-        })
+        }),
       );
     }
 
@@ -304,7 +294,7 @@ ${certifications
 Issuer: ${cert.issuer || "N/A"}
 Date: ${cert.date}
 Description: ${cert.description}
-`
+`,
   )
   .join("\n")}
 `;
@@ -318,7 +308,7 @@ Description: ${cert.description}
             section: "certifications",
             importance: "medium",
           },
-        })
+        }),
       );
     }
 
@@ -349,7 +339,10 @@ Description: ${cert.description}
 1. Proven track record in enterprise software development
 2. Strong AI/ML integration skills
 3. Experience building production RAG systems
-4. Excellent communication in ${aboutConfig.languages.slice(0, 2).map((l) => `${l.language} (${l.proficiency})`).join(", ")}
+4. Excellent communication in ${aboutConfig.languages
+      .slice(0, 2)
+      .map((l) => `${l.language} (${l.proficiency})`)
+      .join(", ")}
 5. Continuous learner with passion for emerging technologies
 `;
 
@@ -362,7 +355,7 @@ Description: ${cert.description}
           section: "summary",
           importance: "high",
         },
-      })
+      }),
     );
 
     // === CONTACT/HIRING DOCUMENT ===
@@ -396,7 +389,7 @@ ${personalInfo.firstName}'s CV/Resume can be downloaded from: ${personalInfo.res
           section: "contact",
           importance: "high",
         },
-      })
+      }),
     );
 
     console.log(`  Created ${allDocuments.length} resume documents`);
@@ -422,7 +415,30 @@ ${personalInfo.firstName}'s CV/Resume can be downloaded from: ${personalInfo.res
 
     // Add documents to vector store
     console.log("\n🔄 Adding documents to vector store...");
-    await vectorStore.addDocuments(splitDocs);
+    const vectorStore = await getIndexingStore();
+    const collection = await getEmbeddingsCollection();
+    await replaceKnowledgeIndex({
+      documents: splitDocs,
+      snapshot: async () => {
+        const ids: string[] = [];
+        for (let offset = 0; ; offset += 1000) {
+          const { data, error } = await collection
+            .select("id")
+            .order("id")
+            .range(offset, offset + 999);
+          if (error) throw error;
+          ids.push(...(data ?? []).map((row) => String(row.id)));
+          if (!data || data.length < 1000) return ids;
+        }
+      },
+      add: (documents) => vectorStore.addDocuments(documents),
+      remove: async (ids) => {
+        for (let offset = 0; offset < ids.length; offset += 500) {
+          const { error } = await collection.delete().in("id", ids.slice(offset, offset + 500));
+          if (error) throw error;
+        }
+      },
+    });
 
     console.log("\n✅ Embeddings generated successfully!");
     console.log(`   - Personal info: 1`);
@@ -440,4 +456,7 @@ ${personalInfo.firstName}'s CV/Resume can be downloaded from: ${personalInfo.res
   }
 }
 
-generateEmbeddings().catch(console.error);
+generateEmbeddings().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

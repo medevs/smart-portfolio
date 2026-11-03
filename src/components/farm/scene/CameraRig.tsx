@@ -8,34 +8,75 @@ import type { TourView } from "@/farm/game/tour";
 import { TRACTOR, walk } from "./walk-state";
 
 /** Disabled orbit input still runs CameraControls.update. Mount exactly one camera owner. */
-export function CameraRig({ walking, paused, reducedMotion, focus, tour }: {
-  walking: boolean; paused: boolean; reducedMotion: boolean; focus: [number, number] | null; tour?: TourView | null;
+export function CameraRig({
+  walking,
+  paused,
+  reducedMotion,
+  focus,
+  tour,
+}: {
+  walking: boolean;
+  paused: boolean;
+  reducedMotion: boolean;
+  focus: [number, number] | null;
+  tour?: TourView | null;
 }) {
-  return walking ? <FollowCamera paused={paused} /> : <OrbitCamera paused={paused} reducedMotion={reducedMotion} focus={focus} tour={tour} />;
+  return walking ? (
+    <FollowCamera paused={paused} />
+  ) : (
+    <OrbitCamera paused={paused} reducedMotion={reducedMotion} focus={focus} tour={tour} />
+  );
 }
-function OrbitCamera({ paused, reducedMotion, focus, tour }: { paused: boolean; reducedMotion: boolean; focus: [number, number] | null; tour?: TourView | null }) {
+function OrbitCamera({
+  paused,
+  reducedMotion,
+  focus,
+  tour,
+}: {
+  paused: boolean;
+  reducedMotion: boolean;
+  focus: [number, number] | null;
+  tour?: TourView | null;
+}) {
   const controls = useRef<CameraControls>(null);
   const previousDistance = useRef(cameraView.distance);
   useFrame(() => {
     if (paused || !controls.current || previousDistance.current === cameraView.distance) return;
-    controls.current.dollyTo(controls.current.distance * cameraView.distance / previousDistance.current, !reducedMotion);
+    controls.current.dollyTo(
+      (controls.current.distance * cameraView.distance) / previousDistance.current,
+      !reducedMotion,
+    );
     previousDistance.current = cameraView.distance;
   });
-  const x = focus?.[0], z = focus?.[1];
+  const x = focus?.[0],
+    z = focus?.[1];
   useEffect(() => {
     controls.current?.setLookAt(34, 25, 39, 0, 1.2, 0, false);
-    controls.current?.dollyTo(Math.hypot(34, 23.8, 39) * cameraView.distance / 6.2, false);
+    controls.current?.dollyTo((Math.hypot(34, 23.8, 39) * cameraView.distance) / 6.2, false);
   }, []);
   useEffect(() => {
     if (tour) controls.current?.setLookAt(...tour.eye, ...tour.target, !reducedMotion);
-    else if (x !== undefined && z !== undefined) controls.current?.setLookAt(x + 6.2, 4.8, z + 7.4, x, 1.7, z, !reducedMotion);
+    else if (x !== undefined && z !== undefined)
+      controls.current?.setLookAt(x + 6.2, 4.8, z + 7.4, x, 1.7, z, !reducedMotion);
   }, [x, z, reducedMotion, tour]);
-  return <CameraControls ref={controls} makeDefault minDistance={5} maxDistance={85}
-    maxPolarAngle={Math.PI / 2.05} minPolarAngle={.35} smoothTime={reducedMotion ? 0 : .45} enabled={!paused} />;
+  return (
+    <CameraControls
+      ref={controls}
+      makeDefault
+      minDistance={5}
+      maxDistance={85}
+      maxPolarAngle={Math.PI / 2.05}
+      minPolarAngle={0.35}
+      smoothTime={reducedMotion ? 0 : 0.45}
+      enabled={!paused}
+    />
+  );
 }
 export function FollowCamera({ paused }: { paused: boolean }) {
   const { camera, gl } = useThree();
-  useEffect(() => { if (!paused) return bindFollowCamera(gl.domElement); }, [gl, paused]);
+  useEffect(() => {
+    if (!paused) return bindFollowCamera(gl.domElement);
+  }, [gl, paused]);
   const desired = useRef(new THREE.Vector3());
   const entered = useRef(false);
   const target = useRef(new THREE.Vector3());
@@ -46,13 +87,17 @@ export function FollowCamera({ paused }: { paused: boolean }) {
     const yaw = (walk.driving ? walk.vehicleYaw : Math.PI) + cameraView.turn;
     const radius = cameraView.distance;
     target.current.set(x, 1.1, z);
-    desired.current.set(x - Math.sin(yaw) * radius, 1.1 + radius * (walk.driving ? 2.7 : 2.1) / 6.2, z - Math.cos(yaw) * radius);
+    desired.current.set(
+      x - Math.sin(yaw) * radius,
+      1.1 + (radius * (walk.driving ? 2.7 : 2.1)) / 6.2,
+      z - Math.cos(yaw) * radius,
+    );
     keepCameraClear(target.current, desired.current);
     if (!entered.current || walk.cameraCut) {
       camera.position.copy(desired.current);
       entered.current = true;
       walk.cameraCut = false;
-    } else camera.position.lerp(desired.current, 1 - Math.exp(-10 * Math.min(delta, .05)));
+    } else camera.position.lerp(desired.current, 1 - Math.exp(-10 * Math.min(delta, 0.05)));
     // Clip the interpolated position too: smoothing must not sweep through a wall.
     keepCameraClear(target.current, camera.position);
     camera.lookAt(target.current);

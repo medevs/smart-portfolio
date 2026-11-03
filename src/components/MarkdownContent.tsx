@@ -1,36 +1,23 @@
-"use client"
+"use client";
 
-import React, { useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
-import remarkGfm from 'remark-gfm';
-import { Components } from 'react-markdown';
+import type { FC } from "react";
+import { remarkHeadingIds } from "@/lib/markdown-headings";
+import ReactMarkdown from "react-markdown";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import remarkGfm from "remark-gfm";
+import { Components } from "react-markdown";
 
 interface MarkdownContentProps {
   content: string;
 }
 
-const MarkdownContent: React.FC<MarkdownContentProps> = ({ content }) => {
-  // Add IDs to headings for the table of contents
-  useEffect(() => {
-    const article = document.querySelector('article');
-    if (!article) return;
-
-    const headings = article.querySelectorAll('h1, h2, h3, h4, h5, h6');
-    headings.forEach(heading => {
-      if (!heading.id) {
-        const id = heading.textContent?.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '') || '';
-        heading.id = id;
-      }
-    });
-  }, [content]);
-
+const MarkdownContent: FC<MarkdownContentProps> = ({ content }) => {
   const components: Components = {
     code({ node, className, children, ...props }) {
-      const match = /language-(\w+)/.exec(className || '');
+      const match = /language-(\w+)/.exec(className || "");
       const isInline = !className || !match;
-      
+
       return isInline ? (
         <code className="bg-gray-800 text-gray-200 rounded px-1 py-0.5" {...props}>
           {children}
@@ -40,14 +27,13 @@ const MarkdownContent: React.FC<MarkdownContentProps> = ({ content }) => {
           <SyntaxHighlighter
             style={oneDark}
             language={match[1]}
-            {...props}
             customStyle={{
               margin: 0,
-              borderRadius: '0.375rem',
-              background: '#1e1e1e',
+              borderRadius: "0.375rem",
+              background: "#1e1e1e",
             }}
           >
-            {String(children).replace(/\n$/, '')}
+            {String(children).replace(/\n$/, "")}
           </SyntaxHighlighter>
         </div>
       );
@@ -63,34 +49,29 @@ const MarkdownContent: React.FC<MarkdownContentProps> = ({ content }) => {
     blockquote: ({ node, ...props }) => (
       <blockquote className="border-l-4 border-gray-300 pl-4 italic my-4" {...props} />
     ),
-    pre: ({ node, ...props }) => (
-      <pre className="my-4 bg-transparent" {...props} />
-    ),
+    pre: ({ children }) => <>{children}</>,
     table: ({ node, ...props }) => (
       <div className="overflow-x-auto my-4">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700" {...props} />
       </div>
     ),
-    thead: ({ node, ...props }) => (
-      <thead className="bg-gray-100 dark:bg-gray-800" {...props} />
-    ),
+    thead: ({ node, ...props }) => <thead className="bg-gray-100 dark:bg-gray-800" {...props} />,
     tbody: ({ node, ...props }) => (
       <tbody className="divide-y divide-gray-200 dark:divide-gray-700" {...props} />
     ),
-    tr: ({ node, ...props }) => (
-      <tr {...props} />
-    ),
+    tr: ({ node, ...props }) => <tr {...props} />,
     th: ({ node, ...props }) => (
-      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" {...props} />
+      <th
+        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+        {...props}
+      />
     ),
-    td: ({ node, ...props }) => (
-      <td className="px-4 py-3 whitespace-nowrap" {...props} />
-    ),
+    td: ({ node, ...props }) => <td className="px-4 py-3 whitespace-nowrap" {...props} />,
   };
 
   return (
-    <div className="prose dark:prose-invert max-w-none">
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+    <div className="prose dark:prose-invert max-w-none" data-article-content>
+      <ReactMarkdown remarkPlugins={[remarkGfm, remarkHeadingIds]} components={components}>
         {content}
       </ReactMarkdown>
     </div>

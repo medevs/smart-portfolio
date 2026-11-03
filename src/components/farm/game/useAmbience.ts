@@ -1,41 +1,37 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createAmbienceEngine } from "./ambience-engine";
 
-/** Local synthesis only. A deliberate click creates the context; it never autoplays. */
+/** Quiet local synthesis, created only by a deliberate click. */
 export function useAmbience(paused: boolean, volume: number) {
-  const state = useRef<{ context: AudioContext; gain: GainNode; source: AudioBufferSourceNode } | null>(null);
+  const engine = useMemo(() => createAmbienceEngine(), []);
+  const mounted = useRef(false);
   const [enabled, setEnabled] = useState(false);
   const [error, setError] = useState("");
   useEffect(() => {
-    const update = () => {
-      const audio = state.current;
-      if (audio) audio.gain.gain.setTargetAtTime(paused || document.hidden ? 0 : volume * .12, audio.context.currentTime, .2);
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      engine.stop();
     };
-    update(); document.addEventListener("visibilitychange", update);
+  }, [engine]);
+  useEffect(() => {
+    const update = () => engine.setLevel(paused || document.hidden ? 0 : volume * 0.12);
+    update();
+    document.addEventListener("visibilitychange", update);
     return () => document.removeEventListener("visibilitychange", update);
-  }, [paused, volume, enabled]);
-  useEffect(() => () => {
-    const audio = state.current; state.current = null;
-    if (audio) { audio.source.stop(); void audio.context.close(); }
-  }, []);
+  }, [engine, paused, volume]);
   async function toggle() {
-    if (state.current) {
-      state.current.source.stop(); await state.current.context.close(); state.current = null; setEnabled(false); return;
+    if (engine.active) {
+      engine.stop();
+      setEnabled(false);
+      setError("");
+      return;
     }
-    let context: AudioContext | undefined;
-    try {
-      context = new AudioContext();
-      await context.resume();
-      if (context.state !== "running") throw new Error("Audio was blocked");
-      const buffer = context.createBuffer(1, context.sampleRate * 4, context.sampleRate);
-      const data = buffer.getChannelData(0);
-      for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * .5;
-      const source = context.createBufferSource(); source.buffer = buffer; source.loop = true;
-      const filter = context.createBiquadFilter(); filter.type = "lowpass"; filter.frequency.value = 650;
-      const gain = context.createGain(); gain.gain.value = 0;
-      source.connect(filter).connect(gain).connect(context.destination); source.start();
-      state.current = { context, gain, source }; setEnabled(true); setError("");
-    } catch { if (context) void context.close(); setError("Sound could not start on this device."); }
+    const result = await engine.start();
+    if (!mounted.current || result === "cancelled") return;
+    setEnabled(result === "started");
+    setError(result === "failed" ? "Sound could not start on this device." : "");
   }
   return { enabled, error, toggle };
 }

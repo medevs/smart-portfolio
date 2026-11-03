@@ -18,7 +18,7 @@ function commandsReachableFrom(command, seen = new Set()) {
 test('local and deployed build chains never reach the database-writing indexer', () => {
   for (const entry of ['npm run build', vercel.buildCommand]) {
     const commands = commandsReachableFrom(entry);
-    assert.ok(commands.some(command => command.includes('next build')));
+    assert.ok(commands.some((command) => command.includes('next build')));
     assert.doesNotMatch(commands.join('\n'), /scripts\/generate\.ts|npm run generate|ts-node/);
   }
 });

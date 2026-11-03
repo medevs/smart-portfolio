@@ -681,3 +681,16 @@ All 100 tests and TypeScript pass; run final lint and require clean Node22 CI
 and Vercel before merge. Direct local Next build still fails with the host
 uv_resident_set_memory ENOENT. GPU driving appearance and physical touch remain
 open under #20/#28; CPU rig evidence is not a rendered visual acceptance.
+
+## Comprehensive application audit · 2026-11-03
+
+See APP-AUDIT.md for scope, findings, changed boundaries and verification limits.
+Remove unreachable legacy UI and unused dependencies, enforce formatting/unused
+code checks, split scene and HUD responsibilities, fix blog/spot navigation,
+nonpersistent sponsorship acknowledgements, audio and stream cancellation,
+queued walking on focus loss, data validation and indexing replacement order.
+Indexing now requires a separate server-only database secret. A read-only RLS
+migration is prepared but is not applied to any live database by this work.
+Builds never run indexing; no paid provider/database operations were performed.
+Require clean Node22 CI and Vercel; record release/browser results in the PR.
+Existing GPU/touch gates #20/#28 and development advisories #25 remain open.

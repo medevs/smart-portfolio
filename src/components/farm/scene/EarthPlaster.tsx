@@ -22,10 +22,23 @@ if(abs(earthDet)>0.00000001) normal=normalize(abs(earthDet)*normal-sign(earthDet
 
 /** Shared factory keeps the component and full Three shader regression on the same hook. */
 export function createEarthMaterial(color: string) {
-  const mat = new THREE.MeshStandardMaterial({ color, metalness: 0, roughness: .97 });
-  mat.onBeforeCompile = shader => {
-    shader.vertexShader = "varying vec3 vEarthPosition;\n" + shader.vertexShader.replace("#include <project_vertex>", "vEarthPosition=(modelMatrix*vec4(transformed,1.0)).xyz;\n#include <project_vertex>");
-    shader.fragmentShader = earthFunctions + "\n" + shader.fragmentShader.replace("#include <color_fragment>", "#include <color_fragment>\n" + earthColor).replace("#include <normal_fragment_maps>", "#include <normal_fragment_maps>\n" + earthNormal);
+  const mat = new THREE.MeshStandardMaterial({ color, metalness: 0, roughness: 0.97 });
+  mat.onBeforeCompile = (shader) => {
+    shader.vertexShader =
+      "varying vec3 vEarthPosition;\n" +
+      shader.vertexShader.replace(
+        "#include <project_vertex>",
+        "vEarthPosition=(modelMatrix*vec4(transformed,1.0)).xyz;\n#include <project_vertex>",
+      );
+    shader.fragmentShader =
+      earthFunctions +
+      "\n" +
+      shader.fragmentShader
+        .replace("#include <color_fragment>", "#include <color_fragment>\n" + earthColor)
+        .replace(
+          "#include <normal_fragment_maps>",
+          "#include <normal_fragment_maps>\n" + earthNormal,
+        );
   };
   mat.customProgramCacheKey = () => "atlas-earth-plaster-v2";
   return mat;

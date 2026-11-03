@@ -9,9 +9,12 @@ const filename = path.resolve('src/components/farm/scene/SketchEffect.ts');
 const source = new Module(filename, module);
 source.filename = filename;
 source.paths = Module._nodeModulePaths(path.dirname(filename));
-source._compile(ts.transpileModule(fs.readFileSync(filename, 'utf8'), {
-  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 }
-}).outputText, filename);
+source._compile(
+  ts.transpileModule(fs.readFileSync(filename, 'utf8'), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 },
+  }).outputText,
+  filename,
+);
 const { sketchFragment } = source.exports;
 
 test('the actual sketch fragment passes GLSL semantic compilation', () => {
@@ -33,13 +36,15 @@ void main() { mainImage(texture(inputBuffer, vUv), vUv, fragColor); }
   assert.equal(binary[0], 0x07230203, 'compiler produced valid SPIR-V magic');
 });
 
-
 test('only identified compositor shader failures use plain 3D recovery', () => {
   const routingPath = path.resolve('src/components/farm/scene/shader-failure.ts');
   const routing = new Module(routingPath, module);
-  routing._compile(ts.transpileModule(fs.readFileSync(routingPath, 'utf8'), {
-    compilerOptions: { module: ts.ModuleKind.CommonJS }
-  }).outputText, routingPath);
+  routing._compile(
+    ts.transpileModule(fs.readFileSync(routingPath, 'utf8'), {
+      compilerOptions: { module: ts.ModuleKind.CommonJS },
+    }).outputText,
+    routingPath,
+  );
   const { routeShaderFailure } = routing.exports;
   const results = [];
   const handlers = { effects: () => results.push('effects'), scene: () => results.push('scene') };
@@ -49,58 +54,97 @@ test('only identified compositor shader failures use plain 3D recovery', () => {
     '#define SHADER_NAME MeshStandardMaterial',
     '// EffectMaterial appears in a comment, not the generated material identity',
     null,
-  ]) routeShaderFailure(source, handlers);
+  ])
+    routeShaderFailure(source, handlers);
   assert.deepEqual(results, ['effects', 'scene', 'scene', 'scene', 'scene']);
 });
 
-
-test('weather sky fragment passes actual GLSL semantic compilation',()=>{
-  const source=fs.readFileSync('src/components/farm/scene/FarmCanvas.tsx','utf8');
-  const fragment=source.match(/fragmentShader=\{`([\s\S]*?)`\}/)[1]
+test('weather sky fragment passes actual GLSL semantic compilation', () => {
+  const source = fs.readFileSync('src/components/farm/scene/SceneLighting.tsx', 'utf8');
+  const fragment = source
+    .match(/fragmentShader=\{`([\s\S]*?)`\}/)[1]
     .replace('varying vec3 vDir;', 'layout(location=0) in vec3 vDir;')
-    .replace(/uniform float u(Overcast|Night|Sunset);/g,'')
-    .replace('gl_FragColor','fragColor');
-  const binary=compiler.compileGLSL(`#version 310 es
+    .replace(/uniform float u(Overcast|Night|Sunset);/g, '')
+    .replace('gl_FragColor', 'fragColor');
+  const binary = compiler.compileGLSL(
+    `#version 310 es
 precision highp float;
 layout(set=0,binding=0) uniform Weather {float uOvercast;float uNight;float uSunset;};
 layout(location=0) out vec4 fragColor;
-${fragment}`, 'fragment');
-  assert.equal(binary[0],0x07230203);
+${fragment}`,
+    'fragment',
+  );
+  assert.equal(binary[0], 0x07230203);
 });
 
-
-test('mineral plaster noise, colour and derivative normal snippets compile together',()=>{
-  const file=path.resolve('src/components/farm/scene/EarthPlaster.tsx');
-  const earth=new Module(file,module);earth.filename=file;earth.paths=Module._nodeModulePaths(path.dirname(file));
-  earth._compile(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true}}).outputText,file);
-  const {earthFunctions,earthColor,earthNormal}=earth.exports;
-  const binary=compiler.compileGLSL(`#version 310 es
+test('mineral plaster noise, colour and derivative normal snippets compile together', () => {
+  const file = path.resolve('src/components/farm/scene/EarthPlaster.tsx');
+  const earth = new Module(file, module);
+  earth.filename = file;
+  earth.paths = Module._nodeModulePaths(path.dirname(file));
+  earth._compile(
+    ts.transpileModule(fs.readFileSync(file, 'utf8'), {
+      compilerOptions: {
+        module: ts.ModuleKind.CommonJS,
+        jsx: ts.JsxEmit.ReactJSX,
+        esModuleInterop: true,
+      },
+    }).outputText,
+    file,
+  );
+  const { earthFunctions, earthColor, earthNormal } = earth.exports;
+  const binary = compiler.compileGLSL(
+    `#version 310 es
 precision highp float;
 layout(location=0) in vec3 vViewPosition;
 layout(location=1) in vec3 vEarthPosition;
 layout(location=0) out vec4 result;
-${earthFunctions.replace('varying vec3 vEarthPosition;','')}
+${earthFunctions.replace('varying vec3 vEarthPosition;', '')}
 void main(){ vec4 diffuseColor=vec4(0.7,0.6,0.5,1.0);vec3 normal=vec3(0,0,1);
 ${earthColor}
 ${earthNormal}
-result=vec4(diffuseColor.rgb*abs(normal.z),1.0);}`, 'fragment');
-  assert.equal(binary[0],0x07230203);
+result=vec4(diffuseColor.rgb*abs(normal.z),1.0);}`,
+    'fragment',
+  );
+  assert.equal(binary[0], 0x07230203);
 });
 
-test('the actual plaster material hook compiles with installed Three standard vertex/fragment chunks',()=>{
-  const THREE=require('three');
-  const {compileThreeShader}=require('./three-shader-host.cjs');
-  const file=path.resolve('src/components/farm/scene/EarthPlaster.tsx');
-  const earth=new Module(file,module);earth.filename=file;earth.paths=Module._nodeModulePaths(path.dirname(file));
-  earth._compile(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true}}).outputText,file);
-  const material=earth.exports.createEarthMaterial('#baa17f');
-  const shader={vertexShader:THREE.ShaderLib.standard.vertexShader,fragmentShader:THREE.ShaderLib.standard.fragmentShader};
-  assert.ok(shader.fragmentShader.startsWith('#define STANDARD'),'fixture is the real trimmed Three material, not a padded snippet');
-  material.onBeforeCompile(shader,{});
+test('the actual plaster material hook compiles with installed Three standard vertex/fragment chunks', () => {
+  const THREE = require('three');
+  const { compileThreeShader } = require('./three-shader-host.cjs');
+  const file = path.resolve('src/components/farm/scene/EarthPlaster.tsx');
+  const earth = new Module(file, module);
+  earth.filename = file;
+  earth.paths = Module._nodeModulePaths(path.dirname(file));
+  earth._compile(
+    ts.transpileModule(fs.readFileSync(file, 'utf8'), {
+      compilerOptions: {
+        module: ts.ModuleKind.CommonJS,
+        jsx: ts.JsxEmit.ReactJSX,
+        esModuleInterop: true,
+      },
+    }).outputText,
+    file,
+  );
+  const material = earth.exports.createEarthMaterial('#baa17f');
+  const shader = {
+    vertexShader: THREE.ShaderLib.standard.vertexShader,
+    fragmentShader: THREE.ShaderLib.standard.fragmentShader,
+  };
+  assert.ok(
+    shader.fragmentShader.startsWith('#define STANDARD'),
+    'fixture is the real trimmed Three material, not a padded snippet',
+  );
+  material.onBeforeCompile(shader, {});
   try {
-    for(const directionalLights of [0,1]) for(const stage of ['vertex','fragment']) {
-      const binary=compileThreeShader(compiler,shader[`${stage}Shader`],stage,{directionalLights});
-      assert.equal(binary[0],0x07230203);
-    }
-  } finally {material.dispose();}
+    for (const directionalLights of [0, 1])
+      for (const stage of ['vertex', 'fragment']) {
+        const binary = compileThreeShader(compiler, shader[`${stage}Shader`], stage, {
+          directionalLights,
+        });
+        assert.equal(binary[0], 0x07230203);
+      }
+  } finally {
+    material.dispose();
+  }
 });

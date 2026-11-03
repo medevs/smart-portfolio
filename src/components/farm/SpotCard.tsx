@@ -6,7 +6,9 @@ import { formatMoney, landmarkPrice, offerings, shop, skuBasePrice } from "@/con
 import type { Placed } from "@/farm/loadFarm";
 import { plotsRemaining } from "@/farm/loadFarm";
 import type { FarmData } from "@/farm/types";
-import { BuyForm, ShareSpot, offeringForItem } from "./BuyForm";
+import { SponsorshipNotice } from "./SponsorshipNotice";
+import { ShareSpot } from "./ShareSpot";
+import { offeringForItem } from "@/farm/offering";
 
 function ReelDemo() {
   return (
@@ -67,16 +69,19 @@ export function SpotCard({
                         TODO: {link.label}
                       </p>
                     ) : (
-                      <a key={link.label} className="text-link" href={link.href} {...linkAttrs(link.href)}>
+                      <a
+                        key={link.label}
+                        className="text-link"
+                        href={link.href}
+                        {...linkAttrs(link.href)}
+                      >
                         {link.label}
                       </a>
-                    )
+                    ),
                   )}
                 </div>
               )}
-              {offering && (
-                <BuyForm offering={offering} spotId={entry.plot.id} sponsors={data.sponsors} />
-              )}
+              {offering && <SponsorshipNotice offering={offering} sponsors={data.sponsors} />}
               <ShareSpot id={entry.plot.id} />
             </>
           )}
@@ -108,8 +113,9 @@ export function ShopDialog({
             <h2>Help build the farm</h2>
           </Dialog.Title>
           <Dialog.Description className="pitch">
-            Buy a post, a flower, an animal, or a plot. Landmarks have one sponsor at a time. The courtyard workshop is
-            ReelStyles and is not for sale.
+            Planned ways to support the farm: a post, flower, animal or plot. Online requests and
+            payments are not available yet. The courtyard workshop is ReelStyles and is not for
+            sale.
           </Dialog.Description>
           <ul className="shop-list">
             {offerings.map((offering) => {
@@ -121,7 +127,9 @@ export function ShopDialog({
                     ? formatMoney(skuBasePrice(offering.sku) ?? 0)
                     : "";
               const extra =
-                offering.sku === "plot" ? ` · ${plotsRemaining(data.sponsors)}/${shop.limits.plots} left` : "";
+                offering.sku === "plot"
+                  ? ` · ${plotsRemaining(data.sponsors)}/${shop.limits.plots} left`
+                  : "";
               return (
                 <li key={offering.id}>
                   <a href={`/spot/${offering.id}`}>

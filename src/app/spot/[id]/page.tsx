@@ -1,15 +1,17 @@
 import { FarmExperience } from "@/components/farm/FarmExperience";
 import { offerings } from "@/config/shop";
-import { loadFarm } from "@/farm/loadFarm";
+import { notFound } from "next/navigation";
+import { loadFarm, placePlots, findSpot } from "@/farm/loadFarm";
 import type { Metadata } from "next";
 
 type Params = { id: string };
 
 function titleFor(id: string, farm: Awaited<ReturnType<typeof loadFarm>>) {
-  const plot = farm.plots.find((entry) => entry.id === id);
-  const item = farm.items.find((entry) => entry.id === (plot?.itemId ?? id));
-  const offering = offerings.find((entry) => entry.id === id);
-  return item?.name || offering?.title || "A spot on the farm";
+  return (
+    findSpot(placePlots(farm), id)?.item.name ??
+    offerings.find((entry) => entry.id === id)?.title ??
+    "A spot on the farm"
+  );
 }
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
@@ -36,5 +38,6 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 export default async function SpotPage({ params }: { params: Promise<Params> }) {
   const { id } = await params;
   const farm = await loadFarm();
-  return <FarmExperience farm={farm} initialSpot={decodeURIComponent(id)} />;
+  if (!findSpot(placePlots(farm), id)) notFound();
+  return <FarmExperience farm={farm} initialSpot={id} />;
 }
