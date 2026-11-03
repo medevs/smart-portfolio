@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CapsuleCollider, CuboidCollider, CoefficientCombineRule, useRevoluteJoint, Physics, RigidBody, useRapier, useBeforePhysicsStep, useAfterPhysicsStep } from "@react-three/rapier";
+import { CapsuleCollider, CuboidCollider, CoefficientCombineRule, useSphericalJoint, Physics, RigidBody, useRapier, useBeforePhysicsStep, useAfterPhysicsStep } from "@react-three/rapier";
 import type { RapierRigidBody } from "@react-three/rapier";
 import { ORCHARD_TREES } from "@/farm/game/world";
 import { Visitor } from "./Visitor";
@@ -183,8 +183,10 @@ function Tractor() {
   const trailer = useRef<RapierRigidBody>(null!);
   const [trailerSpawn] = useState<[number,number,number]>(() => walk.trailerInitialized ? [walk.trailerX,walk.trailerY,walk.trailerZ] : [spawn[0]-Math.sin(rotation[1])*2.25,.22,spawn[2]-Math.cos(rotation[1])*2.25]);
   const [trailerRotation] = useState<[number,number,number]>(()=>[0,walk.trailerInitialized?walk.trailerYaw:rotation[1],0]);
-  const joint = useRevoluteJoint(body, trailer, [[0,-.23,-1],[0,0,1.25],[0,1,0],[-1.2,1.2]]);
-  useEffect(() => { joint.current?.setContactsEnabled(false); }, [joint]);
+  // Flat-yard vehicles share a fixed wheel height. A ball hitch supplies only
+  // the anchor constraint; body rotation locks already constrain pitch/roll.
+  const joint = useSphericalJoint(body, trailer, [[0,-.23,-1],[0,0,1.25]]);
+  useEffect(() => { joint.current?.setContactsEnabled(true); }, [joint]);
   useBeforePhysicsStep(() => {
     const rigid = body.current;
     if (!rigid) return;
@@ -225,13 +227,16 @@ function Tractor() {
       position={spawn}
       rotation={rotation}
       enabledRotations={[false, true, false]}
+      enabledTranslations={[true,false,true]}
+      gravityScale={0}
+      additionalSolverIterations={4}
       linearDamping={0.6}
       angularDamping={1.2}
     >
       {/* Tyre grip/braking is resolved above; the hull must not drag like a crate. */}
       <CuboidCollider args={[0.5, 0.4, 0.85]} friction={0} frictionCombineRule={CoefficientCombineRule.Min} />
     </RigidBody>
-    <RigidBody name="farm-trailer-body" ref={trailer} colliders={false} position={trailerSpawn} rotation={trailerRotation} enabledRotations={[false,true,false]} linearDamping={.6} angularDamping={2}>
+    <RigidBody name="farm-trailer-body" ref={trailer} colliders={false} position={trailerSpawn} rotation={trailerRotation} enabledRotations={[false,true,false]} enabledTranslations={[true,false,true]} gravityScale={0} additionalSolverIterations={4} linearDamping={.6} angularDamping={2}>
       <CuboidCollider args={[.56,.2,.78]} position={[0,.4,0]} friction={0} frictionCombineRule={CoefficientCombineRule.Min} density={.15}/>
       {[-1,1].map(side=><CuboidCollider key={side} args={[.075,.22,.24]} position={[side*.62,0,-.2]} friction={0} frictionCombineRule={CoefficientCombineRule.Min} density={.15}/>)}
     </RigidBody>

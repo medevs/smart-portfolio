@@ -4,7 +4,6 @@ import { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef 
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
-import { MakerHead } from "./MakerAvatar";
 import { ORCHARD_TREES } from "@/farm/game/world";
 import { YARD_WALLS } from "./yard-boundaries";
 import { appleGeometry, cedarGeometry, landNoise } from "./natural-geometry";
@@ -192,21 +191,18 @@ function AtlasRidge() {
   return <mesh geometry={geometry} position={[0, -1, -66]}><meshStandardMaterial vertexColors roughness={1} /></mesh>;
 }
 
-function MakerAtWork() {
-  return <group position={[0, 0, .3]}>
+function MakerWorkbench() {
+  return <group name="makers-workbench" position={[0, 0, .3]}>
     <Block position={[0, .85, 0]} size={[1.65, .1, .65]} color="#725c42" />
     {[-.65, .65].map(x => <Block key={x} position={[x, .4, 0]} size={[.07, .8, .07]} color="#38423d" />)}
     <Block position={[0, 1.17, -.16]} size={[.55, .37, .04]} color="#293f45" />
-    <mesh position={[0, 1.05, .55]} castShadow><capsuleGeometry args={[.18, .38, 4, 8]} /><meshStandardMaterial color="#998886" /></mesh>
-    <group position={[0,.08,.55]} rotation={[0,Math.PI,0]}><MakerHead /></group>
     <Block position={[0, .65, .65]} size={[.45, .1, .45]} color="#584635" />
   </group>;
 }
 
 function FutureSpaces({ night }: { night: boolean }) {
   return <group>
-    {/* The maker uses the existing portrait with the owner’s explicit permission. */}
-    <group position={[-11, 0, .3]}><MakerAtWork /></group>
+    <group position={[-11, 0, .3]}><MakerWorkbench /></group>
     <group position={[-3, 0, 19]}>
       <Block position={[0, .1, 0]} size={[9, .2, 6]} stone color="#b9ab8d" />
       {[-4, 4].flatMap(x => [-2.5, 2.5].map(z => <Block key={`${x}:${z}`} position={[x, 1.6, z]} size={[.16, 3, .16]} color="#796146" />))}

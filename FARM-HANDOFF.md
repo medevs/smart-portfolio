@@ -655,3 +655,29 @@ guards, touch takeover and accessible controls. Types/lint and the full suite
 run locally; direct Next build still hits host uv_resident_set_memory ENOENT.
 Require clean Node22 CI and Vercel before promotion. GPU trail appearance, FPS
 and physical touch remain open under #20/#28.
+
+## Trailer bounce and duplicate maker · 2026-11-03
+
+User reports the trailer continually bumping and two copies of the maker.
+Reproduced in the actual Three/Rapier rig: a parking → forward → turn → brake →
+reverse sequence produced a 0.922-unit vertical range and 11.652-unit maximum
+hitch separation. Short earlier articulation tests did not expose this.
+
+Match the existing flat physical yard with fixed vehicle wheel heights and no
+vehicle gravity. Replace the revolute hitch's overlapping pitch/roll constraints
+with a spherical anchor joint; the existing body locks already allow yaw only.
+Keep horizontal collision resolution, enable tractor/trailer mutual contacts
+and add four solver iterations to these bodies. The trailer still articulates,
+loads/unloads and follows the same physical hitch; visuals do not clamp or hide
+physics movement. A levelled revolute trial diverged and was replaced before
+shipping. The final 30/60/120 fps regression, including four seconds of reversing,
+measures zero vertical range and a maximum hitch gap of 0.000681 world units.
+
+Remove the static portrait/body at the studio; keep its workbench, computer and
+seat. A composed actual scene test checks exactly one effectively visible maker
+on foot, then driving, then on foot again (including ancestor visibility).
+
+All 100 tests and TypeScript pass; run final lint and require clean Node22 CI
+and Vercel before merge. Direct local Next build still fails with the host
+uv_resident_set_memory ENOENT. GPU driving appearance and physical touch remain
+open under #20/#28; CPU rig evidence is not a rendered visual acceptance.

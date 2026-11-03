@@ -431,3 +431,26 @@ test('Map walking survives the real pause handoff, visits each apple and grants 
     walk.driving=true;await act(async()=>game.walkTo('gate'));assert.equal(walk.routeRequest,null);assert.match(game.message,/exit the tractor/);
   }finally{await renderer.unmount();reset();for(const key of keys){if(saved[key]===undefined)delete window[key];else window[key]=saved[key];}}
 });
+
+test('trailer stays level through parking, acceleration, turning, braking and reverse at different frame rates',async t=>{
+  for(const fps of [30,60,120]){
+    reset();Object.assign(walk,{tx:30,tz:3,vehicleYaw:0});const renderer=await yard();
+    try{
+      await frames(renderer,fps*2,1/fps);
+      const tractor=renderer.scene.findByProps({name:'farm-tractor-body'}).instance,trailer=renderer.scene.findByProps({name:'farm-trailer-body'}).instance;
+      const heights=[],gaps=[];
+      for(const [seconds,forward,steer] of [[2,0,0],[1.5,1,0],[1,1,.65],[2,0,0],[4,-1,-.4],[2,0,0]]){
+        walk.driving=true;walk.stickY=-forward;walk.stickX=steer;
+        for(let i=0;i<seconds*fps;i++){
+          await frames(renderer,1,1/fps);heights.push(trailer.position.y);
+          const hitch=new THREE.Vector3(0,-.23,-1).applyQuaternion(tractor.quaternion).add(tractor.position);
+          const tongue=new THREE.Vector3(0,0,1.25).applyQuaternion(trailer.quaternion).add(trailer.position);gaps.push(hitch.distanceTo(tongue));
+        }
+      }
+      const heightRange=Math.max(...heights)-Math.min(...heights),gap=Math.max(...gaps);
+      t.diagnostic(`${fps} fps: vertical range ${heightRange}, maximum hitch gap ${gap}`);
+      assert.ok(heightRange<.008,`trailer vertical range ${heightRange}; hitch gap ${gap}; min/max height ${Math.min(...heights)}/${Math.max(...heights)}`);
+      assert.ok(gap<.03,`hitch gap ${gap}`);
+    }finally{await renderer.unmount();reset();}
+  }
+});
