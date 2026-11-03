@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   CapsuleCollider,
+  CylinderCollider,
   CuboidCollider,
   CoefficientCombineRule,
   useSphericalJoint,
@@ -13,9 +14,14 @@ import {
   useAfterPhysicsStep,
 } from "@react-three/rapier";
 import type { RapierRigidBody } from "@react-three/rapier";
-import { ORCHARD_TREES } from "@/farm/game/world";
 import { Visitor } from "./Visitor";
-import { GROUND_HALF, YARD_WALLS, YARD_BUILDINGS, safeSpawn } from "@/farm/game/collision";
+import {
+  GROUND_HALF,
+  YARD_WALLS,
+  YARD_SOLIDS,
+  YARD_CIRCLES,
+  safeSpawn,
+} from "@/farm/game/collision";
 import {
   resetWalkInput,
   TRACTOR,
@@ -94,7 +100,7 @@ export function PhysicsYard({ paused = false }: { paused?: boolean }) {
       <RigidBody type="fixed" colliders={false} position={[0, -0.3, 0]}>
         <CuboidCollider args={[GROUND_HALF, 0.3, GROUND_HALF]} />
       </RigidBody>
-      {[...YARD_BUILDINGS, ...YARD_WALLS].map((block) => (
+      {[...YARD_SOLIDS, ...YARD_WALLS].map((block) => (
         <RigidBody
           key={block.position.join(",")}
           type="fixed"
@@ -104,19 +110,16 @@ export function PhysicsYard({ paused = false }: { paused?: boolean }) {
           <CuboidCollider args={block.args} />
         </RigidBody>
       ))}
-      {ORCHARD_TREES.map((tree) => (
+      {YARD_CIRCLES.map((tree) => (
         <RigidBody
           key={`tree-${tree.x}-${tree.z}`}
           type="fixed"
           colliders={false}
-          position={[tree.x, 0.9, tree.z]}
+          position={[tree.x, tree.height / 2, tree.z]}
         >
-          <CapsuleCollider args={[0.7, 0.12]} />
+          <CylinderCollider args={[tree.height / 2, tree.radius]} />
         </RigidBody>
       ))}
-      <RigidBody type="fixed" colliders={false} position={[-12.5, 0.35, 3.4]}>
-        <CuboidCollider args={[0.78, 0.35, 0.78]} />
-      </RigidBody>
       <Player />
       <Tractor />
     </Physics>

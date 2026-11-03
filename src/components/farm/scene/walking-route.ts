@@ -1,5 +1,5 @@
-import { distance, ORCHARD_TREES, type Point } from "@/farm/game/world";
-import { safeSpawn, YARD_BUILDINGS } from "@/farm/game/collision";
+import { distance, type Point } from "@/farm/game/world";
+import { safeSpawn, YARD_SOLIDS, YARD_CIRCLES } from "@/farm/game/collision";
 
 export type WalkingObstacle = Point & { radius: number };
 const LIMIT = 43,
@@ -132,15 +132,14 @@ export function findWalkingRoute(
   return null;
 }
 
-const trunks = ORCHARD_TREES.map((tree) => ({ ...tree, radius: 0.56 }));
+const trunks = YARD_CIRCLES.map((tree) => ({ ...tree, radius: tree.radius + 0.44 }));
 const rectangles = [
-  ...YARD_BUILDINGS.map((block) => ({
+  ...YARD_SOLIDS.map((block) => ({
     x: block.position[0],
     z: block.position[2],
     rx: block.args[0] + 0.41,
     rz: block.args[2] + 0.41,
   })),
-  { x: -12.5, z: 3.4, rx: 1.19, rz: 1.19 },
 ];
 
 /** Exact segment tests prevent a smoothed route from clipping a building corner. */

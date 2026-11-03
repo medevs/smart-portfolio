@@ -318,7 +318,7 @@ export function GameOverlay({
                 onSelect={setSelected}
               />
             )}
-            {game.panel === "journal" && <JournalPanel game={game} />}
+            {game.panel === "journal" && <JournalPanel game={game} ready={ready} />}
             {game.panel === "notes" && (
               <>
                 <p>
@@ -401,7 +401,8 @@ export function GameOverlay({
                   <dt>W A S D / arrow keys / movement pad</dt>
                   <dd>
                     Walk relative to the view. Shift or Sprint moves faster. Drag the pad gently for
-                    a slow walk.
+                    a slow walk. Go around fences, trunks and solid objects; the pond is not
+                    swimmable. The open gate leads through the central fence.
                   </dd>
                   <dt>E / action button</dt>
                   <dd>Interact with a nearby place. Follow the journal in order.</dd>

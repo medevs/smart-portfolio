@@ -4,6 +4,35 @@
   top: 24px;
   z-index: 8;
 }
+.journal-next {
+  border: 1px solid #8b754952;
+  border-left: 4px solid #9b7944;
+  background: #e9dfc552;
+  padding: 16px;
+  margin: 18px 0;
+}
+.activity-world-label {
+  display: block;
+  white-space: nowrap;
+  background: #f3edddd9;
+  border: 1px solid #a98c58;
+  border-radius: 3px;
+  color: #3c4635;
+  padding: 5px 9px;
+  font:
+    12px/1.4 system-ui,
+    sans-serif;
+  box-shadow: 0 2px 8px #2b251c26;
+}
+.game-tasks li[data-current] {
+  background: #e5dcc45e;
+  outline: 1px solid #9b794455;
+}
+.game-tasks small {
+  display: block;
+  color: #65715e;
+  font-size: 12px;
+}
 .game-toolbar button,
 .game-dialog button,
 .game-context button,

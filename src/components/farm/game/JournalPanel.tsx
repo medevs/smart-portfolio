@@ -1,14 +1,38 @@
 "use client";
-import { ACTIVITIES } from "@/farm/game/progress";
+import { ACTIVITIES, nextActivity } from "@/farm/game/progress";
 import { FIELD_NOTES } from "@/farm/game/discoveries";
 import { destination } from "@/farm/game/world";
 import { pickedApples } from "@/farm/game/journey";
 import type { FarmGame } from "./useFarmGame";
+import { walk } from "../scene/walk-state";
 
-export function JournalPanel({ game }: { game: FarmGame }) {
+export function JournalPanel({ game, ready }: { game: FarmGame; ready: boolean }) {
   const progress = game.profile.progress;
+  const next = nextActivity(progress);
   return (
     <>
+      {next && (
+        <section className="journal-next" aria-label="Next farm activity">
+          <span className="field-kicker">Your next activity</span>
+          <h3>{next.title}</h3>
+          <p>{next.detail} Follow the ground marker, then use E or the action button.</p>
+          <div className="game-buttons">
+            <button disabled={!ready || walk.driving} onClick={() => game.walkTo(next.id)}>
+              Walk to this activity
+            </button>
+            <button disabled={!ready} onClick={() => game.travel(next.id)}>
+              Travel to this activity
+            </button>
+            <button onClick={() => game.setPanel("tutorial")}>Show me how to play</button>
+          </div>
+          {!ready && (
+            <p className="game-muted">Walking and activities need the running 3D world.</p>
+          )}
+          {ready && walk.driving && (
+            <p className="game-muted">Park and exit the tractor to follow a walking route.</p>
+          )}
+        </section>
+      )}
       <div className="game-journey">
         <h3>Orchard to tea table</h3>
         <p>
@@ -40,7 +64,7 @@ export function JournalPanel({ game }: { game: FarmGame }) {
       </p>
       <ol className="game-tasks">
         {ACTIVITIES.map((activity) => (
-          <li key={activity.id}>
+          <li key={activity.id} data-current={next?.id === activity.id || undefined}>
             <span
               aria-label={
                 game.profile.progress.completed.includes(activity.id)
@@ -52,6 +76,13 @@ export function JournalPanel({ game }: { game: FarmGame }) {
             </span>
             <div>
               <strong>{activity.title}</strong>
+              <small>
+                {progress.completed.includes(activity.id)
+                  ? "Completed"
+                  : next?.id === activity.id
+                    ? "Do this next"
+                    : `After: ${next?.title ?? "your visit"}`}
+              </small>
               <p>{activity.detail}</p>
             </div>
             <button onClick={() => game.setWaypoint(activity.id)}>Waypoint</button>

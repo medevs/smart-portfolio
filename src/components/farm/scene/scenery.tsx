@@ -1,8 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
-import { gameClock } from "@/farm/game/clock";
-import { useFrame } from "@react-three/fiber";
+import { useMemo } from "react";
 import { OptionalAsset } from "./OptionalAsset";
 import { groundedModel } from "./prop-geometry";
 import { foothillGeometry } from "./natural-geometry";
@@ -175,28 +173,26 @@ export function Well({ waterCollected = false }: { waterCollected?: boolean }) {
   );
 }
 
+/** The central opening stays open; visitors and the tractor share the same clear passage. */
 function Gate() {
-  const left = useRef<THREE.Group>(null);
-  const right = useRef<THREE.Group>(null);
-  useFrame(() => {
-    const swing = Math.sin(gameClock.seconds * 0.35) * 0.2;
-    if (left.current) left.current.rotation.y = swing;
-    if (right.current) right.current.rotation.y = -swing;
-  });
   return (
-    <group position={[1.2, 0, 8.5]}>
+    <group name="open-farm-gate" position={[0, 0, 7.7]}>
       {[-1, 1].map((side) => (
         <group key={side} position={[side * 0.9, 0, 0]}>
-          <mesh position={[0, 0.7, 0]}>
-            <boxGeometry args={[0.1, 1.4, 0.1]} />
-            <meshStandardMaterial color="#6b5344" />
+          <mesh position={[0, 0.7, 0]} castShadow>
+            <boxGeometry args={[0.12, 1.4, 0.12]} />
+            <Surface name="wood" color="#6b5344" metalness={0} />
           </mesh>
-          <group ref={side < 0 ? left : right}>
-            <mesh position={[side * 0.42, 0.7, 0]}>
-              <boxGeometry args={[0.78, 1.05, 0.06]} />
-              <meshStandardMaterial color="#e4d2b0" roughness={0.7} />
+          <mesh position={[0, 0.7, -0.45]} castShadow>
+            <boxGeometry args={[0.06, 1.05, 0.78]} />
+            <Surface name="wood" color="#c2b391" metalness={0} />
+          </mesh>
+          {[0.4, 1].map((y) => (
+            <mesh key={y} position={[side * 0.045, y, -0.45]}>
+              <boxGeometry args={[0.025, 0.06, 0.6]} />
+              <meshStandardMaterial color="#626554" metalness={0.4} roughness={0.8} />
             </mesh>
-          </group>
+          ))}
         </group>
       ))}
     </group>

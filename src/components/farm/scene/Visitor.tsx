@@ -3,7 +3,7 @@ import { useContext, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { JourneyProgress } from "./journey-state";
-import { AppleBasket } from "./FarmObjects";
+import { AppleBasket, WateringCan } from "./FarmObjects";
 import { MakerHead } from "./MakerAvatar";
 import { walk, WALK_SPEED } from "./walk-state";
 import { gameClock } from "@/farm/game/clock";
@@ -12,6 +12,7 @@ import { gameClock } from "@/farm/game/clock";
 export function Visitor() {
   const progress = useContext(JourneyProgress);
   const carrying = progress.apples > 0 && progress.basket !== "trailer";
+  const carryingWater = progress.water > 0 && !progress.completed.includes("garden");
   const root = useRef<THREE.Group>(null);
   const leftArm = useRef<THREE.Group>(null),
     rightArm = useRef<THREE.Group>(null);
@@ -37,7 +38,7 @@ export function Visitor() {
     for (const [part, target] of [
       [leftLeg, stride],
       [rightLeg, -stride],
-      [leftArm, carrying ? -1.05 : -stride * 0.7],
+      [leftArm, carrying ? -1.05 : carryingWater ? -0.2 : -stride * 0.7],
       [rightArm, carrying ? -1.05 : stride * 0.7],
     ] as const) {
       if (part.current)
@@ -53,6 +54,7 @@ export function Visitor() {
     length: number,
     color: string,
     knee?: React.RefObject<THREE.Group | null>,
+    heldCan = false,
   ) => (
     <group ref={ref} position={[x, y, 0]}>
       <mesh position={[0, -length * 0.25, 0]} castShadow>
@@ -75,6 +77,11 @@ export function Visitor() {
             <meshStandardMaterial color="#aa8970" roughness={1} />
           </mesh>
         )}
+        {heldCan && (
+          <group name="carried-watering-can" position={[0, -length * 0.5 - 0.22, 0.02]}>
+            <WateringCan />
+          </group>
+        )}
       </group>
     </group>
   );
@@ -90,7 +97,7 @@ export function Visitor() {
           <AppleBasket count={progress.apples} />
         </group>
       )}
-      {limb(leftArm, -0.24, 1.13, 0.45, "#998886")}
+      {limb(leftArm, -0.24, 1.13, 0.45, "#998886", undefined, carryingWater)}
       {limb(rightArm, 0.24, 1.13, 0.45, "#998886")}
       {limb(leftLeg, -0.1, 0.7, 0.62, "#414847", leftKnee)}
       {limb(rightLeg, 0.1, 0.7, 0.62, "#414847", rightKnee)}

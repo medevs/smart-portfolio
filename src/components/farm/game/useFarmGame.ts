@@ -14,15 +14,9 @@ import { freshPractice, practiceStep } from "@/farm/game/tutorial";
 import { guideMarker } from "../scene/guide-state";
 import { cameraView } from "../scene/camera-view";
 import { zoomCamera } from "../scene/camera-view";
-import {
-  canTransferBasket,
-  nearbyApple,
-  transferBasket,
-  harvestApple,
-  HARVEST_APPLES,
-  pickedApples,
-} from "@/farm/game/journey";
+import { canTransferBasket, nearbyApple, transferBasket, harvestApple } from "@/farm/game/journey";
 import { interact, nextActivity } from "@/farm/game/progress";
+import { activityTarget } from "@/farm/game/activity-target";
 import { destination, nearestPlace, SPAWN, type DestinationId } from "@/farm/game/world";
 import { safeSpawn } from "@/farm/game/collision";
 import { resetWalkInput, walk, cancelWalkRoute } from "../scene/walk-state";
@@ -197,7 +191,10 @@ export function useFarmGame({
           ? transferBasket(progress, point, context, true)
           : null;
     if (journey) {
-      if (journey.changed) setProfile((value) => ({ ...value, progress: journey.progress }));
+      if (journey.changed) {
+        setProfile((value) => ({ ...value, progress: journey.progress }));
+        setWaypoint(nextActivity(journey.progress)?.id ?? null);
+      }
       setMessage(journey.message);
       return;
     }
@@ -210,7 +207,10 @@ export function useFarmGame({
     }
     const result = interact(progress, place.id, point, true);
     setMessage(result.message);
-    if (result.changed) setProfile((value) => ({ ...value, progress: result.progress }));
+    if (result.changed) {
+      setProfile((value) => ({ ...value, progress: result.progress }));
+      setWaypoint(nextActivity(result.progress)?.id ?? null);
+    }
     if (Math.hypot(point.x - place.x, point.z - place.z) <= 3.2 && "product" in place)
       onProduct(place.product);
   }, [ready, exploring, paused, onProduct]);
@@ -272,22 +272,11 @@ export function useFarmGame({
       return;
     }
     const progress = current.current.progress;
-    const apple =
-      id === "orchard" && nextActivity(progress)?.id === "orchard"
-        ? HARVEST_APPLES.find((_, i) => !pickedApples(progress).includes(i))
-        : null;
-    const loading =
-      id === "table" && progress.basket === "trailer" ? deliveryContext().loading : null;
-    const point = apple ?? loading ?? place;
-    const label = apple
-      ? `Apple ${progress.apples + 1} of 3`
-      : loading
-        ? "Your basket at the trailer"
-        : place.name;
+    const point = activityTarget(progress, id, deliveryContext());
     cancelWalkRoute();
     resetWalkInput();
     walk.travel = null;
-    walk.routeRequest = { x: point.x, z: point.z, label };
+    walk.routeRequest = point;
     onExplore();
     close();
     setWaypoint(id);

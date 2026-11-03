@@ -299,6 +299,7 @@ function PlacedModel({
     wind,
     cols: entry.plot.cols,
     rows: entry.plot.rows,
+    opening: entry.plot.id === "fence-1" ? 1.8 : 0,
   };
   return (
     <group
