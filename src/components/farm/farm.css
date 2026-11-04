@@ -1126,20 +1126,59 @@ table.ledger td {
 
 .farm-fallback {
   position: absolute;
-  inset: 0;
+  left: 50%;
+  bottom: 12px;
   z-index: 6;
+  transform: translateX(-50%);
+  box-sizing: border-box;
+  width: min(560px, calc(100% - 24px));
+  max-height: calc(100% - 24px);
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 20px;
-  padding: 24px;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
   background: #252c26;
   color: #f4eada;
   text-align: center;
 }
+.farm-fallback-image {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  border-radius: 8px;
+}
+.farm-fallback h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+.farm-fallback p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+.farm-fallback-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 20px;
+}
 .farm-fallback a {
   text-decoration: underline;
+  color: inherit;
+}
+.farm-fallback a:focus-visible {
+  outline: 3px solid #ffd479;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.farm-fallback-primary {
+  font-weight: 700;
+}
+:root[data-farm-night="1"] .farm-fallback {
+  background: #161b18;
 }
 
 /* The landscape is useful from the first paint, without requiring a GPU. */
