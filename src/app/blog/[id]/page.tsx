@@ -3,6 +3,7 @@ import MarkdownContent from "@/components/MarkdownContent";
 import TableOfContents from "@/components/TableOfContents";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
+import { buildBlogPostMetadata, buildBlogPostingJsonLd } from "@/seo/blogPost";
 import { getSortedPostsData, getPostData, getAllPostIds } from "../../../../utils/markdown";
 import Link from "next/link";
 import { ArrowLeft, Calendar, Clock, Tag, User, Terminal } from "lucide-react";
@@ -19,17 +20,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const postData = await getPostData(id);
-
-  if (!postData) {
-    return {
-      title: "Post Not Found",
-    };
-  }
-  return {
-    title: postData.title,
-    description: postData.description,
-  };
+  return buildBlogPostMetadata(await getPostData(id));
 }
 
 async function getRelatedPosts(currentPostId: string, category: string) {
@@ -51,6 +42,10 @@ export default async function BlogPost({ params }: { params: Promise<{ id: strin
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 pb-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: buildBlogPostingJsonLd(postData) }}
+      />
       {/* Back link */}
       <Link
         href="/"
