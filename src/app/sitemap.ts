@@ -1,8 +1,9 @@
 import { MetadataRoute } from "next";
+import { seoConfig } from "@/config/seo";
 import { getSortedPostsData } from "../../utils/markdown";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://medevsmaker.vercel.app";
+  const baseUrl = seoConfig.siteUrl;
 
   // Get all blog posts
   const posts = await getSortedPostsData();
