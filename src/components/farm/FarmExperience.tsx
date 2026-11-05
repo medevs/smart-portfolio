@@ -6,6 +6,7 @@ import { Component, useCallback, useEffect, useMemo, useState, type ReactNode } 
 import { formatMoney } from "@/config/shop";
 import { findSpot, fundRaised, placePlots } from "@/farm/loadFarm";
 import type { FarmData } from "@/farm/types";
+import { FarmFallback } from "./FarmFallback";
 import { FarmPanorama } from "./FarmPanorama";
 import { ShopDialog, SpotCard } from "./SpotCard";
 import type { LightMode } from "./scene/scene-types";
@@ -32,13 +33,7 @@ class FarmBoundary extends Component<
     this.props.onError();
   }
   render() {
-    if (this.state.failed)
-      return (
-        <div className="farm-fallback">
-          <p>The farm couldn’t load on this device.</p>
-          <a href="/list">Explore all places in list view →</a>
-        </div>
-      );
+    if (this.state.failed) return <FarmFallback />;
     return this.props.children;
   }
 }
@@ -187,13 +182,16 @@ export function FarmExperience({
       {sceneRequested && phase === "intro" && <div className="intro-bar" aria-hidden="true" />}
       <div className="farm-stage" onPointerDown={() => setHint(false)}>
         {sceneFailed && (
-          <FarmPanorama
-            onSelect={setActiveId}
-            onTour={() => game.tourStep(0)}
-            onExplore={openScene}
-            loading={sceneRequested && !sceneFailed}
-            unavailable={sceneFailed}
-          />
+          <>
+            <FarmPanorama
+              onSelect={setActiveId}
+              onTour={() => game.tourStep(0)}
+              onExplore={openScene}
+              loading={sceneRequested && !sceneFailed}
+              unavailable={sceneFailed}
+            />
+            <FarmFallback />
+          </>
         )}
         {sceneRequested && !sceneFailed && (
           <div className={`farm-canvas-wrap${ready ? " is-ready" : ""}`}>
