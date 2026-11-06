@@ -4,6 +4,7 @@ import "./gather.css";
 
 export const metadata = {
   title: "A place to gather",
+  alternates: { canonical: "/gather" },
   description:
     "The future vision for medevsmaker’s Middle Atlas farm: a home for making, meeting and welcoming curious visitors.",
 };

@@ -2,7 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import references from "@/data/morocco-references.json";
 
-export const metadata = { title: "Middle Atlas reference photographs" };
+export const metadata = {
+  title: "Middle Atlas reference photographs",
+  alternates: { canonical: "/references" },
+};
 
 export default function ReferencesPage() {
   return (
