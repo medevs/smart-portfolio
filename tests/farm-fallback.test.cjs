@@ -41,7 +41,15 @@ test('boundary, scene failure and WebGL context failure all reach the fallback',
   assert.match(experience, /if \(this\.state\.failed\)\s*return <FarmFallback \/>/);
   // Every scene failure funnels into failScene, which switches to the failed view that renders it.
   assert.match(experience, /onFailure=\{failScene\}/);
-  assert.match(experience, /\{sceneFailed && \([\s\S]*?<FarmFallback \/>/);
+  assert.match(experience, /\{sceneFailed && \([\s\S]*?<FarmPanorama/);
+  // The panorama already carries the list and contact links, so the card is not stacked over it.
+  assert.doesNotMatch(
+    experience,
+    /\{sceneFailed && \([\s\S]*?<FarmFallback \/>[\s\S]*?\)\}\s*\{sceneRequested/,
+  );
+  const panorama = fs.readFileSync('src/components/farm/FarmPanorama.tsx', 'utf8');
+  assert.match(panorama, /href="\/list"/);
+  assert.match(panorama, /href="\/impressum"/);
   // A missing WebGL context calls onFailure, as does the scene error boundary.
   assert.match(root, /farmContext\([\s\S]*?current\.current\.onFailure\(\)/);
   assert.match(root, /this\.props\.onFailure\(\)/);

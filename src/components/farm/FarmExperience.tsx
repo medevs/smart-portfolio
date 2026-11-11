@@ -182,16 +182,13 @@ export function FarmExperience({
       {sceneRequested && phase === "intro" && <div className="intro-bar" aria-hidden="true" />}
       <div className="farm-stage" onPointerDown={() => setHint(false)}>
         {sceneFailed && (
-          <>
-            <FarmPanorama
-              onSelect={setActiveId}
-              onTour={() => game.tourStep(0)}
-              onExplore={openScene}
-              loading={sceneRequested && !sceneFailed}
-              unavailable={sceneFailed}
-            />
-            <FarmFallback />
-          </>
+          <FarmPanorama
+            onSelect={setActiveId}
+            onTour={() => game.tourStep(0)}
+            onExplore={openScene}
+            loading={sceneRequested && !sceneFailed}
+            unavailable={sceneFailed}
+          />
         )}
         {sceneRequested && !sceneFailed && (
           <div className={`farm-canvas-wrap${ready ? " is-ready" : ""}`}>

@@ -127,9 +127,15 @@ export function FarmPanorama({ onSelect, onTour, onExplore, loading, unavailable
           </button>
         </div>
         <p className="atlas-support" role="status">
-          {unavailable
-            ? "The 3D world couldn’t start here. Retry it, or explore every project below."
-            : "Choose a place in the landscape to discover what’s inside."}
+          {unavailable ? (
+            <>
+              The 3D world couldn’t start here. Retry it, or explore every project below.{" "}
+              <Link href="/list">See everything in list view</Link> ·{" "}
+              <Link href="/impressum">Contact the maker</Link>
+            </>
+          ) : (
+            "Choose a place in the landscape to discover what’s inside."
+          )}
         </p>
       </div>
       <div className="atlas-mobile-places" aria-label="Explore projects">
