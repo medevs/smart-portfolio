@@ -18,8 +18,12 @@ export function createDialogFocusReturn(getOpener: () => HTMLElement | null) {
 }
 
 export function useDialogFocusReturn() {
-  return useMemo(() => createDialogFocusReturn(() => {
-    const active = document.activeElement;
-    return active instanceof HTMLElement && active !== document.body ? active : null;
-  }), []);
+  return useMemo(
+    () =>
+      createDialogFocusReturn(() => {
+        const active = document.activeElement;
+        return active instanceof HTMLElement && active !== document.body ? active : null;
+      }),
+    [],
+  );
 }

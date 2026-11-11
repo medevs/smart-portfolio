@@ -113,7 +113,7 @@ const config: Config = {
             transform: "translateY(0px)",
           },
         },
-        "shimmer": {
+        shimmer: {
           "0%": {
             backgroundPosition: "-200% 0",
           },
@@ -193,7 +193,7 @@ const config: Config = {
             opacity: "1",
           },
         },
-        "float": {
+        float: {
           "0%, 100%": {
             transform: "translateY(0)",
           },
@@ -236,11 +236,11 @@ const config: Config = {
         "pulse-glow": "pulse-glow 2s ease-in-out infinite",
         "slide-up": "slide-up 0.5s ease-out forwards",
         "fade-in": "fade-in 0.3s ease-out forwards",
-        "float": "float 6s ease-in-out infinite",
+        float: "float 6s ease-in-out infinite",
         "glow-pulse": "glow-pulse 2s ease-in-out infinite",
         "gradient-x": "gradient-x 3s ease infinite",
         "slide-up-fade": "slide-up-fade 0.4s ease-out",
-        "shimmer": "shimmer 2s linear infinite",
+        shimmer: "shimmer 2s linear infinite",
         "scale-in": "scale-in 0.3s ease-out forwards",
         "spin-slow": "spin-slow 20s linear infinite",
       },
@@ -251,14 +251,14 @@ const config: Config = {
           "0 0 15px hsl(var(--terminal-green) / 0.4), 0 0 30px hsl(var(--terminal-green) / 0.3), 0 0 45px hsl(var(--terminal-green) / 0.2)",
         "cyan-glow":
           "0 0 10px hsl(var(--terminal-cyan) / 0.3), 0 0 20px hsl(var(--terminal-cyan) / 0.2)",
-        "glass": "0 8px 32px rgba(0,0,0,0.3)",
+        glass: "0 8px 32px rgba(0,0,0,0.3)",
         "glass-hover": "0 8px 32px rgba(0,255,136,0.1)",
         "chat-panel": "0 25px 50px -12px rgba(0,0,0,0.5)",
         "chat-button": "0 0 30px rgba(0,255,136,0.4)",
         "chat-button-hover": "0 0 40px rgba(0,255,136,0.6)",
       },
       backdropBlur: {
-        "xl": "20px",
+        xl: "20px",
         "2xl": "40px",
       },
     },

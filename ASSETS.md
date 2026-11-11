@@ -67,3 +67,53 @@ homestead; earth plaster, irregular limestone, flat roofs, timber lintels, apple
 orchard, narrow irrigation channel, stone well, sheep, donkey and old tractor;
 muted regional foothills and broad ridges; late afternoon; no western barns,
 silos, windmills, fantasy palaces, UI or embedded text.
+
+## Natural-form pass · 2026-11-02
+
+Cedar branches/needle sprays, branched orchard trees with folded leaves, mineral
+plaster shading, staggered limestone courses and outer foothill geometry are
+original deterministic Three.js code. They use the existing CC0 surface maps;
+no new external asset service, generated raster asset or paid model was used.
+Regional references remain the credited photographs above. These are artistic
+models, not surveyed structures, botanical scans or photogrammetry.
+
+Workflow reference reviewed: https://github.com/elvarofficial/teardown
+(README, SKILL.md and MIT license). Useful ideas: reference-first shape review,
+shared state for moving parts/readouts, bounded quality and inspection of actual
+renders. No Teardown code/kit or skill installation was copied into this repo.
+The farm continues using its existing R3F/Rapier runtime. The well's visible
+bucket position reads collected-water progress; it is not a hydraulic simulation.
+
+## Complete catalogue pass · 2026-11-02
+
+Original code models now cover all 31 stable catalogue keys: farmhouse/barn,
+granary/silo/windmill aliases, workshop, cedar and blossom, water tower, coop,
+pond, wheat/crops, scarecrow, seven animal entries, tractor, mailbox, produce
+stall, signs, fences, hay and hoop greenhouse. Shared CC0 surface maps remain
+credited above; no additional model downloads, paid services or dependencies.
+Existing scanned scenery and the owner's portrait remain in use.
+
+Animals have species-specific proportions, coat geometry, articulated head/legs,
+fleece and deterministic grazing/walking/rest cycles. Tractor tyre rotation reads
+actual signed travel with separate radii; steering and seated driver read gameplay.
+Wetter beds follow watering progress. Wind, ripples, birds and bees read the shared
+pause/reduced-motion clock. These are artistic behaviour models, not livestock,
+weather, mechanical or agricultural forecasts. Static structural details describe
+construction; ladders, valves, greenhouse doors and coop nesting boxes are not new
+interactive activities. Original footprint IDs and game rules are retained.
+
+### Orchard delivery additions · 2026-11-02
+
+The pickable low branches/apples, quantity-matched basket use, articulated wooden
+trailer, table runner/plates and tea steam are original procedural Three geometry.
+They reuse the existing local wood surface and maker portrait; no external asset
+or license dependency was added. Dog approach is deterministic procedural motion.
+
+### Scanned interaction props, surface wear and field guide · 2026-11-02
+
+The existing CC0 `wicker_basket_01.glb` and `watering_can_metal_01.glb` now provide
+optional detailed interaction props with procedural fallbacks. Original asset
+files/embedded material maps and their credits above remain unchanged. Dimpled
+apple geometry, paint wear/roughness data, chevron tyre geometry and seven SVG
+instruction diagrams are original code. No model, image, font or service was
+newly downloaded. The diagrams are instructional drawings, not farm screenshots.

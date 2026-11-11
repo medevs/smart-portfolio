@@ -1,193 +1,133 @@
-# Smart Portfolio with AI Integration
+# medevsmaker — a farm you can wander
 
-A modern, terminal-inspired portfolio website built with Next.js 15, featuring an AI-powered chatbot with RAG (Retrieval-Augmented Generation) capabilities and a responsive bento grid layout.
+A playable Middle Atlas farm and maker portfolio. Built with Next.js 16, React 19,
+TypeScript, Three.js / React Three Fiber, Rapier, Tailwind CSS and Radix Dialog.
 
-## Key Features
+## Run and check
 
-- **AI-powered Chatbot**: Interactive portfolio exploration using LangChain and OpenAI, with vector search capabilities through Supabase pgvector for context-aware responses
-- **Bento Grid Layout**: Modern, responsive grid design that adapts seamlessly between desktop and mobile views
-- **Terminal Aesthetic**: Developer-focused design with terminal-inspired UI elements, typing animations, and command-style interactions
-- **Global Theming**: Centralized CSS variable system with full dark/light mode support across all components
-- **Blog System**: Markdown-based blog with reading time estimation, syntax highlighting, and table of contents
-- **Configurable Content**: All portfolio data (projects, skills, experience, education) managed through TypeScript config files
+Use **Node.js 22** and npm. The legacy peer flag is required by the current
+Three/LangChain/lint dependency graph; use the same installation path as CI.
 
-## Tech Stack
-
-- **Framework**: Next.js 15 with App Router
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS with CSS variables for theming
-- **Animations**: Framer Motion
-- **Database**: Supabase with pgvector for vector embeddings
-- **AI/ML**:
-  - LangChain for RAG-based chat functionality
-  - OpenAI for embeddings and completions
-  - Vercel AI SDK for streaming responses
-- **UI Components**:
-  - Radix UI primitives (Dialog, Label, Slot)
-  - Lucide React icons
-  - Custom terminal-style components
-- **Content**:
-  - React Markdown with GFM support
-  - Gray Matter for frontmatter parsing
-  - React Syntax Highlighter for code blocks
-
-## Portfolio Sections
-
-1. **Hero**: Personal introduction with animated role typing, availability status, and social links
-2. **Products/Projects**: Showcase of featured projects with images, tech stack, and status badges
-3. **Skills**: Categorized skill display with progress indicators (Frontend, Backend, Database, AI/ML)
-4. **AI Capabilities**: Highlights of AI/ML expertise and interests
-5. **Experience**: Professional timeline with role details and technologies
-6. **Blog**: Latest blog posts with category filtering
-7. **CTA**: Contact section with email and LinkedIn links
-8. **AI Chat Widget**: Floating chatbot for interactive portfolio exploration
-
-## Prerequisites
-
-- Node.js 18.17 or later
-- npm or yarn package manager
-- Git
-- [Supabase](https://supabase.com) account (free tier works)
-- [OpenAI](https://platform.openai.com) API key
-
-## Quick Start
-
-1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/medevs/smart-portfolio.git
-   cd smart-portfolio
-   ```
-
-2. **Install Dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Set Up Environment Variables**
-   ```bash
-   cp .env.example .env.local
-   ```
-
-   Then edit `.env.local` with your credentials:
-
-   | Variable | Description | Where to Get |
-   |----------|-------------|--------------|
-   | `SUPABASE_URL` | Your Supabase project URL | [Supabase Dashboard](https://supabase.com/dashboard) → Settings → API |
-   | `SUPABASE_ANON_KEY` | Public anonymous key | [Supabase Dashboard](https://supabase.com/dashboard) → Settings → API |
-   | `OPENAI_API_KEY` | OpenAI API key | [OpenAI Platform](https://platform.openai.com/api-keys) |
-
-4. **Set Up Supabase Database**
-
-   **Option A: Using Supabase Dashboard (Recommended for beginners)**
-
-   1. Create a new project at [supabase.com](https://supabase.com)
-   2. Go to the SQL Editor in your project dashboard
-   3. Run each migration file in order from `supabase/migrations/`:
-      - `20240101000000_enable_pgvector.sql`
-      - `20240101000001_create_documents_table.sql`
-      - `20240101000002_create_match_function.sql`
-
-   **Option B: Using Supabase CLI**
-
-   ```bash
-   # Install Supabase CLI if you haven't
-   npm install -g supabase
-
-   # Link to your remote project
-   supabase link --project-ref your-project-ref
-
-   # Push migrations
-   supabase db push
-   ```
-
-5. **Generate Embeddings**
-   ```bash
-   npm run generate
-   ```
-   This clears and rebuilds document embeddings for the AI chat. Run it intentionally against the intended database; it is not part of site builds.
-
-6. **Start Development Server**
-   ```bash
-   npm run dev
-   ```
-   Open [http://localhost:3000](http://localhost:3000) to view the site.
-
-## Configuration
-
-All portfolio content is managed through TypeScript config files in `src/config/`:
-
-- `personal.ts` - Name, email, location, availability status
-- `projects.ts` - Featured projects with descriptions and tech stack
-- `experience.ts` - Work history and timeline
-- `education.ts` - Educational background
-- `skills.ts` - Skill categories and proficiency levels
-- `social.ts` - Social media links
-- `ai.ts` - AI capabilities display
-- `seo.ts` - SEO metadata
-
-## Database Schema
-
-The project uses Supabase with pgvector for AI-powered semantic search:
-
-- **`documents` table**: Stores content chunks with vector embeddings
-- **`match_documents` function**: Performs cosine similarity search for RAG
-
-Migration files are located in `supabase/migrations/` for version control.
-
-## Environment Variables Reference
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `SUPABASE_URL` | Yes | Your Supabase project URL |
-| `SUPABASE_ANON_KEY` | Yes | Supabase anonymous (public) key |
-| `OPENAI_API_KEY` | Yes | OpenAI API key for embeddings & chat |
-| `SUPABASE_SERVICE_ROLE_KEY` | No | Only for local CLI migrations |
-
-> **Note**: These are server-side variables. Do NOT prefix with `NEXT_PUBLIC_` as they contain sensitive keys.
-
-## Build for Production
-
-```bash
-npm run build
-npm run start
+```sh
+npm ci --legacy-peer-deps --no-audit
+npm run dev
 ```
 
-## Available Scripts
+The farm, catalog, journal, blog and reference pages work without API keys.
+Browsers without WebGL get the accessible landscape and project links.
 
-- `npm run dev` - Start development server
-- `npm run build` - Build the website for production (no embeddings writes)
-- `npm run generate` - Generate vector embeddings for RAG
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-
-## Project Structure
-
-```
-src/
-├── app/                    # Next.js App Router pages
-│   ├── api/chat/          # AI chat API endpoint
-│   ├── blog/              # Blog pages
-│   └── page.tsx           # Home page with bento grid
-├── components/
-│   ├── chat/              # AI chatbot components
-│   ├── sections/          # Page sections (Hero, Skills, etc.)
-│   ├── terminal/          # Terminal-style UI components
-│   └── ui/                # Reusable UI primitives
-├── config/                # Portfolio configuration files
-└── lib/                   # Utility functions
+```sh
+npm run check             # strict types, lint, formatting, then all tests
+npm run build             # production build; never writes the knowledge index
+npm run format            # shared formatting for source, tests and configuration
+npm run audit:production  # current production dependency advisories
 ```
 
-## License
+CI runs the checks and production build on Node 22. Vercel installs once from the
+lockfile and runs the build separately. Never put `npm run generate` in an
+installation or deployment command.
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## Structure
 
+| Location | Responsibility |
+| --- | --- |
+| `src/app/` | App Router pages, metadata, legal pages and the two API endpoints |
+| `src/farm/` | Farm catalog, placements, sponsor lookup and data validation |
+| `src/farm/game/` | Pure progress, inventory, save validation, routes, collision footprints and clock rules |
+| `src/components/farm/game/` | HUD, map/journal/settings panels, tutorials, audio and React coordination |
+| `src/components/farm/scene/` | 3D presentation, physics integration and camera ownership |
+| `src/lib/` | Bounded chat parsing/streaming, headings, indexing orchestration and adapters |
+| `utils/markdown.ts` | Validated local blog loading and App Router static parameters |
+| `src/config/` | Portfolio content, planned sponsorship prices and site metadata |
+| `posts/` | Markdown journal articles |
+| `public/farm/` | Local textures, models and their license/source documentation |
+| `tests/` | Node tests, actual Three/Rapier integration and shader compilation |
 
-## Build and knowledge indexing
+`FarmExperience` owns the page and recovery state. `FarmCanvas` composes the
+scene; terrain, lighting and effects live in their own modules. `GameOverlay`
+coordinates dialogs and delegates map, journal and settings content. The HUD
+samples visitor state at 5 Hz; physics and animation update Three objects
+without per-frame React state.
 
-`npm run build` and Vercel's `npm run vercel-build` compile the website only.
-They do not regenerate embeddings or require database-writing credentials.
+## Extend the farm
 
-`npm run generate` is a separate, explicit knowledge-indexing operation. It
-clears and rebuilds the documents in the configured Supabase database and calls
-the embeddings provider. Run it only when intentionally updating that knowledge
-index, against the intended database. Site and design deployments do not run it.
+- Add catalog content in `src/farm/items.ts` and placement in `src/farm/plots.ts`.
+  Register the corresponding 3D model in `scene/models.tsx` when adding a shape.
+- Keep physical footprints in `src/farm/game/collision.ts` aligned with visible
+  buildings and `game/world.ts` destinations. Walking, safe saves, travel and
+  guided routes share these rules.
+- Farming rewards belong in `game/progress.ts` and `game/journey.ts`. Reading a
+  lesson, selecting a marker or arriving along a route must not award inventory.
+- Use the one existing camera owner. Optional assets belong inside
+  `OptionalAsset` and need a useful loading/failure fallback.
+- Preserve pause, hidden-tab, focus-loss and reduced-motion behavior. Both manual
+  movement and guided routes use the Rapier character controller.
+- Tests share `tests/register-ts.cjs`; provider/database tests use in-memory
+  fetch fixtures. Do not replace GPU acceptance with a successful build.
+
+## Blog
+
+Add a `.md` file to `posts/` using an alphanumeric, underscore or hyphen slug.
+Frontmatter supplies title, ISO date, author, tags, category and description.
+Place its cover at `public/images/<slug>.png`. Missing/unsafe slugs return 404;
+heading IDs are generated in server HTML, including unique repeated headings.
+Categories are real links using `?category=` and survive reloads.
+
+## Sponsorship
+
+The catalog and planned prices remain visible. Online requests, reservations
+and payments are **unavailable** until a persistent backend and approval/payment
+workflow exist. `/api/sponsor` returns 503 and never fabricates a queued request.
+The UI links to the existing contact details instead of collecting information
+that would be discarded. A future implementation must verify catalog IDs and
+prices on the server, persist before acknowledging, and reconcile payment state.
+
+## Optional knowledge service
+
+`/api/chat` remains a bounded plain-text API. It is independent of the farm's
+playable controls; the retired floating chat UI is not part of the current app.
+
+Server-only environment variables for this optional service:
+
+| Variable | Purpose |
+| --- | --- |
+| `OPENAI_API_KEY` | Model and embedding provider access |
+| `SUPABASE_URL` | Existing knowledge database URL |
+| `SUPABASE_PUBLISHABLE_KEY` | Read-only knowledge access; legacy `SUPABASE_ANON_KEY` is supported |
+| `SUPABASE_SECRET_KEY` | Indexer only; legacy `SUPABASE_SERVICE_ROLE_KEY` is supported |
+
+Do not place these in public configuration or commit credentials. Database
+migrations are in `supabase/migrations/`; applying them is an explicit operation
+outside normal website builds. The audit prepared
+`20261103000000_knowledge_read_only.sql` to enable RLS and revoke anonymous writes.
+It has **not** been applied to a live database by this audit. Apply it explicitly
+to the intended project; indexing now requires a separate server-only admin key.
+
+```sh
+npm run generate
+```
+
+Run indexing intentionally against the intended database only. It can incur
+provider charges and write data. Source documents are prepared before provider
+work; old IDs are snapshotted, new chunks are written and verified, then only
+those old IDs are removed. A failed new write preserves the previous index.
+Run one indexer at a time. This is not a transactional database swap: a partial
+write or cleanup failure can leave duplicate/staged chunks requiring inspection.
+Failures exit nonzero. No real indexing is part of the test suite.
+
+The chat endpoint bounds request bytes and roles, limits output, sets a provider
+timeout, honors cancellation and supports response backpressure. Deployment-level
+rate limiting and verification of production Supabase RLS/secrets remain separate
+hosting concerns; the repository alone cannot prove their configuration.
+
+## Verification limits and audit
+
+See [APP-AUDIT.md](APP-AUDIT.md) for this review's findings, changes and remaining
+items, and [FARM-HANDOFF.md](FARM-HANDOFF.md) for earlier release evidence.
+
+The available cloud browser cannot render WebGL. CPU scene/physics/shader tests
+and UI recovery checks do not prove rendered GPU appearance, measured frame rate
+or physical touch controls. Issues #20/#28 remain open for that acceptance.
+The current dependency audit has no production findings; 16 moderate findings
+in development lint tooling remain tracked under #25. Do not force npm's
+incompatible downgrade suggestions into the working toolchain.

@@ -4,7 +4,7 @@ import type { FarmItem } from "./types";
  * Catalog of things on the farm.
  * Adding a product: add an item here and a plot in plots.ts.
  * Adding a shop piece: set `sku` or `landmark` (never on reelstyles).
- * A new shape also needs a sprite in sprites.tsx.
+ * Register new shapes in scene/models.tsx and spriteIds.ts.
  */
 export const items: FarmItem[] = [
   {
@@ -17,8 +17,7 @@ export const items: FarmItem[] = [
     interactive: true,
     featured: true,
     forSale: false,
-    pitch:
-      "Style packs for Claude Code that make videos in code with HyperFrames and Remotion.",
+    pitch: "Style packs for Claude Code that make videos in code with HyperFrames and Remotion.",
     demo: "reelstyles",
     cta: { label: "Buy / See styles", href: "https://reelstyles.com" },
     lights: [
@@ -205,7 +204,13 @@ export const items: FarmItem[] = [
     pitch: "Claim one square of the farm grid. Limited to one hundred.",
   },
   { id: "tree", name: "Tree", label: "Tree", sprite: "tree", visual: { w: 110, h: 180 } },
-  { id: "blossom", name: "Blossom", label: "Blossom", sprite: "blossom", visual: { w: 110, h: 180 } },
+  {
+    id: "blossom",
+    name: "Blossom",
+    label: "Blossom",
+    sprite: "blossom",
+    visual: { w: 110, h: 180 },
+  },
   { id: "coop", name: "Coop", label: "Coop", sprite: "coop", visual: { w: 160, h: 150 } },
   { id: "pond", name: "Pond", label: "Pond", sprite: "pond", visual: { w: 200, h: 110 } },
   { id: "wheat", name: "Wheat", label: "Wheat", sprite: "wheat", visual: { w: 200, h: 90 } },
@@ -214,10 +219,28 @@ export const items: FarmItem[] = [
   { id: "hen", name: "Hen", label: "Hen", sprite: "hen", visual: { w: 70, h: 70 } },
   { id: "cow", name: "Cow", label: "Cow", sprite: "cow", visual: { w: 140, h: 110 } },
   { id: "sheep", name: "Sheep", label: "Sheep", sprite: "sheep", visual: { w: 90, h: 70 } },
-  { id: "donkey", name: "Farm donkey", label: "Donkey", sprite: "donkey", visual: { w: 110, h: 100 } },
+  {
+    id: "donkey",
+    name: "Farm donkey",
+    label: "Donkey",
+    sprite: "donkey",
+    visual: { w: 110, h: 100 },
+  },
   { id: "cat", name: "Cat", label: "Cat", sprite: "cat", visual: { w: 80, h: 70 } },
-  { id: "tractor", name: "Tractor", label: "Tractor", sprite: "tractor", visual: { w: 160, h: 110 } },
+  {
+    id: "tractor",
+    name: "Tractor",
+    label: "Tractor",
+    sprite: "tractor",
+    visual: { w: 160, h: 110 },
+  },
   { id: "fence", name: "Fence", label: "Fence", sprite: "fence", visual: { w: 120, h: 50 } },
   { id: "hay", name: "Hay", label: "Hay", sprite: "hay", visual: { w: 80, h: 60 } },
-  { id: "greenhouse", name: "Greenhouse", label: "Greenhouse", sprite: "greenhouse", visual: { w: 130, h: 120 } },
+  {
+    id: "greenhouse",
+    name: "Greenhouse",
+    label: "Greenhouse",
+    sprite: "greenhouse",
+    visual: { w: 130, h: 120 },
+  },
 ];

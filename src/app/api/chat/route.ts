@@ -2,6 +2,9 @@
  * Enhanced RAG-based Chat API with Agent Personality
  * Features: Improved RAG, concise responses, slash commands, personality
  */
+import type { DocumentInterface } from "@langchain/core/documents";
+import { textStream } from "@/lib/text-stream";
+import { readChatMessages } from "@/lib/chat-request";
 import { getVectorStore } from "@/lib/supabase";
 import { ChatOpenAI } from "@langchain/openai";
 import { StringOutputParser } from "@langchain/core/output_parsers";
@@ -15,7 +18,7 @@ const EASTER_EGGS = aiConfig.easterEggs;
 /**
  * Re-rank documents by relevance and importance
  */
-function reRankDocuments(docs: any[], query: string): any[] {
+function reRankDocuments(docs: DocumentInterface[], query: string) {
   const queryLower = query.toLowerCase();
   const queryTerms = queryLower.split(/\s+/);
 
@@ -100,17 +103,11 @@ function generateFollowUp(query: string): string {
     return "Curious about a specific project using these?";
   } else if (queryLower.includes("project")) {
     return "Want to dive deeper into any of these?";
-  } else if (
-    queryLower.includes("experience") ||
-    queryLower.includes("work")
-  ) {
+  } else if (queryLower.includes("experience") || queryLower.includes("work")) {
     return "Interested in specific achievements or tech used?";
   } else if (queryLower.includes("hire") || queryLower.includes("contact")) {
     return "Want to know more about availability or skills?";
-  } else if (
-    queryLower.includes("blog") ||
-    queryLower.includes("article")
-  ) {
+  } else if (queryLower.includes("blog") || queryLower.includes("article")) {
     return "Interested in a specific topic?";
   }
   return "";
@@ -121,15 +118,10 @@ function generateFollowUp(query: string): string {
  */
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const messages = body.messages;
-
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      return Response.json(
-        { error: "Invalid request: messages array is required" },
-        { status: 400 }
-      );
-    }
+    const parsed = await readChatMessages(req);
+    if (parsed.error !== undefined)
+      return Response.json({ error: parsed.error }, { status: parsed.status });
+    const { messages } = parsed;
 
     let currentMessageContent = messages[messages.length - 1].content.trim();
 
@@ -150,28 +142,31 @@ export async function POST(req: Request) {
     // Format previous messages for context
     const previousMessages = messages
       .slice(-6, -1) // Keep last 5 messages for context
-      .map(
-        (m: any) => `${m.role === "user" ? "Human" : "Assistant"}: ${m.content}`
-      )
+      .map((m) => `${m.role === "user" ? "Human" : "Assistant"}: ${m.content}`)
       .join("\n");
+
+    if (!process.env.OPENAI_API_KEY)
+      return Response.json(
+        { error: "Chat is currently unavailable." },
+        { status: 503, headers: { "Cache-Control": "no-store" } },
+      );
 
     // Initialize the language model
     const model = new ChatOpenAI({
       modelName: "gpt-4o-mini",
       streaming: true,
       temperature: 0.7,
+      maxTokens: 512,
+      timeout: 30000,
     });
 
     // Initialize vector store and perform similarity search
-    const vectorStore = await getVectorStore();
     let resumeContext = "";
 
     try {
+      const vectorStore = await getVectorStore();
       // Get more documents for re-ranking
-      const relevantDocs = await vectorStore.similaritySearch(
-        currentMessageContent,
-        8
-      );
+      const relevantDocs = await vectorStore.similaritySearch(currentMessageContent, 8);
 
       if (relevantDocs && relevantDocs.length > 0) {
         // Re-rank documents
@@ -246,36 +241,17 @@ Respond concisely and helpfully:`);
     // Create and execute the chain
     const chain = promptTemplate.pipe(model).pipe(new StringOutputParser());
 
-    const stream = await chain.stream({
-      resumeContext: resumeContext,
-      chatHistory: previousMessages,
-      question: currentMessageContent,
-    });
-
-    // Create streaming response
-    const encoder = new TextEncoder();
-
-    const readable = new ReadableStream({
-      async start(controller) {
-        try {
-          for await (const chunk of stream) {
-            const text =
-              typeof chunk === "string" ? chunk : String(chunk || "");
-            controller.enqueue(encoder.encode(text));
-          }
-
-          // Append a single contextual follow-up (if any)
-          if (followUp) {
-            controller.enqueue(encoder.encode(`\n\n*${followUp}*`));
-          }
-
-          controller.close();
-        } catch (error) {
-          console.error("Error processing stream:", error);
-          controller.error(error);
-        }
+    const abort = new AbortController();
+    const stream = await chain.stream(
+      {
+        resumeContext: resumeContext,
+        chatHistory: previousMessages,
+        question: currentMessageContent,
       },
-    });
+      { signal: AbortSignal.any([req.signal, abort.signal]) },
+    );
+
+    const readable = textStream(stream, abort, followUp ? `\n\n*${followUp}*` : "");
 
     return new Response(readable, {
       headers: {
@@ -283,15 +259,14 @@ Respond concisely and helpfully:`);
         "Cache-Control": "no-cache",
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Chat API error:", error);
 
     return Response.json(
       {
         error: "Chat processing failed",
-        details: error?.message || "Unknown error occurred",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

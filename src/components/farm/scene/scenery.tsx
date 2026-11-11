@@ -1,7 +1,10 @@
 "use client";
 
-import { useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useMemo } from "react";
+import { OptionalAsset } from "./OptionalAsset";
+import { groundedModel } from "./prop-geometry";
+import { foothillGeometry } from "./natural-geometry";
+import { Surface } from "./materials";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
@@ -12,7 +15,7 @@ type Spot = {
   rotation?: number;
 };
 
-/** Models that have to be in before the loader finishes. */
+/** Optional local scans enrich the yard without blocking the playable scene. */
 export const CORE_PROPS: Spot[] = [
   { file: "shrub_02", position: [-4.2, 0, 5.2], height: 1.15, rotation: 0.3 },
   { file: "shrub_03", position: [6.4, 0, 5.6], height: 0.9 },
@@ -57,178 +60,139 @@ export const EXTRA_PROPS: Spot[] = [
   { file: "fern_02", position: [14, 0, -3], height: 0.65, rotation: 1.7 },
 ];
 
-const ready = new Set<string>();
-
 function Prop({ spot }: { spot: Spot }) {
   const url = `/farm/models/${spot.file}.glb`;
   const { scene } = useGLTF(url);
   const object = useMemo(() => {
-    const root = scene.clone(true);
-    root.updateWorldMatrix(true, true);
-    const box = new THREE.Box3().setFromObject(root);
-    const size = box.getSize(new THREE.Vector3());
-    const scale = spot.height / Math.max(size.y, 1e-4);
-    root.scale.setScalar(scale);
-    root.position.set(spot.position[0], -box.min.y * scale, spot.position[2]);
+    const root = groundedModel(scene, spot.height);
+    root.position.set(...spot.position);
     root.rotation.y = spot.rotation ?? 0;
-    root.traverse((child) => {
-      const mesh = child as THREE.Mesh;
-      if (mesh.isMesh) {
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-      }
-    });
     return root;
   }, [scene, spot]);
-  ready.add(url);
-  return <primitive object={object} />;
+  return <primitive object={object} dispose={null} />;
 }
 
 export function Scenery({ detail }: { detail: boolean }) {
   return (
     <group>
       {CORE_PROPS.map((spot, index) => (
-        <Prop key={`core-${spot.file}-${index}`} spot={spot} />
+        <OptionalAsset key={`core-${spot.file}-${index}`}>
+          <Prop spot={spot} />
+        </OptionalAsset>
       ))}
       {detail
-        ? EXTRA_PROPS.map((spot, index) => <Prop key={`extra-${spot.file}-${index}`} spot={spot} />)
+        ? EXTRA_PROPS.map((spot, index) => (
+            <OptionalAsset key={`extra-${spot.file}-${index}`}>
+              <Prop spot={spot} />
+            </OptionalAsset>
+          ))
         : null}
     </group>
   );
 }
 
 export function Horizon() {
-  const hills = [
-    [-28, -18, 10, "#6ea24a"],
-    [8, -24, 14, "#7eae56"],
-    [32, -16, 11, "#628f42"],
-    [-40, 4, 8, "#87b45c"],
-    [42, 8, 9, "#6d9848"],
-  ] as const;
+  const ground = useMemo(() => foothillGeometry(), []);
   return (
-    <group>
-      {hills.map(([x, z, r, color], i) => (
-        <mesh key={i} position={[x, -r * 0.55, z]} receiveShadow>
-          <sphereGeometry args={[r, 24, 16]} />
-          <meshStandardMaterial color={color} roughness={1} />
-        </mesh>
-      ))}
-      <mesh rotation={[-Math.PI / 2, 0, 0.04]} position={[1.2, 0.03, 16]} receiveShadow>
-        <planeGeometry args={[3.2, 28]} />
-        <meshStandardMaterial color="#8b6844" roughness={1} />
-      </mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0.2]} position={[-22, 0.02, 2]} receiveShadow>
-        <planeGeometry args={[4.5, 36]} />
-        <meshStandardMaterial color="#2f6f86" metalness={0.45} roughness={0.18} />
-      </mesh>
-      {[-6, 0, 6, 12, 18].map((z) => (
-        <group key={z} position={[4.2, 0, z]}>
-          <mesh position={[0, 2.2, 0]}>
-            <cylinderGeometry args={[0.08, 0.1, 4.4, 6]} />
-            <meshStandardMaterial color="#4d555c" metalness={0.4} roughness={0.55} />
-          </mesh>
-          <mesh position={[1.2, 4.2, 0]}>
-            <boxGeometry args={[2.6, 0.03, 0.03]} />
-            <meshStandardMaterial color="#222" />
-          </mesh>
-        </group>
-      ))}
-      <group position={[26, 0, -8]}>
-        {[0, 1, 2, 3].map((i) => (
-          <mesh key={i} position={[i * 2.2, 1.1 + (i % 2) * 0.4, (i % 2) * 1.5]}>
-            <boxGeometry args={[1.6, 2 + (i % 3), 1.4]} />
-            <meshStandardMaterial color={i % 2 ? "#c4b6a2" : "#8d6b58"} roughness={0.9} />
-          </mesh>
-        ))}
-      </group>
-    </group>
+    <mesh name="middle-atlas-foothills" geometry={ground} receiveShadow>
+      <meshStandardMaterial vertexColors roughness={1} metalness={0} />
+    </mesh>
   );
 }
 
-export function MillWorks() {
+export function MillWorks({ waterCollected = false }: { waterCollected?: boolean }) {
   return (
     <group>
-
-      <Well />
+      <Well waterCollected={waterCollected} />
       <Gate />
     </group>
   );
 }
 
-function MillWheel() {
-  const ref = useRef<THREE.Group>(null);
-  useFrame((_, dt) => {
-    if (ref.current) ref.current.rotation.x -= dt * 0.55;
-  });
+export function Well({ waterCollected = false }: { waterCollected?: boolean }) {
+  const bucketY = waterCollected ? 1.2 : 0.25;
   return (
-    <group position={[-14.2, 0.75, 2.2]}>
-      <group ref={ref}>
-        <mesh rotation={[0, 0, Math.PI / 2]}>
-          <torusGeometry args={[0.7, 0.06, 8, 18]} />
-          <meshStandardMaterial color="#6b5344" roughness={0.8} />
-        </mesh>
-        {Array.from({ length: 8 }, (_, i) => (
-          <mesh key={i} rotation={[0, 0, (i / 8) * Math.PI * 2]}>
-            <boxGeometry args={[1.35, 0.08, 0.22]} />
-            <meshStandardMaterial color="#7d624e" roughness={0.75} />
+    <group name="stone-well-mechanism" position={[-12.5, 0, 3.4]}>
+      <mesh position={[0, 0.36, 0]} receiveShadow castShadow>
+        <cylinderGeometry args={[0.72, 0.8, 0.72, 24, 1, true]} />
+        <Surface name="rock" color="#a29881" repeat={[4, 1]} metalness={0} />
+      </mesh>
+      <mesh position={[0, 0.36, 0]}>
+        <cylinderGeometry args={[0.5, 0.56, 0.68, 24, 1, true]} />
+        <meshStandardMaterial color="#5e5a4b" side={THREE.BackSide} roughness={1} />
+      </mesh>
+      <mesh position={[0, 0.74, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+        <torusGeometry args={[0.61, 0.115, 6, 28]} />
+        <Surface name="rock" color="#b1a78f" repeat={[4, 1]} metalness={0} />
+      </mesh>
+      <mesh position={[0, 0.12, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[0.61, 24]} />
+        <meshStandardMaterial color="#263f3e" roughness={0.2} metalness={0} />
+      </mesh>
+      {[-0.85, 0.85].map((x) => (
+        <group key={x} position={[x, 0, 0]}>
+          <mesh position={[0, 1.05, 0]} castShadow>
+            <boxGeometry args={[0.12, 2.1, 0.14]} />
+            <Surface name="wood" color="#77684d" repeat={[0.3, 3]} metalness={0} />
           </mesh>
-        ))}
+          <mesh position={[0, 0.05, 0]}>
+            <boxGeometry args={[0.3, 0.1, 0.34]} />
+            <Surface name="rock" color="#aaa18c" metalness={0} />
+          </mesh>
+        </group>
+      ))}
+      <mesh position={[0, 1.85, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
+        <cylinderGeometry args={[0.09, 0.09, 1.95, 12]} />
+        <Surface name="wood" color="#6e5f45" repeat={[1, 2]} metalness={0} />
+      </mesh>
+      <mesh position={[0.1, (1.85 + bucketY + 0.295) / 2, 0]}>
+        <cylinderGeometry args={[0.012, 0.012, 1.85 - bucketY - 0.295, 6]} />
+        <meshStandardMaterial color="#b8a786" roughness={1} />
+      </mesh>
+      <group name="well-bucket" position={[0.1, bucketY, 0]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.16, 0.12, 0.27, 12, 1, true]} />
+          <Surface name="wood" color="#958063" repeat={[1, 1]} metalness={0} />
+        </mesh>
+        <mesh position={[0, 0.135, 0]}>
+          <torusGeometry args={[0.15, 0.012, 6, 16, Math.PI]} />
+          <meshStandardMaterial color="#54584f" metalness={0.5} roughness={0.65} />
+        </mesh>
+      </group>
+      <group position={[1.03, 1.85, 0]} rotation={[waterCollected ? 0.8 : 0, 0, 0]}>
+        <mesh position={[0, -0.18, 0]}>
+          <boxGeometry args={[0.045, 0.36, 0.045]} />
+          <meshStandardMaterial color="#53564b" metalness={0.5} roughness={0.7} />
+        </mesh>
+        <mesh position={[0.12, -0.35, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.035, 0.035, 0.24, 8]} />
+          <Surface name="wood" color="#6d5a40" metalness={0} />
+        </mesh>
       </group>
     </group>
   );
 }
 
-function Well() {
-  const crank = useRef<THREE.Group>(null);
-  useFrame((_, dt) => {
-    if (crank.current) crank.current.rotation.x += dt * 0.9;
-  });
-  return (
-    <group position={[-12.5, 0, 3.4]}>
-      <mesh position={[0, 0.35, 0]} receiveShadow>
-        <cylinderGeometry args={[0.7, 0.78, 0.7, 12]} />
-        <meshStandardMaterial color="#9a9186" roughness={0.95} />
-      </mesh>
-      <mesh position={[0, 0.78, 0]}>
-        <cylinderGeometry args={[0.4, 0.4, 0.16, 12]} />
-        <meshStandardMaterial color="#1d4e5c" roughness={0.25} metalness={0.15} />
-      </mesh>
-      <group ref={crank} position={[0.62, 1.15, 0]}>
-        <mesh rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[0.035, 0.035, 0.46, 8]} />
-          <meshStandardMaterial color="#6b5344" roughness={0.6} />
-        </mesh>
-        <mesh position={[0.2, 0.12, 0]}>
-          <boxGeometry args={[0.05, 0.26, 0.05]} />
-          <meshStandardMaterial color="#5c4636" />
-        </mesh>
-      </group>
-    </group>
-  );
-}
-
+/** The central opening stays open; visitors and the tractor share the same clear passage. */
 function Gate() {
-  const left = useRef<THREE.Group>(null);
-  const right = useRef<THREE.Group>(null);
-  useFrame(({ clock }) => {
-    const swing = Math.sin(clock.elapsedTime * 0.35) * 0.2;
-    if (left.current) left.current.rotation.y = swing;
-    if (right.current) right.current.rotation.y = -swing;
-  });
   return (
-    <group position={[1.2, 0, 8.5]}>
+    <group name="open-farm-gate" position={[0, 0, 7.7]}>
       {[-1, 1].map((side) => (
         <group key={side} position={[side * 0.9, 0, 0]}>
-          <mesh position={[0, 0.7, 0]}>
-            <boxGeometry args={[0.1, 1.4, 0.1]} />
-            <meshStandardMaterial color="#6b5344" />
+          <mesh position={[0, 0.7, 0]} castShadow>
+            <boxGeometry args={[0.12, 1.4, 0.12]} />
+            <Surface name="wood" color="#6b5344" metalness={0} />
           </mesh>
-          <group ref={side < 0 ? left : right}>
-            <mesh position={[side * 0.42, 0.7, 0]}>
-              <boxGeometry args={[0.78, 1.05, 0.06]} />
-              <meshStandardMaterial color="#e4d2b0" roughness={0.7} />
+          <mesh position={[0, 0.7, -0.45]} castShadow>
+            <boxGeometry args={[0.06, 1.05, 0.78]} />
+            <Surface name="wood" color="#c2b391" metalness={0} />
+          </mesh>
+          {[0.4, 1].map((y) => (
+            <mesh key={y} position={[side * 0.045, y, -0.45]}>
+              <boxGeometry args={[0.025, 0.06, 0.6]} />
+              <meshStandardMaterial color="#626554" metalness={0.4} roughness={0.8} />
             </mesh>
-          </group>
+          ))}
         </group>
       ))}
     </group>

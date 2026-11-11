@@ -1,5 +1,3 @@
-import { LucideIcon } from "lucide-react";
-
 // Personal Information
 export interface PersonalInfo {
   firstName: string;

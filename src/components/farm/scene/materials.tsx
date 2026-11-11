@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useMemo, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
+import { OptionalAsset } from "./OptionalAsset";
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 
@@ -20,19 +21,27 @@ type Set = { diff: THREE.Texture; nor: THREE.Texture; arm: THREE.Texture };
 const Ctx = createContext<Record<SurfaceName, Set> | null>(null);
 
 const URLS = (Object.keys(FILES) as SurfaceName[]).flatMap((name) =>
-  FILES[name].map((file) => `/farm/tex/${file}.webp`)
+  FILES[name].map((file) => `/farm/tex/${file}.webp`),
 );
 
 /** Loads the CC0 surface set once. Suspends until every map is in. */
 export function Textures({ children }: { children: ReactNode }) {
+  return (
+    <OptionalAsset fallback={children}>
+      <LoadedTextures>{children}</LoadedTextures>
+    </OptionalAsset>
+  );
+}
+
+function LoadedTextures({ children }: { children: ReactNode }) {
   const loaded = useTexture(URLS);
   const lib = useMemo(() => {
     const out = {} as Record<SurfaceName, Set>;
     let index = 0;
     for (const name of Object.keys(FILES) as SurfaceName[]) {
-      const diff = loaded[index++];
-      const nor = loaded[index++];
-      const arm = loaded[index++];
+      const diff = loaded[index++].clone();
+      const nor = loaded[index++].clone();
+      const arm = loaded[index++].clone();
       for (const tex of [diff, nor, arm]) {
         tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
         tex.anisotropy = 8;
@@ -44,6 +53,13 @@ export function Textures({ children }: { children: ReactNode }) {
     }
     return out;
   }, [loaded]);
+  useEffect(
+    () => () => {
+      for (const set of Object.values(lib))
+        for (const texture of Object.values(set)) texture.dispose();
+    },
+    [lib],
+  );
   return <Ctx.Provider value={lib}>{children}</Ctx.Provider>;
 }
 
@@ -53,7 +69,8 @@ export function Surface({
   repeat = [1, 1],
   golden = false,
   roughness = 1,
-  metalness = 0.04,
+  metalness = 0,
+  vertexColors = false,
 }: {
   name?: SurfaceName;
   color?: string;
@@ -61,6 +78,7 @@ export function Surface({
   golden?: boolean;
   roughness?: number;
   metalness?: number;
+  vertexColors?: boolean;
 }) {
   const lib = useContext(Ctx);
   const rx = repeat[0];
@@ -82,10 +100,13 @@ export function Surface({
       roughness,
       metalness,
       envMapIntensity: 1,
+      vertexColors,
     });
     if (!set) return mat;
     mat.map = set.diff;
     mat.normalMap = set.nor;
+    mat.aoMap = set.arm;
+    mat.aoMapIntensity = 0.55;
     mat.roughnessMap = set.arm;
     mat.metalnessMap = set.arm;
     mat.normalScale = new THREE.Vector2(0.85, 0.85);
@@ -106,12 +127,16 @@ export function Surface({
            #ifdef USE_ROUGHNESSMAP
              vRoughnessMapUv *= uRepeat;
            #endif
+           #ifdef USE_AOMAP
+             vAoMapUv *= uRepeat;
+           #endif
            #ifdef USE_METALNESSMAP
              vMetalnessMapUv *= uRepeat;
-           #endif`
+           #endif`,
         );
     };
     return mat;
-  }, [color, golden, lib, metalness, name, roughness, rx, ry]);
+  }, [color, golden, lib, metalness, name, roughness, rx, ry, vertexColors]);
+  useEffect(() => () => material.dispose(), [material]);
   return <primitive object={material} attach="material" />;
 }

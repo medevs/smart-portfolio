@@ -1,53 +1,94 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
-import { CapsuleCollider, CuboidCollider, Physics, RigidBody, useRapier } from "@react-three/rapier";
+import { useEffect, useRef, useState } from "react";
+import {
+  CapsuleCollider,
+  CylinderCollider,
+  CuboidCollider,
+  CoefficientCombineRule,
+  useSphericalJoint,
+  Physics,
+  RigidBody,
+  useRapier,
+  useBeforePhysicsStep,
+  useAfterPhysicsStep,
+} from "@react-three/rapier";
 import type { RapierRigidBody } from "@react-three/rapier";
-import * as THREE from "three";
-import { resetWalkInput, TRACTOR, walk, walkingMovement } from "./walk-state";
+import { Visitor } from "./Visitor";
+import {
+  GROUND_HALF,
+  YARD_WALLS,
+  YARD_SOLIDS,
+  YARD_CIRCLES,
+  safeSpawn,
+} from "@/farm/game/collision";
+import {
+  resetWalkInput,
+  TRACTOR,
+  walk,
+  walkingMovement,
+  movementInput,
+  isMovementKey,
+  cancelWalkRoute,
+  routeMovement,
+} from "./walk-state";
+import { cameraView } from "./camera-view";
+import { findWalkingRoute } from "./walking-route";
+import { tractorDrive } from "./tractor-drive";
 
-const BLOCKS: { position: [number, number, number]; args: [number, number, number] }[] = [
-  { position: [1.1, 1.6, -2.2], args: [3.1, 1.6, 2.1] },
-  { position: [-11, 1.4, -2.2], args: [2.5, 1.4, 1.9] },
-  { position: [8.8, 2.1, -3.2], args: [1.2, 2.1, 1.2] },
-  { position: [14.3, 1.1, -2.2], args: [1.6, 1.1, 1.3] },
-  { position: [19.5, 2.2, -5.5], args: [1.3, 2.2, 1.3] },
-];
-
-const keys = { w: false, a: false, s: false, d: false };
-function resetInput() {
-  keys.w = keys.a = keys.s = keys.d = false;
-  resetWalkInput();
-}
+const keys = walk.keys;
+const FIXED_STEP = 1 / 60;
+const VISITOR_HEIGHT = 0.7;
 
 function isEditing(target: EventTarget | null) {
-  return target instanceof HTMLElement && Boolean(target.closest("input, textarea, select, [contenteditable]:not([contenteditable='false']), [role='dialog']"));
+  return (
+    target instanceof HTMLElement &&
+    Boolean(
+      target.closest(
+        "input, textarea, select, [contenteditable]:not([contenteditable='false']), [role='dialog']",
+      ),
+    )
+  );
 }
 
-export function PhysicsYard() {
+export function PhysicsYard({ paused = false }: { paused?: boolean }) {
+  useEffect(() => {
+    if (paused) resetWalkInput();
+  }, [paused]);
   useEffect(() => {
     const down = (event: KeyboardEvent) => {
-      if (walk.paused || isEditing(event.target) || event.ctrlKey || event.metaKey || event.altKey) return;
+      if (walk.paused || isEditing(event.target) || event.ctrlKey || event.metaKey || event.altKey)
+        return;
       const key = event.key.toLowerCase();
-      if (key === "w" || key === "a" || key === "s" || key === "d") keys[key] = true;
-      if (key === "f" && !event.repeat) walk.toggleDrive = true;
+      if (isMovementKey(key)) {
+        cancelWalkRoute();
+        keys[key] = true;
+        if (key.startsWith("arrow")) event.preventDefault();
+      }
+      if (key === "shift") walk.sprinting = true;
+      if (key === "f" && !event.repeat) {
+        cancelWalkRoute();
+        walk.toggleDrive = true;
+      }
     };
     const up = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
-      if (key === "w" || key === "a" || key === "s" || key === "d") keys[key] = false;
+      if (key === "shift") walk.sprinting = false;
+      if (isMovementKey(key)) keys[key] = false;
     };
     const onVisibility = () => {
-      if (document.hidden) resetInput();
+      if (document.hidden) resetWalkInput();
     };
-    window.addEventListener("blur", resetInput);
+    const onBlur = () => resetWalkInput();
+    window.addEventListener("blur", onBlur);
     document.addEventListener("visibilitychange", onVisibility);
     window.addEventListener("keydown", down);
     window.addEventListener("keyup", up);
     return () => {
-      window.removeEventListener("blur", resetInput);
+      window.removeEventListener("blur", onBlur);
       document.removeEventListener("visibilitychange", onVisibility);
-      resetInput();
+      cancelWalkRoute();
+      resetWalkInput();
       window.removeEventListener("keydown", down);
       window.removeEventListener("keyup", up);
       walk.driving = false;
@@ -55,38 +96,45 @@ export function PhysicsYard() {
   }, []);
 
   return (
-    <Physics gravity={[0, -9.81, 0]} timeStep={1 / 60}>
+    <Physics paused={paused} gravity={[0, -9.81, 0]} timeStep={FIXED_STEP} updatePriority={-2}>
       <RigidBody type="fixed" colliders={false} position={[0, -0.3, 0]}>
-        <CuboidCollider args={[70, 0.3, 70]} />
+        <CuboidCollider args={[GROUND_HALF, 0.3, GROUND_HALF]} />
       </RigidBody>
-      {BLOCKS.map((block) => (
-        <RigidBody key={block.position.join(",")} type="fixed" colliders={false} position={block.position}>
+      {[...YARD_SOLIDS, ...YARD_WALLS].map((block) => (
+        <RigidBody
+          key={block.position.join(",")}
+          type="fixed"
+          colliders={false}
+          position={block.position}
+        >
           <CuboidCollider args={block.args} />
+        </RigidBody>
+      ))}
+      {YARD_CIRCLES.map((tree) => (
+        <RigidBody
+          key={`tree-${tree.x}-${tree.z}`}
+          type="fixed"
+          colliders={false}
+          position={[tree.x, tree.height / 2, tree.z]}
+        >
+          <CylinderCollider args={[tree.height / 2, tree.radius]} />
         </RigidBody>
       ))}
       <Player />
       <Tractor />
-      <FollowCam />
     </Physics>
   );
 }
 
-function input() {
-  if (walk.paused) {
-    resetInput();
-    return { forward: 0, strafe: 0 };
-  }
-  const forward = (keys.w || walk.stickY < -0.25 ? 1 : 0) - (keys.s || walk.stickY > 0.25 ? 1 : 0);
-  const strafe = (keys.d || walk.stickX > 0.25 ? 1 : 0) - (keys.a || walk.stickX < -0.25 ? 1 : 0);
-  return { forward, strafe };
-}
+const input = movementInput;
 
 function Player() {
+  const [spawn] = useState<[number, number, number]>(() => [walk.px, VISITOR_HEIGHT, walk.pz]);
   const body = useRef<RapierRigidBody>(null);
-  const mesh = useRef<THREE.Mesh>(null);
   const { world } = useRapier();
   const controller = useRef<ReturnType<typeof world.createCharacterController> | null>(null);
   const velocityY = useRef(0);
+  const blockedSeconds = useRef(0);
 
   useEffect(() => {
     const next = world.createCharacterController(0.04);
@@ -100,111 +148,265 @@ function Player() {
     };
   }, [world]);
 
-  useFrame((_, dt) => {
+  useBeforePhysicsStep(() => {
+    const dt = FIXED_STEP;
     const rigid = body.current;
     const character = controller.current;
     if (!rigid || !character) return;
+    if (walk.paused) {
+      resetWalkInput();
+      velocityY.current = 0;
+      return;
+    }
     let here = rigid.translation();
+    if (walk.travel && !walk.paused) {
+      cancelWalkRoute();
+      const target = walk.travel;
+      walk.travel = null;
+      if (safeSpawn(target)) {
+        walk.driving = false;
+        walk.cameraCut = true;
+        rigid.setEnabled(true);
+        here = { x: target.x, y: VISITOR_HEIGHT, z: target.z };
+        rigid.setTranslation(here, true);
+        rigid.setNextKinematicTranslation(here);
+        walk.px = here.x;
+        walk.pz = here.z;
+        velocityY.current = 0;
+        resetWalkInput();
+      }
+    }
     const tractorX = TRACTOR.x + walk.tx;
     const tractorZ = TRACTOR.z + walk.tz;
     if (walk.toggleDrive && !walk.paused) {
+      cancelWalkRoute();
       walk.toggleDrive = false;
       const near = Math.hypot(here.x - tractorX, here.z - tractorZ) < 2.4;
       if (walk.driving || near) {
         walk.driving = !walk.driving;
         if (!walk.driving) {
-          here = { x: tractorX + 1.4, y: 1.2, z: tractorZ };
+          const sides = [1, -1].map((side) => ({
+            x: tractorX + Math.cos(walk.vehicleYaw) * 1.7 * side,
+            z: tractorZ - Math.sin(walk.vehicleYaw) * 1.7 * side,
+          }));
+          const exit = sides.find(safeSpawn);
+          if (!exit) {
+            walk.driving = true;
+            return;
+          }
+          here = { ...exit, y: VISITOR_HEIGHT };
           rigid.setTranslation(here, true);
           velocityY.current = 0;
         }
       }
     }
     rigid.setEnabled(!walk.driving);
-    if (mesh.current) mesh.current.visible = !walk.driving;
     if (walk.driving) return;
 
+    if (walk.routeRequest) {
+      const request = walk.routeRequest;
+      walk.routeRequest = null;
+      walk.routeLabel = request.label;
+      walk.route =
+        findWalkingRoute(here, request, [
+          { x: tractorX, z: tractorZ, radius: 1.35 },
+          { x: walk.trailerX, z: walk.trailerZ, radius: 1.35 },
+        ]) ?? [];
+      walk.routeIndex = 0;
+      walk.routeStatus = walk.route.length ? "walking" : "blocked";
+      blockedSeconds.current = 0;
+    }
     const { forward, strafe } = input();
-    dt = Math.min(dt, 0.05);
-    const { x: dx, z: dz } = walkingMovement(forward, strafe, dt);
+    if (forward || strafe) cancelWalkRoute();
+    const { x: dx, z: dz } =
+      walk.routeStatus === "walking"
+        ? routeMovement(here, dt)
+        : walkingMovement(forward, strafe, dt, walk.sprinting, cameraView.turn);
+
     velocityY.current = Math.max(velocityY.current - 9.81 * dt, -20);
     const collider = rigid.collider(0);
     character.computeColliderMovement(collider, { x: dx, y: velocityY.current * dt, z: dz });
     const move = character.computedMovement();
+    if (walk.routeStatus === "walking") {
+      blockedSeconds.current =
+        Math.hypot(move.x, move.z) < Math.hypot(dx, dz) * 0.15 ? blockedSeconds.current + dt : 0;
+      if (blockedSeconds.current > 1.2) {
+        walk.route = [];
+        walk.routeIndex = 0;
+        walk.routeStatus = "blocked";
+      }
+    }
     if (character.computedGrounded() && velocityY.current < 0) velocityY.current = 0;
     const next = {
       x: here.x + move.x,
-      y: Math.max(0.9, here.y + move.y),
+      y: here.y + move.y,
       z: here.z + move.z,
     };
     rigid.setNextKinematicTranslation(next);
-    walk.px = next.x;
-    walk.pz = next.z;
+    walk.moving = Math.hypot(move.x, move.z) / dt;
     if (Math.hypot(dx, dz) > 0.001) walk.yaw = Math.atan2(dx, dz);
   });
 
+  useAfterPhysicsStep(() => {
+    if (body.current && !walk.driving) {
+      const point = body.current.translation();
+      walk.px = point.x;
+      walk.pz = point.z;
+    }
+  });
   return (
-    <RigidBody ref={body} type="kinematicPosition" colliders={false} position={[walk.px, 1.2, walk.pz]} lockRotations>
+    <RigidBody
+      name="farm-visitor-body"
+      ref={body}
+      type="kinematicPosition"
+      colliders={false}
+      position={spawn}
+      lockRotations
+    >
       <CapsuleCollider args={[0.38, 0.28]} />
-      <mesh ref={mesh} castShadow>
-        <capsuleGeometry args={[0.28, 0.76, 4, 8]} />
-        <meshStandardMaterial color="#3c4a5c" roughness={0.7} />
-      </mesh>
+      <Visitor />
     </RigidBody>
   );
 }
 
 function Tractor() {
-  const body = useRef<RapierRigidBody>(null);
-  useFrame((_, dt) => {
+  const [spawn] = useState<[number, number, number]>(() => [
+    TRACTOR.x + walk.tx,
+    0.45,
+    TRACTOR.z + walk.tz,
+  ]);
+  const [rotation] = useState<[number, number, number]>(() => [0, walk.vehicleYaw, 0]);
+  const body = useRef<RapierRigidBody>(null!);
+  const trailer = useRef<RapierRigidBody>(null!);
+  const [trailerSpawn] = useState<[number, number, number]>(() =>
+    walk.trailerInitialized
+      ? [walk.trailerX, walk.trailerY, walk.trailerZ]
+      : [spawn[0] - Math.sin(rotation[1]) * 2.25, 0.22, spawn[2] - Math.cos(rotation[1]) * 2.25],
+  );
+  const [trailerRotation] = useState<[number, number, number]>(() => [
+    0,
+    walk.trailerInitialized ? walk.trailerYaw : rotation[1],
+    0,
+  ]);
+  // Flat-yard vehicles share a fixed wheel height. A ball hitch supplies only
+  // the anchor constraint; body rotation locks already constrain pitch/roll.
+  const joint = useSphericalJoint(body, trailer, [
+    [0, -0.23, -1],
+    [0, 0, 1.25],
+  ]);
+  useEffect(() => {
+    joint.current?.setContactsEnabled(true);
+  }, [joint]);
+  useBeforePhysicsStep(() => {
     const rigid = body.current;
     if (!rigid) return;
     const rotation = rigid.rotation();
-    const yaw = Math.atan2(2 * (rotation.w * rotation.y + rotation.x * rotation.z), 1 - 2 * (rotation.y * rotation.y + rotation.z * rotation.z));
-    if (walk.driving) {
-      const { forward, strafe } = input();
-      const speed = forward * 7;
-      rigid.setLinvel({ x: Math.sin(yaw) * speed, y: rigid.linvel().y, z: Math.cos(yaw) * speed }, true);
-      rigid.setAngvel({ x: 0, y: strafe * -1.3, z: 0 }, true);
-    } else {
-      const velocity = rigid.linvel();
-      rigid.setLinvel({ x: velocity.x * 0.9, y: velocity.y, z: velocity.z * 0.9 }, true);
-      rigid.setAngvel({ x: 0, y: 0, z: 0 }, true);
+    const yaw = Math.atan2(
+      2 * (rotation.w * rotation.y + rotation.x * rotation.z),
+      1 - 2 * (rotation.y * rotation.y + rotation.z * rotation.z),
+    );
+    const velocity = rigid.linvel();
+    const { forward, strafe } = walk.driving ? input() : { forward: 0, strafe: 0 };
+    // Read resolved physics velocity so a collision cannot accumulate hidden speed.
+    const actualSpeed = velocity.x * Math.sin(yaw) + velocity.z * Math.cos(yaw);
+    const drive = tractorDrive(actualSpeed, forward, strafe, FIXED_STEP);
+    rigid.setLinvel(
+      { x: Math.sin(yaw) * drive.speed, y: velocity.y, z: Math.cos(yaw) * drive.speed },
+      true,
+    );
+    rigid.setAngvel({ x: 0, y: drive.yawRate, z: 0 }, true);
+    if (trailer.current && forward === 0) {
+      // Releasing the drive applies the trailer brake too; the hitch must not
+      // keep pushing a stopped tractor or let an unoccupied rig drift.
+      const velocity = trailer.current.linvel(),
+        speed = Math.hypot(velocity.x, velocity.z);
+      const brake = speed > 0 ? Math.max(0, speed - 12 * FIXED_STEP) / speed : 0;
+      trailer.current.setLinvel(
+        { x: velocity.x * brake, y: velocity.y, z: velocity.z * brake },
+        true,
+      );
+      trailer.current.setAngvel({ x: 0, y: trailer.current.angvel().y * 0.7, z: 0 }, true);
     }
-    const position = rigid.translation();
+  });
+  useAfterPhysicsStep(() => {
+    const rigid = body.current;
+    if (!rigid) return;
+    const position = rigid.translation(),
+      rotation = rigid.rotation();
     walk.tx = position.x - TRACTOR.x;
     walk.tz = position.z - TRACTOR.z;
-    walk.yaw = walk.driving ? yaw : walk.yaw;
-    void dt;
+    const velocity = rigid.linvel();
+    walk.vehicleSpeed = Math.hypot(velocity.x, velocity.z);
+    if (trailer.current) {
+      const point = trailer.current.translation(),
+        q = trailer.current.rotation(),
+        v = trailer.current.linvel();
+      walk.trailerInitialized = true;
+      walk.trailerSpeed = Math.hypot(v.x, v.z);
+      walk.trailerX = point.x;
+      walk.trailerY = point.y;
+      walk.trailerZ = point.z;
+      walk.trailerYaw = Math.atan2(2 * (q.w * q.y + q.x * q.z), 1 - 2 * (q.y * q.y + q.z * q.z));
+    }
+    walk.vehicleYaw = Math.atan2(
+      2 * (rotation.w * rotation.y + rotation.x * rotation.z),
+      1 - 2 * (rotation.y * rotation.y + rotation.z * rotation.z),
+    );
   });
 
   return (
-    <RigidBody
-      ref={body}
-      colliders={false}
-      position={[TRACTOR.x + walk.tx, 0.45, TRACTOR.z + walk.tz]}
-      enabledRotations={[false, true, false]}
-      linearDamping={0.6}
-      angularDamping={1.2}
-    >
-      <CuboidCollider args={[0.85, 0.4, 0.5]} />
-    </RigidBody>
+    <>
+      <RigidBody
+        name="farm-tractor-body"
+        ref={body}
+        colliders={false}
+        position={spawn}
+        rotation={rotation}
+        enabledRotations={[false, true, false]}
+        enabledTranslations={[true, false, true]}
+        gravityScale={0}
+        additionalSolverIterations={4}
+        linearDamping={0.6}
+        angularDamping={1.2}
+      >
+        {/* Tyre grip/braking is resolved above; the hull must not drag like a crate. */}
+        <CuboidCollider
+          args={[0.5, 0.4, 0.85]}
+          friction={0}
+          frictionCombineRule={CoefficientCombineRule.Min}
+        />
+      </RigidBody>
+      <RigidBody
+        name="farm-trailer-body"
+        ref={trailer}
+        colliders={false}
+        position={trailerSpawn}
+        rotation={trailerRotation}
+        enabledRotations={[false, true, false]}
+        enabledTranslations={[true, false, true]}
+        gravityScale={0}
+        additionalSolverIterations={4}
+        linearDamping={0.6}
+        angularDamping={2}
+      >
+        <CuboidCollider
+          args={[0.56, 0.2, 0.78]}
+          position={[0, 0.4, 0]}
+          friction={0}
+          frictionCombineRule={CoefficientCombineRule.Min}
+          density={0.15}
+        />
+        {[-1, 1].map((side) => (
+          <CuboidCollider
+            key={side}
+            args={[0.075, 0.22, 0.24]}
+            position={[side * 0.62, 0, -0.2]}
+            friction={0}
+            frictionCombineRule={CoefficientCombineRule.Min}
+            density={0.15}
+          />
+        ))}
+      </RigidBody>
+    </>
   );
-}
-
-function FollowCam() {
-  const { camera } = useThree();
-  const look = useRef(new THREE.Vector3());
-  useFrame((_, dt) => {
-    const x = walk.driving ? TRACTOR.x + walk.tx : walk.px;
-    const z = walk.driving ? TRACTOR.z + walk.tz : walk.pz;
-    // Keep the walking camera stable while strafing or backing up.
-    const yaw = walk.driving ? walk.yaw : Math.PI;
-    const sin = Math.sin(yaw);
-    const cos = Math.cos(yaw);
-    look.current.set(x - sin * 6.2, walk.driving ? 3.8 : 3.2, z - cos * 6.2);
-    const blend = 1 - Math.pow(0.0015, dt);
-    camera.position.lerp(look.current, blend);
-    camera.lookAt(x, 1.1, z);
-  });
-  return null;
 }

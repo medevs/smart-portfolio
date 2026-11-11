@@ -5,6 +5,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Dream Home Fund",
+  alternates: { canonical: "/open" },
   description: "Public ledger of money in and what it was spent on.",
 };
 
@@ -21,8 +22,8 @@ export default async function OpenPage() {
         </p>
         <h1>Dream Home Fund</h1>
         <p>
-          Money in, and what it was spent on. The figures are the public ledger in the site data file — nothing here
-          is estimated. Currency: {shop.currency}.
+          Money in, and what it was spent on. The figures are the public ledger in the site data
+          file — nothing here is estimated. Currency: {shop.currency}.
         </p>
         <p>
           In: <strong>{formatMoney(raised)}</strong>
