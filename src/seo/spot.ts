@@ -6,9 +6,9 @@ export function spotUrl(id: string): string {
   return `${seoConfig.siteUrl}/spot/${encodeURIComponent(id)}`;
 }
 
-/** Ids worth indexing: each plot and each product. Legacy landmark aliases stay out so they do not duplicate a page. */
+/** Ids worth indexing: one per plot. Item ids resolve to the first plot with that item, so they would duplicate a page. */
 export function indexableSpotIds(placed: Placed[]): string[] {
-  return [...new Set(placed.flatMap((entry) => [entry.plot.id, entry.item.id]))];
+  return placed.map((entry) => entry.plot.id);
 }
 
 export function buildSpotMetadata(id: string, title: string): Metadata {
