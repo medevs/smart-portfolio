@@ -5,6 +5,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Dream Home Fund",
+  alternates: { canonical: "/open" },
   description: "Public ledger of money in and what it was spent on.",
 };
 

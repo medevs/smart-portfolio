@@ -1,8 +1,11 @@
 import { MetadataRoute } from "next";
+import { seoConfig } from "@/config/seo";
+import { loadFarm, placePlots } from "@/farm/loadFarm";
+import { indexableSpotIds, spotUrl } from "@/seo/spot";
 import { getSortedPostsData } from "../../utils/markdown";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://medevsmaker.vercel.app";
+  const baseUrl = seoConfig.siteUrl;
 
   // Get all blog posts
   const posts = await getSortedPostsData();
@@ -13,6 +16,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: new Date(post.date),
     changeFrequency: "monthly" as const,
     priority: 0.7,
+  }));
+
+  const spotUrls = indexableSpotIds(placePlots(await loadFarm())).map((id) => ({
+    url: spotUrl(id),
+    changeFrequency: "monthly" as const,
+    priority: 0.5,
   }));
 
   return [
@@ -29,6 +38,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/blog`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${baseUrl}/impressum`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${baseUrl}/datenschutz`, changeFrequency: "yearly", priority: 0.3 },
+    ...spotUrls,
     ...blogUrls,
   ];
 }

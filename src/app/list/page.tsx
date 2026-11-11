@@ -9,6 +9,7 @@ import "./list.css";
 
 export const metadata: Metadata = {
   title: "List",
+  alternates: { canonical: "/list" },
   description:
     "Everything on the farm, in a list: products, the dream-home shop, notes, and contact.",
 };
