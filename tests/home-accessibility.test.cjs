@@ -222,3 +222,38 @@ test('map destinations expose keyboard selection and retain the accessible desti
   );
   assert.match(html, /aria-label="Select The well"/);
 });
+
+test('closing project and support dialogs returns focus to the entrance that opened each one', () => {
+  const { createDialogFocusReturn } = require('../src/components/farm/dialog-focus.ts');
+  let active = null;
+  const focused = [];
+  const entrance = (name) => ({
+    isConnected: true,
+    focus: (options) => focused.push([name, options]),
+  });
+  const project = entrance('ReelStyles');
+  const support = entrance('Help build');
+  const handlers = createDialogFocusReturn(() => active);
+  for (const target of [project, support]) {
+    active = target;
+    handlers.onOpenAutoFocus();
+    active = entrance('Close');
+    const close = new Event('closeAutoFocus', { cancelable: true });
+    handlers.onCloseAutoFocus(close);
+    assert.equal(close.defaultPrevented, true);
+  }
+  assert.deepEqual(focused, [
+    ['ReelStyles', { preventScroll: true }],
+    ['Help build', { preventScroll: true }],
+  ]);
+  active = entrance('removed entrance');
+  handlers.onOpenAutoFocus();
+  active.isConnected = false;
+  const detached = new Event('closeAutoFocus', { cancelable: true });
+  handlers.onCloseAutoFocus(detached);
+  assert.equal(detached.defaultPrevented, false);
+  active = null; // Deep links have no entrance; leave Radix's default behavior intact.
+  handlers.onOpenAutoFocus();
+  handlers.onCloseAutoFocus(new Event('closeAutoFocus', { cancelable: true }));
+  assert.equal(focused.length, 2);
+});

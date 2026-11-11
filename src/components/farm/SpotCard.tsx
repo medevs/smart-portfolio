@@ -6,6 +6,7 @@ import { formatMoney, landmarkPrice, offerings, shop, skuBasePrice } from "@/con
 import type { Placed } from "@/farm/loadFarm";
 import { plotsRemaining } from "@/farm/loadFarm";
 import type { FarmData } from "@/farm/types";
+import { useDialogFocusReturn } from "./dialog-focus";
 import { SponsorshipNotice } from "./SponsorshipNotice";
 import { ShareSpot } from "./ShareSpot";
 import { offeringForItem } from "@/farm/offering";
@@ -33,11 +34,12 @@ export function SpotCard({
   const item = entry?.item;
   const offering = item ? offeringForItem(item) : null;
 
+  const focusReturn = useDialogFocusReturn();
   return (
     <Dialog.Root open={!!entry} onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
         <Dialog.Overlay className="overlay" />
-        <Dialog.Content className="product-card" aria-describedby={undefined}>
+        <Dialog.Content className="product-card" aria-describedby={undefined} {...focusReturn}>
           {item && entry && (
             <>
               <Dialog.Close className="close-btn" aria-label="Close">
@@ -100,11 +102,12 @@ export function ShopDialog({
   data: FarmData;
   onClose: () => void;
 }) {
+  const focusReturn = useDialogFocusReturn();
   return (
     <Dialog.Root open={open} onOpenChange={(next) => !next && onClose()}>
       <Dialog.Portal>
         <Dialog.Overlay className="overlay" />
-        <Dialog.Content className="product-card shop-dialog">
+        <Dialog.Content className="product-card shop-dialog" {...focusReturn}>
           <Dialog.Close className="close-btn" aria-label="Close">
             ×
           </Dialog.Close>
