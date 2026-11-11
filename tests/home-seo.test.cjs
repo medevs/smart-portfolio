@@ -17,6 +17,9 @@ const graphOf = (html) => {
 test('home metadata declares a canonical and matching Open Graph url', () => {
   assert.equal(page.metadata.alternates.canonical, '/');
   assert.equal(page.metadata.openGraph.url, '/');
+  assert.equal(page.metadata.openGraph.siteName, seoConfig.siteName);
+  assert.equal(page.metadata.openGraph.type, 'website');
+  assert.equal(page.metadata.openGraph.locale, seoConfig.openGraph.locale);
 });
 
 test('home JSON-LD is a graph with WebSite and ProfessionalService from config', async () => {
@@ -43,6 +46,6 @@ test('server HTML has sr-only crawlable links, one sentence and a single h1', as
   for (const route of ['/list', '/blog', '/references', '/open', '/gather'])
     assert.ok(nav.includes(`<a href="${route}">`), route);
   assert.match(nav, /interactive 3D farm walkthroughs/);
-  assert.ok(!fs.existsSync('src/app/work') && !nav.includes('/work/3d-walkthroughs'));
+  assert.equal(nav.includes('/work/3d-walkthroughs'), fs.existsSync('src/app/work'));
   assert.equal((html.match(/<h1[ >]/g) || []).length, 1);
 });

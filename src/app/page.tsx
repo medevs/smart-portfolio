@@ -6,7 +6,14 @@ import { socialLinks } from "@/config/social";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
-  openGraph: { url: "/" },
+  openGraph: {
+    type: "website",
+    locale: seoConfig.openGraph.locale,
+    url: "/",
+    siteName: seoConfig.siteName,
+    title: seoConfig.openGraph.title,
+    description: seoConfig.description,
+  },
 };
 
 const farmSentence =
