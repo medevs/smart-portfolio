@@ -1,5 +1,7 @@
 import { MetadataRoute } from "next";
 import { seoConfig } from "@/config/seo";
+import { loadFarm, placePlots } from "@/farm/loadFarm";
+import { indexableSpotIds, spotUrl } from "@/seo/spot";
 import { getSortedPostsData } from "../../utils/markdown";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -16,6 +18,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
+  const spotUrls = indexableSpotIds(placePlots(await loadFarm())).map((id) => ({
+    url: spotUrl(id),
+    changeFrequency: "monthly" as const,
+    priority: 0.5,
+  }));
+
   return [
     {
       url: baseUrl,
@@ -30,6 +38,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/blog`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${baseUrl}/impressum`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${baseUrl}/datenschutz`, changeFrequency: "yearly", priority: 0.3 },
+    ...spotUrls,
     ...blogUrls,
   ];
 }
