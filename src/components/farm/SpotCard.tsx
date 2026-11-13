@@ -10,6 +10,7 @@ import { useDialogFocusReturn } from "./dialog-focus";
 import { SponsorshipNotice } from "./SponsorshipNotice";
 import { ShareSpot } from "./ShareSpot";
 import { offeringForItem } from "@/farm/offering";
+import { visibleLinks } from "@/farm/links";
 
 function ReelDemo() {
   return (
@@ -33,6 +34,7 @@ export function SpotCard({
 }) {
   const item = entry?.item;
   const offering = item ? offeringForItem(item) : null;
+  const links = visibleLinks(item?.links);
 
   const focusReturn = useDialogFocusReturn();
   return (
@@ -63,24 +65,18 @@ export function SpotCard({
                   {item.cta.label}
                 </a>
               )}
-              {item.links && item.links.length > 0 && (
+              {links.length > 0 && (
                 <div className="link-row">
-                  {item.links.map((link) =>
-                    link.todo || !link.href ? (
-                      <p key={link.label} className="todo">
-                        TODO: {link.label}
-                      </p>
-                    ) : (
-                      <a
-                        key={link.label}
-                        className="text-link"
-                        href={link.href}
-                        {...linkAttrs(link.href)}
-                      >
-                        {link.label}
-                      </a>
-                    ),
-                  )}
+                  {links.map((link) => (
+                    <a
+                      key={link.label}
+                      className="text-link"
+                      href={link.href}
+                      {...linkAttrs(link.href)}
+                    >
+                      {link.label}
+                    </a>
+                  ))}
                 </div>
               )}
               {offering && <SponsorshipNotice offering={offering} sponsors={data.sponsors} />}

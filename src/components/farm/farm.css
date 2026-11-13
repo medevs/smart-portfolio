@@ -520,8 +520,7 @@ html[data-farm-phase="color"] .tagline {
 
 .hud-btn,
 .text-link,
-.cta,
-.todo {
+.cta {
   font: inherit;
 }
 
@@ -802,15 +801,6 @@ html[data-farm-phase="color"] .farm-ui {
   border-radius: 999px;
   text-decoration: none;
   font-weight: 750;
-}
-
-.todo {
-  border: 2px dashed #b08968;
-  background: #fff4e4;
-  padding: 10px 12px;
-  border-radius: 12px;
-  font-weight: 750;
-  margin: 8px 0;
 }
 
 .buy-block {

@@ -2,6 +2,7 @@ import { offerings, formatMoney, landmarkPrice, shop, skuBasePrice } from "@/con
 import { experiences } from "@/config/experience";
 import { skillCategories } from "@/config/skills";
 import { loadFarm, plotsRemaining } from "@/farm/loadFarm";
+import { visibleLinks } from "@/farm/links";
 import { getSortedPostsData } from "../../../utils/markdown";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -68,17 +69,11 @@ export default async function ListPage() {
                       </>
                     )}
                   </p>
-                  {item.links?.map((link) =>
-                    link.todo || !link.href ? (
-                      <p key={link.label} className="directory-pending">
-                        {link.label} — not available yet
-                      </p>
-                    ) : (
-                      <p key={link.label}>
-                        <a href={link.href}>{link.label}</a>
-                      </p>
-                    ),
-                  )}
+                  {visibleLinks(item.links).map((link) => (
+                    <p key={link.label}>
+                      <a href={link.href}>{link.label}</a>
+                    </p>
+                  ))}
                 </article>
               </li>
             );
