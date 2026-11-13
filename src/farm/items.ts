@@ -83,8 +83,7 @@ export const items: FarmItem[] = [
     visual: { w: 150, h: 210 },
     interactive: true,
     sku: "scarecrowWeek",
-    pitch: "Video channels from the farm. The channel URL is not in the site yet.",
-    links: [{ label: "YouTube channel link", href: "", todo: true }],
+    pitch: "Video from the farm is coming. The scarecrow keeps watch until the first one is ready.",
   },
   {
     id: "mailbox",

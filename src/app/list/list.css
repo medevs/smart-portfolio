@@ -98,10 +98,6 @@
 .farm-directory .card-list p:last-child {
   margin-bottom: 0;
 }
-.farm-directory .card-list .directory-pending {
-  color: #69755f;
-  font-size: 11px;
-}
 .farm-directory h2 + ul:not(.card-list) {
   list-style: none;
   padding: 0;
